@@ -11,12 +11,3 @@ urlpatterns = [
     path('perfil/', views.perfil_view, name='perfil'),
     path('actualizar-perfil/', views.actualizar_perfil_view, name='actualizar_perfil'),
 ]
-
-# edubooks/urls.py (URLs principales)
-from django.contrib import admin
-from django.urls import path, include
-
-urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('api/auth/', include('usuarios.urls')),
-]
