@@ -1,0 +1,152 @@
+.login-content {
+  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.login-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100%;
+  padding: 20px;
+}
+
+.logo-section {
+  text-align: center;
+  margin-bottom: 40px;
+  
+  .logo-icon {
+    font-size: 80px;
+    color: white;
+    margin-bottom: 20px;
+  }
+  
+  h1 {
+    color: white;
+    font-size: 32px;
+    font-weight: 700;
+    margin: 0 0 10px 0;
+  }
+  
+  p {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 16px;
+    margin: 0;
+  }
+}
+
+.login-form {
+  background: white;
+  border-radius: 20px;
+  padding: 30px 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  margin-bottom: 20px;
+}
+
+.form-item {
+  --background: transparent;
+  --border-radius: 12px;
+  margin-bottom: 20px;
+  
+  ion-label {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+  }
+  
+  ion-input {
+    --padding-start: 40px;
+    --border-width: 2px;
+    --border-color: #e0e0e0;
+    --border-radius: 12px;
+    --background: #f8f9fa;
+  }
+  
+  ion-icon[slot="start"] {
+    color: #667eea;
+    margin-right: 10px;
+  }
+  
+  &.ion-invalid {
+    ion-input {
+      --border-color: #ff6b6b;
+    }
+  }
+  
+  &.ion-valid {
+    ion-input {
+      --border-color: #51cf66;
+    }
+  }
+}
+
+.login-button {
+  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --border-radius: 12px;
+  --box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  height: 50px;
+  font-weight: 600;
+  font-size: 16px;
+  margin-top: 20px;
+  
+  &:not([disabled]):hover {
+    --box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+  }
+  
+  &[disabled] {
+    --background: #cccccc;
+    --box-shadow: none;
+  }
+}
+
+.additional-links {
+  text-align: center;
+  
+  .register-link {
+    --color: white;
+    font-size: 14px;
+    text-decoration: none;
+    
+    &:hover {
+      --color: rgba(255, 255, 255, 0.8);
+    }
+  }
+}
+
+// Responsivo
+@media (min-width: 768px) {
+  .login-container {
+    max-width: 400px;
+    margin: 0 auto;
+  }
+}
+
+// Animaciones
+.login-form {
+  animation: slideUp 0.6s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.logo-section {
+  animation: fadeIn 0.8s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

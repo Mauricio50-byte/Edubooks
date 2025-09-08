@@ -14,16 +14,9 @@ export class ApiService {
   constructor(private http: HttpClient) {}
 
   private getHeaders(): HttpHeaders {
-    let headers = new HttpHeaders({
+    return new HttpHeaders({
       'Content-Type': 'application/json'
     });
-
-    const token = localStorage.getItem('access_token');
-    if (token) {
-      headers = headers.set('Authorization', `Bearer ${token}`);
-    }
-
-    return headers;
   }
 
   private handleError(error: HttpErrorResponse) {
@@ -38,8 +31,10 @@ export class ApiService {
         errorMessage = error.error.message;
       } else if (error.error?.detail) {
         errorMessage = error.error.detail;
+      } else if (error.status === 0) {
+        errorMessage = 'No se pudo conectar con el servidor. Verifica que esté ejecutándose.';
       } else {
-        errorMessage = `Código de error: ${error.status}, Mensaje: ${error.message}`;
+        errorMessage = `Error ${error.status}: ${error.message}`;
       }
     }
 

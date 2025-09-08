@@ -1,15 +1,15 @@
-// src/app/pages/auth/login/login.page.ts
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AlertController, LoadingController, ToastController } from '@ionic/angular';
-import { AuthService } from './../../core/services/auth.service';
+import { AuthService } from '../../core/services/auth.service';
 import { UsuarioLogin } from '../../core/models/usuario.model';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.page.html',
   styleUrls: ['./login.page.scss'],
+  standalone: false,
 })
 export class LoginPage implements OnInit {
   loginForm: FormGroup;
@@ -31,10 +31,10 @@ export class LoginPage implements OnInit {
   }
 
   ngOnInit() {
-    // Redirigir si ya está autenticado
+    // Verificar si ya está autenticado
     this.authService.isAuthenticated$.subscribe(isAuth => {
       if (isAuth) {
-        this.router.navigate(['/dashboard']);
+        this.router.navigate(['/home']);
       }
     });
   }
@@ -60,7 +60,7 @@ export class LoginPage implements OnInit {
           });
           await toast.present();
 
-          this.router.navigate(['/dashboard']);
+          this.router.navigate(['/home']);
         },
         error: async (error) => {
           await loading.dismiss();

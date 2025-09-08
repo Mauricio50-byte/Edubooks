@@ -1,8 +1,6 @@
-// src/app/core/services/auth.service.ts
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of } from 'rxjs';
-import { map, tap, catchError } from 'rxjs/operators';
-import { Storage } from '@ionic/storage-angular';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { tap, catchError } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { ApiService } from './api.service';
 import { Usuario, UsuarioLogin, UsuarioRegistro, AuthResponse } from '../models/usuario.model';
@@ -18,34 +16,25 @@ export class AuthService {
 
   constructor(
     private apiService: ApiService,
-    private storage: Storage,
     private router: Router
   ) {
-    this.initStorage();
-  }
-
-  async initStorage() {
-    await this.storage.create();
-    await this.loadStoredUser();
+    this.loadStoredUser();
   }
 
   // Cargar usuario almacenado al inicializar la app
-  private async loadStoredUser() {
+  private loadStoredUser() {
     try {
-      const accessToken = await this.storage.get('access_token');
-      const userData = await this.storage.get('user_data');
+      const accessToken = localStorage.getItem('access_token');
+      const userData = localStorage.getItem('user_data');
 
       if (accessToken && userData) {
-        this.currentUserSubject.next(userData);
+        const user = JSON.parse(userData);
+        this.currentUserSubject.next(user);
         this.isAuthenticatedSubject.next(true);
-        
-        // Verificar si el token sigue siendo válido
-        this.verificarToken().subscribe({
-          error: () => this.logout()
-        });
       }
     } catch (error) {
       console.error('Error cargando usuario almacenado:', error);
+      this.clearStorage();
     }
   }
 
@@ -74,32 +63,33 @@ export class AuthService {
   }
 
   // Cerrar sesión
-  logout(): Observable<any> {
-    return new Observable(observer => {
-      // Intentar logout en el servidor
-      this.storage.get('refresh_token').then(refreshToken => {
-        if (refreshToken) {
-          this.apiService.post('/auth/logout/', { refresh_token: refreshToken })
-            .subscribe({
-              complete: () => {
-                this.handleLogoutSuccess();
-                observer.next("");
-                observer.complete();
-              },
-              error: () => {
-                // Aún si hay error en el servidor, limpiar localmente
-                this.handleLogoutSuccess();
-                observer.next("");
-                observer.complete();
-              }
-            });
-        } else {
-          this.handleLogoutSuccess();
-          observer.next("");
-          observer.complete();
-        }
-      });
-    });
+  async logout(): Promise<void> {
+    try {
+      const refreshToken = localStorage.getItem('refresh_token');
+      if (refreshToken) {
+        // Intentar logout en el servidor
+        this.apiService.post('/auth/logout/', { refresh_token: refreshToken }).subscribe({
+          error: (error) => console.log('Error en logout del servidor:', error)
+        });
+      }
+      
+      this.clearStorage();
+      this.router.navigate(['/login']);
+    } catch (error) {
+      console.error('Error durante logout:', error);
+      this.clearStorage();
+      this.router.navigate(['/login']);
+    }
+  }
+
+  // Limpiar almacenamiento
+  private clearStorage() {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user_data');
+    
+    this.currentUserSubject.next(null);
+    this.isAuthenticatedSubject.next(false);
   }
 
   // Obtener perfil del usuario
@@ -109,7 +99,7 @@ export class AuthService {
         tap((response: any) => {
           if (response.user) {
             this.currentUserSubject.next(response.user);
-            this.storage.set('user_data', response.user);
+            localStorage.setItem('user_data', JSON.stringify(response.user));
           }
         })
       );
@@ -122,44 +112,24 @@ export class AuthService {
         tap((response: any) => {
           if (response.user) {
             this.currentUserSubject.next(response.user);
-            this.storage.set('user_data', response.user);
+            localStorage.setItem('user_data', JSON.stringify(response.user));
           }
         })
       );
   }
 
-  // Verificar si el token es válido
-  private verificarToken(): Observable<any> {
-    return this.apiService.get('/auth/perfil/');
-  }
-
   // Manejar respuesta exitosa de autenticación
-  private async handleAuthSuccess(response: AuthResponse) {
+  private handleAuthSuccess(response: AuthResponse) {
     const { user, tokens } = response;
     
     // Guardar tokens y datos del usuario
-    await this.storage.set('access_token', tokens.access);
-    await this.storage.set('refresh_token', tokens.refresh);
-    await this.storage.set('user_data', user);
+    localStorage.setItem('access_token', tokens.access);
+    localStorage.setItem('refresh_token', tokens.refresh);
+    localStorage.setItem('user_data', JSON.stringify(user));
     
     // Actualizar subjects
     this.currentUserSubject.next(user);
     this.isAuthenticatedSubject.next(true);
-  }
-
-  // Manejar logout exitoso
-  private async handleLogoutSuccess() {
-    // Limpiar storage
-    await this.storage.remove('access_token');
-    await this.storage.remove('refresh_token');
-    await this.storage.remove('user_data');
-    
-    // Actualizar subjects
-    this.currentUserSubject.next(null);
-    this.isAuthenticatedSubject.next(false);
-    
-    // Redirigir al login
-    this.router.navigate(['/login']);
   }
 
   // Getters
