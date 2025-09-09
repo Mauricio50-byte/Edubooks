@@ -104,9 +104,11 @@ export class RegisterPage implements OnInit {
         break;
     }
 
-    // Actualizar validaciones
+    // Actualizar validaciones (excluyendo el control 'rol' para evitar bucle infinito)
     Object.keys(this.registerForm.controls).forEach(key => {
-      this.registerForm.get(key)?.updateValueAndValidity();
+      if (key !== 'rol') {
+        this.registerForm.get(key)?.updateValueAndValidity();
+      }
     });
   }
 
@@ -142,14 +144,14 @@ export class RegisterPage implements OnInit {
           await loading.dismiss();
           
           const toast = await this.toastController.create({
-            message: '¡Registro exitoso! Bienvenido a EduBooks',
+            message: '¡Registro exitoso! Por favor inicia sesión',
             duration: 3000,
             color: 'success',
             position: 'top'
           });
           await toast.present();
 
-          this.router.navigate(['/home']);
+          this.router.navigate(['/login']);
         },
         error: async (error) => {
           await loading.dismiss();
