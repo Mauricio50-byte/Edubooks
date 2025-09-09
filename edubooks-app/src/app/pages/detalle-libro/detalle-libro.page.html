@@ -1,0 +1,216 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/catalogo"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Detalle del Libro</ion-title>
+    <ion-buttons slot="end" *ngIf="isAdministrador()">
+      <ion-button (click)="editarLibro()">
+        <ion-icon name="create-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <!-- Loading state -->
+  <div class="loading-container" *ngIf="isLoading">
+    <ion-spinner name="dots"></ion-spinner>
+    <p>Cargando información del libro...</p>
+  </div>
+
+  <!-- Error state -->
+  <div class="error-container" *ngIf="error">
+    <ion-icon name="alert-circle-outline" color="danger"></ion-icon>
+    <h3>Error al cargar el libro</h3>
+    <p>{{ error }}</p>
+    <ion-button fill="outline" (click)="cargarLibro()">
+      Reintentar
+    </ion-button>
+  </div>
+
+  <!-- Libro content -->
+  <div class="libro-detail" *ngIf="libro && !isLoading">
+    <!-- Hero section -->
+    <div class="libro-hero">
+      <div class="imagen-container">
+        <img 
+          [src]="libro.imagen_portada || 'assets/images/book-placeholder.png'" 
+          [alt]="libro.titulo"
+          class="libro-imagen">
+        
+        <!-- Estado badge -->
+        <ion-badge 
+          [color]="getEstadoColor(libro.estado)" 
+          class="estado-badge">
+          {{ libro.estado }}
+        </ion-badge>
+      </div>
+
+      <div class="info-principal">
+        <h1 class="titulo">{{ libro.titulo }}</h1>
+        <p class="autor">por {{ libro.autor }}</p>
+        
+        <div class="disponibilidad">
+          <div class="disponibilidad-item">
+            <ion-icon name="copy-outline"></ion-icon>
+            <span>{{ libro.cantidad_disponible }}/{{ libro.cantidad_total }} disponibles</span>
+          </div>
+          
+          <div class="disponibilidad-item">
+            <ion-icon name="location-outline"></ion-icon>
+            <span>{{ libro.ubicacion }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Información detallada -->
+    <div class="info-detallada">
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>
+            <ion-icon name="information-circle-outline"></ion-icon>
+            Información del Libro
+          </ion-card-title>
+        </ion-card-header>
+        
+        <ion-card-content>
+          <ion-list lines="none">
+            <ion-item *ngIf="libro.isbn">
+              <ion-icon name="barcode-outline" slot="start"></ion-icon>
+              <ion-label>
+                <h3>ISBN</h3>
+                <p>{{ libro.isbn }}</p>
+              </ion-label>
+            </ion-item>
+            
+            <ion-item *ngIf="libro.editorial">
+              <ion-icon name="business-outline" slot="start"></ion-icon>
+              <ion-label>
+                <h3>Editorial</h3>
+                <p>{{ libro.editorial }}</p>
+              </ion-label>
+            </ion-item>
+            
+            <ion-item *ngIf="libro['año_publicacion']">
+              <ion-icon name="calendar-outline" slot="start"></ion-icon>
+              <ion-label>
+                <h3>Año de Publicación</h3>
+                <p>{{ libro['año_publicacion'] }}</p>
+              </ion-label>
+            </ion-item>
+            
+            <ion-item>
+              <ion-icon name="bookmark-outline" slot="start"></ion-icon>
+              <ion-label>
+                <h3>Categoría</h3>
+                <p>{{ libro.categoria }}</p>
+              </ion-label>
+            </ion-item>
+            
+            <ion-item>
+              <ion-icon name="time-outline" slot="start"></ion-icon>
+              <ion-label>
+                <h3>Fecha de Registro</h3>
+                <p>{{ libro.fecha_registro | date:'dd/MM/yyyy' }}</p>
+              </ion-label>
+            </ion-item>
+          </ion-list>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Descripción -->
+      <ion-card *ngIf="libro.descripcion">
+        <ion-card-header>
+          <ion-card-title>
+            <ion-icon name="document-text-outline"></ion-icon>
+            Descripción
+          </ion-card-title>
+        </ion-card-header>
+        
+        <ion-card-content>
+          <p class="descripcion">{{ libro.descripcion }}</p>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Acciones principales -->
+    <div class="acciones-principales" *ngIf="!isAdministrador()">
+      <ion-button 
+        *ngIf="puedePrestar()" 
+        expand="block" 
+        size="large"
+        (click)="solicitarPrestamo()"
+        class="action-button prestamo-button">
+        <ion-icon name="download-outline" slot="start"></ion-icon>
+        Solicitar Préstamo
+      </ion-button>
+      
+      <ion-button 
+        *ngIf="puedeReservar" 
+        expand="block" 
+        size="large"
+        fill="outline"
+        color="warning"
+        (click)="crearReserva()"
+        class="action-button reserva-button">
+        <ion-icon name="bookmark-outline" slot="start"></ion-icon>
+        Hacer Reserva
+      </ion-button>
+      
+      <div class="info-no-disponible" *ngIf="!puedePrestar() && !puedeReservar">
+        <ion-icon name="information-circle-outline" color="medium"></ion-icon>
+        <p>Este libro no está disponible para préstamo o reserva en este momento.</p>
+      </div>
+    </div>
+
+    <!-- Acciones de administrador -->
+    <div class="acciones-admin" *ngIf="isAdministrador()">
+      <ion-button 
+        expand="block" 
+        fill="outline" 
+        (click)="editarLibro()">
+        <ion-icon name="create-outline" slot="start"></ion-icon>
+        Editar Libro
+      </ion-button>
+      
+      <ion-button 
+        expand="block" 
+        fill="outline" 
+        color="danger"
+        (click)="eliminarLibro()">
+        <ion-icon name="trash-outline" slot="start"></ion-icon>
+        Eliminar Libro
+      </ion-button>
+    </div>
+
+    <!-- Libros relacionados -->
+    <div class="libros-relacionados" *ngIf="librosRelacionados.length > 0">
+      <h3>
+        <ion-icon name="library-outline"></ion-icon>
+        Libros Relacionados
+      </h3>
+      
+      <div class="libros-grid">
+        <ion-card 
+          *ngFor="let libroRel of librosRelacionados" 
+          class="libro-relacionado"
+          (click)="verLibroRelacionado(libroRel)">
+          
+          <img 
+            [src]="libroRel.imagen_portada || 'assets/images/book-placeholder.png'" 
+            [alt]="libroRel.titulo">
+          
+          <div class="libro-info">
+            <h4>{{ libroRel.titulo }}</h4>
+            <p>{{ libroRel.autor }}</p>
+            <ion-badge [color]="getEstadoColor(libroRel.estado)">
+              {{ libroRel.estado }}
+            </ion-badge>
+          </div>
+        </ion-card>
+      </div>
+    </div>
+  </div>
+</ion-content>

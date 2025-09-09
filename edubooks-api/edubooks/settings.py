@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',  # Para blacklist de tokens
     'corsheaders',  # Para permitir CORS
     'usuarios',
+    'libros',
 ]
 
 MIDDLEWARE = [
