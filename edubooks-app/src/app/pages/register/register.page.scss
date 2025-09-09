@@ -1,0 +1,234 @@
+.register-content {
+  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding-bottom: 20px;
+}
+
+.register-container {
+  padding: 20px;
+  min-height: 100%;
+}
+
+.header-section {
+  text-align: center;
+  margin-bottom: 30px;
+  
+  h1 {
+    color: white;
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0 0 10px 0;
+  }
+  
+  p {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 16px;
+    margin: 0;
+  }
+}
+
+.register-form {
+  background: white;
+  border-radius: 20px;
+  padding: 25px 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  margin-bottom: 20px;
+}
+
+.form-section {
+  margin-bottom: 25px;
+  
+  h3 {
+    color: #333;
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 15px 0;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #f0f0f0;
+  }
+}
+
+.form-item {
+  --background: transparent;
+  --border-radius: 12px;
+  margin-bottom: 16px;
+  
+  ion-label {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+  }
+  
+  ion-input, ion-select {
+    --padding-start: 40px;
+    --border-width: 2px;
+    --border-color: #e0e0e0;
+    --border-radius: 12px;
+    --background: #f8f9fa;
+    
+    &::part(native) {
+      padding-left: 40px;
+    }
+  }
+  
+  ion-icon[slot="start"] {
+    color: #667eea;
+    margin-right: 10px;
+  }
+  
+  &.ion-invalid {
+    ion-input, ion-select {
+      --border-color: #ff6b6b;
+    }
+  }
+  
+  &.ion-valid {
+    ion-input, ion-select {
+      --border-color: #51cf66;
+    }
+  }
+  
+  ion-note {
+    font-size: 12px;
+    margin-top: 4px;
+  }
+}
+
+.register-button {
+  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --border-radius: 12px;
+  --box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  height: 50px;
+  font-weight: 600;
+  font-size: 16px;
+  margin-top: 20px;
+  
+  &:not([disabled]):hover {
+    --box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+  }
+  
+  &[disabled] {
+    --background: #cccccc;
+    --box-shadow: none;
+  }
+}
+
+.additional-links {
+  text-align: center;
+  
+  .login-link {
+    --color: white;
+    font-size: 14px;
+    text-decoration: none;
+    
+    &:hover {
+      --color: rgba(255, 255, 255, 0.8);
+    }
+  }
+}
+
+// Estilos específicos para select
+ion-item {
+  ion-select {
+    --placeholder-color: #999;
+    --placeholder-opacity: 1;
+    
+    &::part(placeholder) {
+      color: #999;
+      opacity: 1;
+    }
+    
+    &::part(text) {
+      color: #333;
+    }
+  }
+}
+
+// Responsivo
+@media (min-width: 768px) {
+  .register-container {
+    max-width: 500px;
+    margin: 0 auto;
+  }
+  
+  .form-section {
+    .form-row {
+      display: flex;
+      gap: 15px;
+      
+      .form-item {
+        flex: 1;
+      }
+    }
+  }
+}
+
+// Animaciones
+.register-form {
+  animation: slideUp 0.6s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.header-section {
+  animation: fadeIn 0.8s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.form-section {
+  animation: fadeInUp 0.7s ease-out backwards;
+  
+  &:nth-child(1) { animation-delay: 0.1s; }
+  &:nth-child(2) { animation-delay: 0.2s; }
+  &:nth-child(3) { animation-delay: 0.3s; }
+  &:nth-child(4) { animation-delay: 0.4s; }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Mejoras de UX
+.form-item {
+  transition: all 0.3s ease;
+  
+  &:focus-within {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+  }
+}
+
+// Indicador de campos requeridos
+.form-item ion-label::after {
+  content: '';
+}
+
+.form-item ion-label:has-text('*')::after {
+  content: ' *';
+  color: #ff6b6b;
+}
