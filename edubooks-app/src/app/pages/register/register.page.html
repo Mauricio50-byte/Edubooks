@@ -243,7 +243,7 @@
         expand="block" 
         type="submit" 
         class="register-button"
-        [disabled]="registerForm.invalid || isLoading || !passwordMatchValidator">
+        [disabled]="registerForm.invalid || isLoading || !checkPasswordsMatch()">
         <ion-spinner name="dots" *ngIf="isLoading"></ion-spinner>
         <span *ngIf="!isLoading">Crear Cuenta</span>
       </ion-button>

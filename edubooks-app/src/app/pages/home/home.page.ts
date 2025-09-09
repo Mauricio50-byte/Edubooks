@@ -20,17 +20,13 @@ export class HomePage implements OnInit {
   ) {}
 
   ngOnInit() {
-    // Suscribirse a los cambios del usuario actual
-    this.authService.currentUser$.subscribe(user => {
-      this.currentUser = user;
-    });
+    // Obtener el usuario actual
+    this.currentUser = this.authService.currentUserValue;
 
     // Verificar autenticación
-    this.authService.isAuthenticated$.subscribe(isAuth => {
-      if (!isAuth) {
-        this.router.navigate(['/login']);
-      }
-    });
+    if (!this.authService.isAuthenticated) {
+      this.router.navigate(['/login']);
+    }
   }
 
   async logout() {

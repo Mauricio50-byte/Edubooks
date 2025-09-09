@@ -32,11 +32,9 @@ export class LoginPage implements OnInit {
 
   ngOnInit() {
     // Verificar si ya está autenticado
-    this.authService.isAuthenticated$.subscribe(isAuth => {
-      if (isAuth) {
-        this.router.navigate(['/home']);
-      }
-    });
+    if (this.authService.isAuthenticated) {
+      this.router.navigate(['/home']);
+    }
   }
 
   async onSubmit() {

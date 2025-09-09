@@ -30,11 +30,9 @@ export class RegisterPage implements OnInit {
 
   ngOnInit() {
     // Verificar si ya está autenticado
-    this.authService.isAuthenticated$.subscribe(isAuth => {
-      if (isAuth) {
-        this.router.navigate(['/home']);
-      }
-    });
+    if (this.authService.isAuthenticated) {
+      this.router.navigate(['/home']);
+    }
 
     // Escuchar cambios en el rol para mostrar/ocultar campos específicos
     this.registerForm.get('rol')?.valueChanges.subscribe(rol => {
