@@ -1,275 +1,368 @@
-// src/app/core/services/biblioteca.service.ts
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { ApiService } from './api.service';
-import { 
-  Libro, 
-  LibroResponse, 
-  Prestamo, 
-  PrestamoResponse, 
-  Reserva, 
-  Bibliografia, 
-  Sancion,
-  PrestamoRequest,
-  ReservaRequest,
-  BusquedaLibros,
-  LibroRegistro,
-  ApiResponse 
-} from '../models/libro.model';
+import { Observable, BehaviorSubject, of, throwError } from 'rxjs';
+import { map, delay } from 'rxjs/operators';
+import { LIBROS_MUESTRA, LibroData, CATEGORIAS, ESTADOS_LIBRO } from '../data/libros-data';
+import { Libro, Prestamo, Reserva } from '../models/libro.model';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class BibliotecaService {
+  private librosSubject = new BehaviorSubject<Libro[]>([]);
+  public libros$ = this.librosSubject.asObservable();
   
-  constructor(private apiService: ApiService) {}
-
-  // ==================== GESTIÓN DE LIBROS ====================
+  private prestamosSubject = new BehaviorSubject<Prestamo[]>([]);
+  public prestamos$ = this.prestamosSubject.asObservable();
   
-  /**
-   * Buscar libros en el catálogo
-   */
-  buscarLibros(filtros: BusquedaLibros): Observable<LibroResponse> {
-    const params = new URLSearchParams();
-    
-    if (filtros.query) params.append('titulo', filtros.query);
-    if (filtros.categoria) params.append('categoria', filtros.categoria);
-    if (filtros.autor) params.append('autor', filtros.autor);
-    if (filtros.estado) params.append('disponible', filtros.estado === 'Disponible' ? 'true' : 'false');
-    if (filtros.page) params.append('page', filtros.page.toString());
-    if (filtros.page_size) params.append('page_size', filtros.page_size.toString());
+  private reservasSubject = new BehaviorSubject<Reserva[]>([]);
+  public reservas$ = this.reservasSubject.asObservable();
 
-    const queryString = params.toString();
-    return this.apiService.get<LibroResponse>(`/libros/?${queryString}`);
+  private libros: Libro[] = [];
+  private prestamos: Prestamo[] = [];
+  private reservas: Reserva[] = [];
+
+  constructor(private authService: AuthService) {
+    this.initializeData();
   }
 
-  /**
-   * Obtener detalles de un libro específico
-   */
-  obtenerLibro(id: number): Observable<ApiResponse<Libro>> {
-    return this.apiService.get<ApiResponse<Libro>>(`/libros/${id}/`);
+  private initializeData() {
+    // Convertir datos de muestra a formato del modelo
+    this.libros = LIBROS_MUESTRA.map(libro => ({
+      id: libro.id,
+      titulo: libro.titulo,
+      autor: libro.autor,
+      isbn: libro.isbn,
+      editorial: libro.editorial,
+      año_publicacion: libro.año_publicacion,
+      categoria: libro.categoria,
+      ubicacion: libro.ubicacion,
+      estado: libro.estado as any,
+      cantidad_total: libro.cantidad_total,
+      cantidad_disponible: libro.cantidad_disponible,
+      descripcion: libro.descripcion,
+      imagen_portada: libro.imagen_portada,
+      fecha_registro: new Date().toISOString()
+    }));
+
+    this.librosSubject.next(this.libros);
   }
 
-  /**
-   * Obtener categorías disponibles
-   */
-  obtenerCategorias(): Observable<ApiResponse<string[]>> {
-    return this.apiService.get<ApiResponse<string[]>>('/categorias/');
+  // Métodos para libros
+  getLibros(): Observable<Libro[]> {
+    return of(this.libros).pipe(delay(500)); // Simular latencia de red
   }
 
-  /**
-   * Registrar nuevo libro (solo Administradores)
-   */
-  registrarLibro(libroData: LibroRegistro): Observable<ApiResponse<Libro>> {
-    return this.apiService.post<ApiResponse<Libro>>('/libros/crear/', libroData);
+  getLibroById(id: number): Observable<Libro | undefined> {
+    const libro = this.libros.find(l => l.id === id);
+    return of(libro).pipe(delay(300));
   }
 
-  /**
-   * Actualizar libro (solo Administradores)
-   */
-  actualizarLibro(id: number, libroData: Partial<LibroRegistro>): Observable<ApiResponse<Libro>> {
-    return this.apiService.put<ApiResponse<Libro>>(`/libros/${id}/actualizar/`, libroData);
+  searchLibros(termino: string): Observable<Libro[]> {
+    const terminoLower = termino.toLowerCase();
+    const resultados = this.libros.filter(libro => 
+      libro.titulo.toLowerCase().includes(terminoLower) ||
+      libro.autor.toLowerCase().includes(terminoLower) ||
+      libro.categoria.toLowerCase().includes(terminoLower) ||
+      libro.isbn?.includes(termino)
+    );
+    return of(resultados).pipe(delay(400));
   }
 
-  /**
-   * Eliminar libro (solo Administradores)
-   */
-  eliminarLibro(id: number): Observable<ApiResponse<any>> {
-    return this.apiService.delete<ApiResponse<any>>(`/libros/${id}/eliminar/`);
-  }
-
-  // ==================== GESTIÓN DE PRÉSTAMOS ====================
-
-  /**
-   * Solicitar préstamo de un libro
-   */
-  solicitarPrestamo(prestamoData: PrestamoRequest): Observable<ApiResponse<Prestamo>> {
-    return this.apiService.post<ApiResponse<Prestamo>>('/prestamos/crear/', prestamoData);
-  }
-
-  /**
-   * Obtener préstamos del usuario actual
-   */
-  obtenerMisPrestamos(page: number = 1): Observable<PrestamoResponse> {
-    return this.apiService.get<PrestamoResponse>(`/prestamos/?page=${page}`);
-  }
-
-  /**
-   * Obtener historial completo de préstamos del usuario
-   */
-  obtenerHistorialPrestamos(page: number = 1): Observable<PrestamoResponse> {
-    return this.apiService.get<PrestamoResponse>(`/prestamos/?page=${page}`);
-  }
-
-  /**
-   * Obtener todos los préstamos (solo Administradores)
-   */
-  obtenerTodosPrestamos(page: number = 1, filtros?: any): Observable<PrestamoResponse> {
-    let query = `page=${page}`;
-    if (filtros) {
-      Object.keys(filtros).forEach(key => {
-        if (filtros[key]) {
-          query += `&${key}=${filtros[key]}`;
-        }
-      });
+  filterLibrosByCategoria(categoria: string): Observable<Libro[]> {
+    if (!categoria || categoria === 'Todas') {
+      return this.getLibros();
     }
-    return this.apiService.get<PrestamoResponse>(`/prestamos/?${query}`);
+    const filtrados = this.libros.filter(libro => libro.categoria === categoria);
+    return of(filtrados).pipe(delay(300));
   }
 
-  /**
-   * Devolver libro (Administradores)
-   */
-  devolverLibro(prestamoId: number, observaciones?: string): Observable<ApiResponse<Prestamo>> {
-    return this.apiService.post<ApiResponse<Prestamo>>(`/prestamos/${prestamoId}/devolver/`, {
-      observaciones
-    });
+  filterLibrosByEstado(estado: string): Observable<Libro[]> {
+    if (!estado || estado === 'Todos') {
+      return this.getLibros();
+    }
+    const filtrados = this.libros.filter(libro => libro.estado === estado);
+    return of(filtrados).pipe(delay(300));
   }
 
-  /**
-   * Renovar préstamo
-   */
-  renovarPrestamo(prestamoId: number): Observable<ApiResponse<Prestamo>> {
-    return this.apiService.post<ApiResponse<Prestamo>>(`/prestamos/${prestamoId}/renovar/`, {});
+  getCategorias(): Observable<string[]> {
+    return of(CATEGORIAS);
   }
 
-  // ==================== GESTIÓN DE RESERVAS ====================
-
-  /**
-   * Crear reserva de un libro
-   */
-  crearReserva(reservaData: ReservaRequest): Observable<ApiResponse<Reserva>> {
-    return this.apiService.post<ApiResponse<Reserva>>('/reservas/crear/', reservaData);
+  getEstados(): Observable<string[]> {
+    return of(ESTADOS_LIBRO);
   }
 
-  /**
-   * Obtener reservas del usuario actual
-   */
-  obtenerMisReservas(page: number = 1): Observable<any> {
-    return this.apiService.get(`/reservas/?page=${page}`);
+  // Métodos para préstamos
+  prestarLibro(libroId: number): Observable<any> {
+    const usuario = this.authService.currentUserValue;
+    if (!usuario) {
+      return throwError(() => new Error('Usuario no autenticado'));
+    }
+
+    const libro = this.libros.find(l => l.id === libroId);
+    if (!libro) {
+      return throwError(() => new Error('Libro no encontrado'));
+    }
+
+    if (libro.cantidad_disponible <= 0) {
+      return throwError(() => new Error('No hay ejemplares disponibles'));
+    }
+
+    // Verificar si el usuario ya tiene este libro prestado
+    const prestamoExistente = this.prestamos.find(p => 
+      p.libro.id === libroId && p.usuario.id === usuario.id && p.estado === 'Activo'
+    );
+    
+    if (prestamoExistente) {
+      return throwError(() => new Error('Ya tienes este libro prestado'));
+    }
+
+    // Crear nuevo préstamo
+    const fechaDevolucion = new Date();
+    fechaDevolucion.setDate(fechaDevolucion.getDate() + 15); // 15 días
+
+    const nuevoPrestamo: Prestamo = {
+      id: this.prestamos.length + 1,
+      libro: libro,
+      usuario: {
+        id: usuario.id ?? 0,
+        nombre: usuario.nombre,
+        apellido: usuario.apellido,
+        email: usuario.email,
+        rol: usuario.rol
+      },
+      fecha_prestamo: new Date().toISOString(),
+      fecha_devolucion_esperada: fechaDevolucion.toISOString().split('T')[0],
+      fecha_devolucion_real: undefined,
+      estado: 'Activo',
+      observaciones: undefined
+    };
+
+    this.prestamos.push(nuevoPrestamo);
+    
+    // Actualizar disponibilidad del libro
+    libro.cantidad_disponible--;
+    if (libro.cantidad_disponible === 0) {
+      libro.estado = 'Prestado';
+    }
+
+    this.librosSubject.next([...this.libros]);
+    this.prestamosSubject.next([...this.prestamos]);
+
+    return of({ success: true, prestamo: nuevoPrestamo }).pipe(delay(500));
   }
 
-  /**
-   * Cancelar reserva
-   */
-  cancelarReserva(reservaId: number): Observable<ApiResponse<any>> {
-    return this.apiService.post<ApiResponse<any>>(`/reservas/${reservaId}/cancelar/`, {});
+  devolverLibro(prestamoId: number): Observable<any> {
+    const prestamo = this.prestamos.find(p => p.id === prestamoId);
+    if (!prestamo) {
+      return throwError(() => new Error('Préstamo no encontrado'));
+    }
+
+    if (prestamo.estado !== 'Activo') {
+      return throwError(() => new Error('Este préstamo ya fue devuelto'));
+    }
+
+    // Actualizar préstamo
+    prestamo.estado = 'Devuelto';
+    prestamo.fecha_devolucion_real = new Date().toISOString();
+
+    // Actualizar disponibilidad del libro
+    const libro = this.libros.find(l => l.id === prestamo.libro.id);
+    if (libro) {
+      libro.cantidad_disponible++;
+      if (libro.cantidad_disponible > 0 && libro.estado === 'Prestado') {
+        libro.estado = 'Disponible';
+      }
+    }
+
+    this.librosSubject.next([...this.libros]);
+    this.prestamosSubject.next([...this.prestamos]);
+
+    return of({ success: true }).pipe(delay(500));
   }
 
-  /**
-   * Obtener todas las reservas (solo Administradores)
-   */
-  obtenerTodasReservas(page: number = 1): Observable<any> {
-    return this.apiService.get(`/reservas/?page=${page}`);
+  getPrestamosUsuario(): Observable<Prestamo[]> {
+    const usuario = this.authService.currentUserValue;
+    if (!usuario) {
+      return of([]);
+    }
+
+    const prestamosUsuario = this.prestamos.filter(p => p.usuario.id === usuario.id);
+    return of(prestamosUsuario).pipe(delay(400));
   }
 
-  // ==================== GESTIÓN DE BIBLIOGRAFÍA (DOCENTES) ====================
+  getPrestamosActivos(): Observable<Prestamo[]> {
+    const usuario = this.authService.currentUserValue;
+    if (!usuario) {
+      return of([]);
+    }
 
-  /**
-   * Obtener bibliografías del docente
-   */
-  obtenerMisBibliografias(): Observable<ApiResponse<Bibliografia[]>> {
-    return this.apiService.get<ApiResponse<Bibliografia[]>>('/bibliografias/');
+    const prestamosActivos = this.prestamos.filter(p => 
+      p.usuario.id === usuario.id && p.estado === 'Activo'
+    );
+    return of(prestamosActivos).pipe(delay(400));
   }
 
-  /**
-   * Crear nueva bibliografía
-   */
-  crearBibliografia(bibliografiaData: { curso: string; descripcion?: string; libros?: number[]; es_publica?: boolean }): Observable<ApiResponse<Bibliografia>> {
-    return this.apiService.post<ApiResponse<Bibliografia>>('/bibliografias/crear/', bibliografiaData);
+  // Métodos para reservas
+  reservarLibro(libroId: number): Observable<any> {
+    const usuario = this.authService.currentUserValue;
+    if (!usuario) {
+      return throwError(() => new Error('Usuario no autenticado'));
+    }
+
+    const libro = this.libros.find(l => l.id === libroId);
+    if (!libro) {
+      return throwError(() => new Error('Libro no encontrado'));
+    }
+
+    if (libro.cantidad_disponible > 0) {
+      return throwError(() => new Error('El libro está disponible, puedes prestarlo directamente'));
+    }
+
+    // Verificar si el usuario ya tiene una reserva activa para este libro
+    const reservaExistente = this.reservas.find(r => 
+      r.libro.id === libroId && r.usuario.id === usuario.id && r.estado === 'Activa'
+    );
+    
+    if (reservaExistente) {
+      return throwError(() => new Error('Ya tienes una reserva activa para este libro'));
+    }
+
+    // Crear nueva reserva
+    const fechaExpiracion = new Date();
+    fechaExpiracion.setDate(fechaExpiracion.getDate() + 3); // 3 días
+
+    const nuevaReserva: Reserva = {
+      id: this.reservas.length + 1,
+      libro: libro,
+      usuario: {
+        id: usuario.id ?? 0,
+        nombre: usuario.nombre,
+        apellido: usuario.apellido,
+        email: usuario.email
+      },
+      fecha_reserva: new Date().toISOString(),
+      estado: 'Activa',
+      fecha_expiracion: fechaExpiracion.toISOString()
+    };
+
+    this.reservas.push(nuevaReserva);
+    
+    // Actualizar estado del libro si es necesario
+    if (libro.estado === 'Disponible') {
+      libro.estado = 'Reservado';
+    }
+
+    this.librosSubject.next([...this.libros]);
+    this.reservasSubject.next([...this.reservas]);
+
+    return of({ success: true, reserva: nuevaReserva }).pipe(delay(500));
   }
 
-  /**
-   * Actualizar bibliografía
-   */
-  actualizarBibliografia(id: number, bibliografiaData: any): Observable<ApiResponse<Bibliografia>> {
-    return this.apiService.put<ApiResponse<Bibliografia>>(`/bibliografias/${id}/actualizar/`, bibliografiaData);
+  cancelarReserva(reservaId: number): Observable<any> {
+    const reserva = this.reservas.find(r => r.id === reservaId);
+    if (!reserva) {
+      return throwError(() => new Error('Reserva no encontrada'));
+    }
+
+    if (reserva.estado !== 'Activa') {
+      return throwError(() => new Error('Esta reserva ya fue procesada'));
+    }
+
+    // Actualizar reserva
+    reserva.estado = 'Cancelada';
+
+    // Verificar si hay otras reservas activas para este libro
+    const otrasReservas = this.reservas.filter(r => 
+      r.libro.id === reserva.libro.id && r.estado === 'Activa' && r.id !== reservaId
+    );
+
+    // Si no hay otras reservas y el libro no está prestado, marcarlo como disponible
+    const libro = this.libros.find(l => l.id === reserva.libro.id);
+    if (libro && otrasReservas.length === 0 && libro.cantidad_disponible > 0) {
+      libro.estado = 'Disponible';
+    }
+
+    this.librosSubject.next([...this.libros]);
+    this.reservasSubject.next([...this.reservas]);
+
+    return of({ success: true }).pipe(delay(500));
   }
 
-  /**
-   * Agregar libro a bibliografía
-   */
-  agregarLibroABibliografia(bibliografiaId: number, libroId: number): Observable<ApiResponse<any>> {
-    return this.apiService.post<ApiResponse<any>>(`/bibliografias/${bibliografiaId}/agregar-libro/`, {
-      libro_id: libroId
-    });
+  getReservasUsuario(): Observable<Reserva[]> {
+    const usuario = this.authService.currentUserValue;
+    if (!usuario) {
+      return of([]);
+    }
+
+    const reservasUsuario = this.reservas.filter(r => r.usuario.id === usuario.id);
+    return of(reservasUsuario).pipe(delay(400));
   }
 
-  /**
-   * Remover libro de bibliografía
-   */
-  removerLibroDeBibliografia(bibliografiaId: number, libroId: number): Observable<ApiResponse<any>> {
-    return this.apiService.post<ApiResponse<any>>(`/bibliografias/${bibliografiaId}/remover-libro/`, {
-      libro_id: libroId
-    });
+  getReservasActivas(): Observable<Reserva[]> {
+    const usuario = this.authService.currentUserValue;
+    if (!usuario) {
+      return of([]);
+    }
+
+    const reservasActivas = this.reservas.filter(r => 
+      r.usuario.id === usuario.id && r.estado === 'Activa'
+    );
+    return of(reservasActivas).pipe(delay(400));
   }
 
-  /**
-   * Obtener bibliografías públicas
-   */
-  obtenerBibliografiasPublicas(curso?: string): Observable<ApiResponse<Bibliografia[]>> {
-    const query = curso ? `?curso=${curso}` : '';
-    return this.apiService.get<ApiResponse<Bibliografia[]>>(`/bibliografias/${query}`);
+  // Métodos de utilidad
+  puedePrestar(libroId: number): Observable<boolean> {
+    const libro = this.libros.find(l => l.id === libroId);
+    return of(libro ? libro.cantidad_disponible > 0 : false);
   }
 
-  // ==================== GESTIÓN DE SANCIONES (ADMINISTRADORES) ====================
+  puedeReservar(libroId: number): Observable<boolean> {
+    const usuario = this.authService.currentUserValue;
+    if (!usuario) {
+      return of(false);
+    }
 
-  /**
-   * Obtener sanciones del usuario actual
-   */
-  obtenerMisSanciones(): Observable<ApiResponse<Sancion[]>> {
-    return this.apiService.get<ApiResponse<Sancion[]>>('/sanciones/');
+    const libro = this.libros.find(l => l.id === libroId);
+    if (!libro || libro.cantidad_disponible > 0) {
+      return of(false);
+    }
+
+    const reservaExistente = this.reservas.find(r => 
+      r.libro.id === libroId && r.usuario.id === usuario.id && r.estado === 'Activa'
+    );
+
+    return of(!reservaExistente);
   }
 
-  /**
-   * Obtener todas las sanciones (solo Administradores)
-   */
-  obtenerTodasSanciones(page: number = 1): Observable<any> {
-    return this.apiService.get(`/sanciones/?page=${page}`);
-  }
+  getEstadisticas(): Observable<any> {
+    const totalLibros = this.libros.length;
+    const librosDisponibles = this.libros.filter(l => l.cantidad_disponible > 0).length;
+    const librosPrestados = this.libros.filter(l => l.estado === 'Prestado').length;
+    const librosReservados = this.libros.filter(l => l.estado === 'Reservado').length;
 
-  /**
-   * Aplicar sanción (solo Administradores)
-   */
-  aplicarSancion(sancionData: any): Observable<ApiResponse<Sancion>> {
-    return this.apiService.post<ApiResponse<Sancion>>('/sanciones/crear/', sancionData);
-  }
+    const usuario = this.authService.currentUserValue;
+    let prestamosActivos = 0;
+    let reservasActivas = 0;
 
-  /**
-   * Actualizar sanción (solo Administradores)
-   */
-  actualizarSancion(id: number, sancionData: any): Observable<ApiResponse<Sancion>> {
-    return this.apiService.put<ApiResponse<Sancion>>(`/sanciones/${id}/`, sancionData);
-  }
+    if (usuario) {
+      prestamosActivos = this.prestamos.filter(p => 
+        p.usuario.id === usuario.id && p.estado === 'Activo'
+      ).length;
+      
+      reservasActivas = this.reservas.filter(r => 
+        r.usuario.id === usuario.id && r.estado === 'Activa'
+      ).length;
+    }
 
-  /**
-   * Pagar multa
-   */
-  pagarMulta(sancionId: number, metodoPago: string): Observable<ApiResponse<any>> {
-    return this.apiService.post<ApiResponse<any>>(`/sanciones/${sancionId}/pagar/`, {
-      metodo_pago: metodoPago
-    });
-  }
-
-  // ==================== ESTADÍSTICAS Y REPORTES ====================
-
-  /**
-   * Obtener estadísticas del sistema (solo Administradores)
-   */
-  obtenerEstadisticas(): Observable<ApiResponse<any>> {
-    return this.apiService.get<ApiResponse<any>>('/estadisticas/');
-  }
-
-  /**
-   * Obtener préstamos vencidos (solo Administradores)
-   */
-  obtenerPrestamosVencidos(): Observable<ApiResponse<Prestamo[]>> {
-    return this.apiService.get<ApiResponse<Prestamo[]>>('/prestamos-vencidos/');
-  }
-
-  /**
-   * Generar reporte de actividad (solo Administradores)
-   */
-  generarReporteActividad(fechaInicio: string, fechaFin: string): Observable<ApiResponse<any>> {
-    return this.apiService.get<ApiResponse<any>>(`/reportes/actividad/?inicio=${fechaInicio}&fin=${fechaFin}`);
+    return of({
+      totalLibros,
+      librosDisponibles,
+      librosPrestados,
+      librosReservados,
+      prestamosActivos,
+      reservasActivas
+    }).pipe(delay(300));
   }
 }

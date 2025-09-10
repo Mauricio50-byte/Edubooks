@@ -30,10 +30,6 @@ const routes: Routes = [
     pathMatch: 'full'
   },
   {
-    path: '**',
-    redirectTo: 'login' // Ruta por defecto para páginas no encontradas
-  },
-  {
     path: 'catalogo',
     loadChildren: () => import('./pages/catalogo/catalogo.module').then( m => m.CatalogoPageModule),
     canActivate: [AuthGuard] // Solo accesible si está autenticado
@@ -52,6 +48,10 @@ const routes: Routes = [
     path: 'admin-libros',
     loadChildren: () => import('./pages/admin-libros/admin-libros.module').then( m => m.AdminLibrosPageModule),
     canActivate: [AuthGuard] // Solo accesible si está autenticado
+  },
+  {
+    path: '**',
+    redirectTo: 'login' // Ruta por defecto para páginas no encontradas
   }
 ];
 

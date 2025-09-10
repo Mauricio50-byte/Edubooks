@@ -1,10 +1,9 @@
-// src/app/pages/catalogo/catalogo.page.ts
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { AlertController, ModalController, ToastController, LoadingController } from '@ionic/angular';
+import { AlertController, ToastController, LoadingController } from '@ionic/angular';
 import { BibliotecaService } from '../../core/services/biblioteca.service';
 import { AuthService } from '../../core/services/auth.service';
-import { Libro, BusquedaLibros } from '../../core/models/libro.model';
+import { Libro } from '../../core/models/libro.model';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
@@ -16,17 +15,13 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 })
 export class CatalogoPage implements OnInit {
   libros: Libro[] = [];
+  librosFiltrados: Libro[] = [];
   categorias: string[] = [];
   searchQuery: string = '';
+  categoriaSeleccionada: string = 'Todas';
+  estadoSeleccionado: string = 'Todos';
   isLoading: boolean = false;
-  isLoadingMore: boolean = false;
-  hasMorePages: boolean = false;
   
-  filtros: BusquedaLibros = {
-    page: 1,
-    page_size: 20
-  };
-
   private searchSubject = new Subject<string>();
 
   constructor(
@@ -34,303 +29,215 @@ export class CatalogoPage implements OnInit {
     private authService: AuthService,
     private router: Router,
     private alertController: AlertController,
-    private modalController: ModalController,
     private toastController: ToastController,
     private loadingController: LoadingController
   ) {
     // Configurar búsqueda con debounce
     this.searchSubject.pipe(
-      debounceTime(500),
+      debounceTime(300),
       distinctUntilChanged()
     ).subscribe(query => {
-      this.filtros.query = query;
-      this.buscarLibros(true);
+      this.buscarLibros(query);
     });
   }
 
   ngOnInit() {
-    this.cargarCategorias();
-    this.buscarLibros(true);
+    this.cargarDatos();
   }
 
   ionViewWillEnter() {
     // Recargar datos cuando se vuelve a la página
-    this.buscarLibros(true);
+    this.cargarDatos();
   }
 
-  /**
-   * Cargar categorías disponibles
-   */
-  async cargarCategorias() {
+  async cargarDatos() {
+    this.isLoading = true;
+    
     try {
-      const response = await this.bibliotecaService.obtenerCategorias().toPromise();
-      if (response?.data) {
-        this.categorias = response.data;
-      }
-    } catch (error) {
-      console.error('Error cargando categorías:', error);
-    }
-  }
-
-  /**
-   * Buscar libros con filtros actuales
-   */
-  async buscarLibros(reset: boolean = false) {
-    if (reset) {
-      this.filtros.page = 1;
-      this.libros = [];
-    }
-
-    this.isLoading = reset;
-    this.isLoadingMore = !reset;
-
-    try {
-      const response = await this.bibliotecaService.buscarLibros(this.filtros).toPromise();
-      
-      if (response) {
-        if (reset) {
-          this.libros = response.results;
-        } else {
-          this.libros = [...this.libros, ...response.results];
+      // Cargar libros
+      this.bibliotecaService.getLibros().subscribe({
+        next: (libros) => {
+          this.libros = libros;
+          this.librosFiltrados = libros;
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Error cargando libros:', error);
+          this.isLoading = false;
         }
-        
-        this.hasMorePages = !!response.next;
-      }
-    } catch (error) {
-      console.error('Error buscando libros:', error);
-      const toast = await this.toastController.create({
-        message: 'Error al cargar los libros. Verifica tu conexión.',
-        duration: 3000,
-        color: 'danger'
       });
-      await toast.present();
-    } finally {
+
+      // Cargar categorías
+      this.bibliotecaService.getCategorias().subscribe({
+        next: (categorias) => {
+          this.categorias = ['Todas', ...categorias];
+        }
+      });
+    } catch (error) {
+      console.error('Error cargando datos:', error);
       this.isLoading = false;
-      this.isLoadingMore = false;
     }
   }
 
-  /**
-   * Manejar input de búsqueda
-   */
   onSearchInput(event: any) {
-    const query = event.target.value?.trim() || '';
+    const query = event.target.value;
     this.searchQuery = query;
     this.searchSubject.next(query);
   }
 
-  /**
-   * Limpiar búsqueda
-   */
-  limpiarBusqueda() {
+  buscarLibros(query: string) {
+    if (!query || query.trim() === '') {
+      this.aplicarFiltros();
+      return;
+    }
+
+    this.bibliotecaService.searchLibros(query).subscribe({
+      next: (resultados) => {
+        this.librosFiltrados = resultados;
+      },
+      error: (error) => {
+        console.error('Error en búsqueda:', error);
+      }
+    });
+  }
+
+  onCategoriaChange(event: any) {
+    this.categoriaSeleccionada = event.detail.value;
+    this.aplicarFiltros();
+  }
+
+  onEstadoChange(event: any) {
+    this.estadoSeleccionado = event.detail.value;
+    this.aplicarFiltros();
+  }
+
+  aplicarFiltros() {
+    let librosFiltrados = [...this.libros];
+
+    // Filtrar por categoría
+    if (this.categoriaSeleccionada && this.categoriaSeleccionada !== 'Todas') {
+      librosFiltrados = librosFiltrados.filter(libro => 
+        libro.categoria === this.categoriaSeleccionada
+      );
+    }
+
+    // Filtrar por estado
+    if (this.estadoSeleccionado && this.estadoSeleccionado !== 'Todos') {
+      if (this.estadoSeleccionado === 'Disponible') {
+        librosFiltrados = librosFiltrados.filter(libro => 
+          libro.cantidad_disponible > 0
+        );
+      } else {
+        librosFiltrados = librosFiltrados.filter(libro => 
+          libro.estado === this.estadoSeleccionado
+        );
+      }
+    }
+
+    this.librosFiltrados = librosFiltrados;
+  }
+
+  limpiarFiltros() {
     this.searchQuery = '';
-    this.filtros.query = '';
-    this.filtros.categoria = '';
-    this.buscarLibros(true);
+    this.categoriaSeleccionada = 'Todas';
+    this.estadoSeleccionado = 'Todos';
+    this.librosFiltrados = [...this.libros];
   }
 
-  /**
-   * Toggle categoría
-   */
-  toggleCategoria(categoria: string) {
-    if (this.filtros.categoria === categoria) {
-      this.filtros.categoria = '';
-    } else {
-      this.filtros.categoria = categoria;
-    }
-    this.buscarLibros(true);
+  filtrarPorCategoria(categoria: string) {
+    this.categoriaSeleccionada = categoria;
+    this.aplicarFiltros();
   }
 
-  /**
-   * Cargar más libros (paginación)
-   */
-  cargarMasLibros() {
-    if (this.hasMorePages && !this.isLoadingMore) {
-      this.filtros.page = (this.filtros.page || 1) + 1;
-      this.buscarLibros(false);
-    }
-  }
-
-  /**
-   * Ver detalle de un libro
-   */
-  verDetalleLibro(libro: Libro, event?: Event) {
-    if (event) {
-      event.stopPropagation();
-    }
-    this.router.navigate(['/libro', libro.id]);
-  }
-
-  /**
-   * Solicitar préstamo de un libro
-   */
-  async solicitarPrestamo(libro: Libro, event: Event) {
-    event.stopPropagation();
-
-    const alert = await this.alertController.create({
-      header: 'Confirmar Préstamo',
-      message: `¿Deseas solicitar el préstamo de "${libro.titulo}"?`,
-      buttons: [
-        {
-          text: 'Cancelar',
-          role: 'cancel'
-        },
-        {
-          text: 'Solicitar',
-          handler: async () => {
-            await this.procesarSolicitudPrestamo(libro);
-          }
-        }
-      ]
-    });
-
-    await alert.present();
-  }
-
-  /**
-   * Procesar solicitud de préstamo
-   */
-  private async procesarSolicitudPrestamo(libro: Libro) {
+  async prestarLibro(libro: Libro) {
     const loading = await this.loadingController.create({
-      message: 'Solicitando préstamo...'
+      message: 'Procesando préstamo...',
     });
     await loading.present();
 
-    try {
-      const response = await this.bibliotecaService.solicitarPrestamo({ 
-        libro_id: libro.id 
-      }).toPromise();
+    this.bibliotecaService.prestarLibro(libro.id).subscribe({
+      next: async (response) => {
+        await loading.dismiss();
+        
+        const toast = await this.toastController.create({
+          message: `¡Préstamo exitoso! Tienes 15 días para devolver "${libro.titulo}".`,
+          duration: 4000,
+          color: 'success',
+          position: 'top'
+        });
+        await toast.present();
 
-      await loading.dismiss();
-
-      const toast = await this.toastController.create({
-        message: `Préstamo solicitado exitosamente. ${response?.message || ''}`,
-        duration: 3000,
-        color: 'success'
-      });
-      await toast.present();
-
-      // Actualizar estado del libro
-      this.buscarLibros(true);
-
-    } catch (error: any) {
-      await loading.dismiss();
-      
-      const alert = await this.alertController.create({
-        header: 'Error en Préstamo',
-        message: error.message || 'No se pudo procesar la solicitud de préstamo.',
-        buttons: ['OK']
-      });
-      await alert.present();
-    }
-  }
-
-  /**
-   * Crear reserva de un libro
-   */
-  async crearReserva(libro: Libro, event: Event) {
-    event.stopPropagation();
-
-    const alert = await this.alertController.create({
-      header: 'Confirmar Reserva',
-      message: `¿Deseas reservar "${libro.titulo}"?`,
-      buttons: [
-        {
-          text: 'Cancelar',
-          role: 'cancel'
-        },
-        {
-          text: 'Reservar',
-          handler: async () => {
-            await this.procesarReserva(libro);
-          }
-        }
-      ]
+        // Actualizar la lista
+        this.cargarDatos();
+      },
+      error: async (error) => {
+        await loading.dismiss();
+        
+        const alert = await this.alertController.create({
+          header: 'Error en Préstamo',
+          message: error.message || 'No se pudo procesar el préstamo.',
+          buttons: ['OK']
+        });
+        await alert.present();
+      }
     });
-
-    await alert.present();
   }
 
-  /**
-   * Procesar reserva
-   */
-  private async procesarReserva(libro: Libro) {
+  async reservarLibro(libro: Libro) {
     const loading = await this.loadingController.create({
-      message: 'Creando reserva...'
+      message: 'Procesando reserva...',
     });
     await loading.present();
 
-    try {
-      const response = await this.bibliotecaService.crearReserva({ 
-        libro_id: libro.id 
-      }).toPromise();
+    this.bibliotecaService.reservarLibro(libro.id).subscribe({
+      next: async (response) => {
+        await loading.dismiss();
+        
+        const toast = await this.toastController.create({
+          message: `¡Reserva exitosa! Te notificaremos cuando "${libro.titulo}" esté disponible.`,
+          duration: 4000,
+          color: 'success',
+          position: 'top'
+        });
+        await toast.present();
 
-      await loading.dismiss();
-
-      const toast = await this.toastController.create({
-        message: `Reserva creada exitosamente. ${response?.message || ''}`,
-        duration: 3000,
-        color: 'success'
-      });
-      await toast.present();
-
-      // Actualizar lista de libros
-      this.buscarLibros(true);
-
-    } catch (error: any) {
-      await loading.dismiss();
-      
-      const alert = await this.alertController.create({
-        header: 'Error en Reserva',
-        message: error.message || 'No se pudo crear la reserva.',
-        buttons: ['OK']
-      });
-      await alert.present();
-    }
-  }
-
-  /**
-   * Abrir modal de filtros
-   */
-  async presentFilterModal() {
-    // TODO: Implementar modal de filtros avanzados
-    const alert = await this.alertController.create({
-      header: 'Filtros',
-      message: 'Funcionalidad de filtros avanzados en desarrollo',
-      buttons: ['OK']
+        // Actualizar la lista
+        this.cargarDatos();
+      },
+      error: async (error) => {
+        await loading.dismiss();
+        
+        const alert = await this.alertController.create({
+          header: 'Error en Reserva',
+          message: error.message || 'No se pudo procesar la reserva.',
+          buttons: ['OK']
+        });
+        await alert.present();
+      }
     });
-    await alert.present();
   }
 
-  /**
-   * Agregar nuevo libro (solo Administradores)
-   */
-  agregarLibro() {
-    this.router.navigate(['/admin/libro/nuevo']);
+  verDetalle(libro: Libro) {
+    this.router.navigate(['/detalle-libro'], {
+      queryParams: { id: libro.id }
+    });
   }
 
-  /**
-   * Obtener color según el estado del libro
-   */
   getEstadoColor(estado: string): string {
     switch (estado) {
-      case 'Disponible':
-        return 'success';
-      case 'Prestado':
-        return 'warning';
-      case 'Reservado':
-        return 'primary';
-      case 'Mantenimiento':
-        return 'danger';
-      default:
-        return 'medium';
+      case 'Disponible': return 'success';
+      case 'Prestado': return 'danger';
+      case 'Reservado': return 'warning';
+      case 'Mantenimiento': return 'medium';
+      default: return 'medium';
     }
   }
 
-  /**
-   * Verificar si el usuario es administrador
-   */
-  isAdministrador(): boolean {
-    return this.authService.isAdministrador();
+  puedePrestar(libro: Libro): boolean {
+    return libro.cantidad_disponible > 0;
+  }
+
+  puedeReservar(libro: Libro): boolean {
+    return libro.cantidad_disponible === 0 && libro.estado !== 'Mantenimiento';
   }
 }

@@ -5,7 +5,7 @@
     </ion-buttons>
     <ion-title>Detalle del Libro</ion-title>
     <ion-buttons slot="end" *ngIf="isAdministrador()">
-      <ion-button (click)="editarLibro()">
+      <ion-button (click)="volverAlCatalogo()">
         <ion-icon name="create-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
@@ -141,7 +141,7 @@
         *ngIf="puedePrestar()" 
         expand="block" 
         size="large"
-        (click)="solicitarPrestamo()"
+        (click)="prestarLibro()"
         class="action-button prestamo-button">
         <ion-icon name="download-outline" slot="start"></ion-icon>
         Solicitar Préstamo
@@ -153,7 +153,7 @@
         size="large"
         fill="outline"
         color="warning"
-        (click)="crearReserva()"
+        (click)="reservarLibro()"
         class="action-button reserva-button">
         <ion-icon name="bookmark-outline" slot="start"></ion-icon>
         Hacer Reserva
@@ -168,20 +168,20 @@
     <!-- Acciones de administrador -->
     <div class="acciones-admin" *ngIf="isAdministrador()">
       <ion-button 
+        *ngIf="isDocente()"
         expand="block" 
         fill="outline" 
-        (click)="editarLibro()">
-        <ion-icon name="create-outline" slot="start"></ion-icon>
-        Editar Libro
+        (click)="agregarABibliografia()">
+        <ion-icon name="library-outline" slot="start"></ion-icon>
+        Agregar a Bibliografía
       </ion-button>
       
       <ion-button 
         expand="block" 
         fill="outline" 
-        color="danger"
-        (click)="eliminarLibro()">
-        <ion-icon name="trash-outline" slot="start"></ion-icon>
-        Eliminar Libro
+        (click)="volverAlCatalogo()">
+        <ion-icon name="arrow-back-outline" slot="start"></ion-icon>
+        Volver al Catálogo
       </ion-button>
     </div>
 

@@ -1,156 +1,182 @@
 <ion-header [translucent]="true">
   <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home" text="" icon="arrow-back-outline"></ion-back-button>
+    </ion-buttons>
     <ion-title>
       <ion-icon name="library-outline"></ion-icon>
-      Catálogo de Libros
+      <span class="title-text">Catálogo</span>
     </ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="presentFilterModal()">
-        <ion-icon name="filter-outline"></ion-icon>
+      <ion-button (click)="limpiarFiltros()">
+        <ion-icon name="refresh-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <!-- Buscador -->
+  <!-- Barra de búsqueda -->
   <div class="search-container">
     <ion-searchbar 
       [(ngModel)]="searchQuery"
       (ionInput)="onSearchInput($event)"
-      (ionClear)="limpiarBusqueda()"
-      placeholder="Buscar por título, autor, ISBN..."
+      (ionClear)="limpiarFiltros()"
+      placeholder="Buscar por título, autor, categoría..."
       show-clear-button="focus"
-      debounce="500">
+      debounce="300">
     </ion-searchbar>
   </div>
 
-  <!-- Filtros rápidos -->
-  <div class="quick-filters" *ngIf="categorias.length > 0">
-    <ion-chip 
-      *ngFor="let categoria of categorias" 
-      [color]="filtros.categoria === categoria ? 'primary' : 'medium'"
-      (click)="toggleCategoria(categoria)">
-      <ion-label>{{ categoria }}</ion-label>
-    </ion-chip>
+  <!-- Filtros -->
+  <div class="filters-container">
+    <ion-row>
+      <ion-col size="12" size-md="6">
+        <ion-select 
+          [(ngModel)]="categoriaSeleccionada"
+          (ionChange)="onCategoriaChange($event)"
+          placeholder="Seleccionar Categoría"
+          interface="action-sheet"
+          class="category-select">
+          <ion-select-option value="Todas">📚 Todas las Categorías</ion-select-option>
+          <ion-select-option value="Programación y Desarrollo">💻 Programación y Desarrollo</ion-select-option>
+          <ion-select-option value="Matemáticas y Estadística">📊 Matemáticas y Estadística</ion-select-option>
+          <ion-select-option value="Ciencias Naturales">🔬 Ciencias Naturales</ion-select-option>
+          <ion-select-option value="Literatura y Humanidades">📖 Literatura y Humanidades</ion-select-option>
+          <ion-select-option value="Ingeniería">⚙️ Ingeniería</ion-select-option>
+          <ion-select-option value="Administración y Negocios">💼 Administración y Negocios</ion-select-option>
+        </ion-select>
+      </ion-col>
+      <ion-col size="12" size-md="6">
+        <ion-select 
+          [(ngModel)]="estadoSeleccionado"
+          (ionChange)="onEstadoChange($event)"
+          placeholder="Filtrar por Estado"
+          interface="action-sheet"
+          class="status-select">
+          <ion-select-option value="Todos">📋 Todos los Estados</ion-select-option>
+          <ion-select-option value="Disponible">✅ Disponible</ion-select-option>
+          <ion-select-option value="Prestado">📤 Prestado</ion-select-option>
+          <ion-select-option value="Reservado">📝 Reservado</ion-select-option>
+          <ion-select-option value="Mantenimiento">🔧 Mantenimiento</ion-select-option>
+        </ion-select>
+      </ion-col>
+    </ion-row>
+    
+    <!-- Filtros rápidos por categoría -->
+    <div class="quick-filters">
+      <ion-chip 
+        [color]="categoriaSeleccionada === 'Todas' ? 'primary' : 'medium'"
+        (click)="filtrarPorCategoria('Todas')">
+        <ion-label>Todas</ion-label>
+      </ion-chip>
+      <ion-chip 
+        [color]="categoriaSeleccionada === 'Programación y Desarrollo' ? 'primary' : 'medium'"
+        (click)="filtrarPorCategoria('Programación y Desarrollo')">
+        <ion-label>💻 Programación</ion-label>
+      </ion-chip>
+      <ion-chip 
+        [color]="categoriaSeleccionada === 'Matemáticas y Estadística' ? 'primary' : 'medium'"
+        (click)="filtrarPorCategoria('Matemáticas y Estadística')">
+        <ion-label>📊 Matemáticas</ion-label>
+      </ion-chip>
+      <ion-chip 
+        [color]="categoriaSeleccionada === 'Ingeniería' ? 'primary' : 'medium'"
+        (click)="filtrarPorCategoria('Ingeniería')">
+        <ion-label>⚙️ Ingeniería</ion-label>
+      </ion-chip>
+      <ion-chip 
+        [color]="categoriaSeleccionada === 'Ciencias Naturales' ? 'primary' : 'medium'"
+        (click)="filtrarPorCategoria('Ciencias Naturales')">
+        <ion-label>🔬 Ciencias</ion-label>
+      </ion-chip>
+    </div>
   </div>
 
   <!-- Estado de carga -->
-  <div class="loading-container" *ngIf="isLoading && libros.length === 0">
-    <ion-spinner name="dots"></ion-spinner>
-    <p>Buscando libros...</p>
+  <div class="loading-container" *ngIf="isLoading">
+    <ion-spinner name="dots" color="primary"></ion-spinner>
+    <p>Cargando libros...</p>
   </div>
 
   <!-- Mensaje cuando no hay resultados -->
-  <div class="no-results" *ngIf="!isLoading && libros.length === 0 && searchQuery">
-    <ion-icon name="search-outline" color="medium"></ion-icon>
+  <div class="no-results" *ngIf="!isLoading && librosFiltrados.length === 0 && libros.length > 0">
+    <ion-icon name="search-outline" color="medium" size="large"></ion-icon>
     <h3>No se encontraron resultados</h3>
-    <p>Prueba con otros términos de búsqueda</p>
-    <ion-button fill="outline" (click)="limpiarBusqueda()">
-      Limpiar búsqueda
+    <p>Prueba con otros términos de búsqueda o filtros</p>
+    <ion-button fill="outline" (click)="limpiarFiltros()">
+      <ion-icon name="refresh-outline" slot="start"></ion-icon>
+      Limpiar filtros
     </ion-button>
   </div>
 
   <!-- Lista de libros -->
-  <div class="books-grid" *ngIf="libros.length > 0">
-    <ion-card 
-      *ngFor="let libro of libros" 
-      class="book-card"
-      (click)="verDetalleLibro(libro)">
-      
-      <!-- Imagen del libro -->
+  <div class="books-grid" *ngIf="!isLoading && librosFiltrados.length > 0">
+    <ion-card *ngFor="let libro of librosFiltrados" class="book-card" (click)="verDetalle(libro)">
       <div class="book-image-container">
-        <img 
-          [src]="libro.imagen_portada || 'assets/images/book-placeholder.png'" 
-          [alt]="libro.titulo"
-          class="book-image">
-        
-        <!-- Badge de estado -->
-        <ion-badge 
-          [color]="getEstadoColor(libro.estado)" 
-          class="estado-badge">
+        <img [src]="libro.imagen_portada" [alt]="libro.titulo" class="book-image" 
+              onerror="this.src='assets/images/book-placeholder.svg'">
+        <ion-chip class="status-chip" [color]="getEstadoColor(libro.estado)">
           {{ libro.estado }}
-        </ion-badge>
+        </ion-chip>
       </div>
-
-      <!-- Información del libro -->
+      
       <ion-card-content>
         <h3 class="book-title">{{ libro.titulo }}</h3>
         <p class="book-author">{{ libro.autor }}</p>
+        <p class="book-category">{{ libro.categoria }}</p>
         
-        <div class="book-details">
-          <div class="detail-item">
-            <ion-icon name="bookmark-outline"></ion-icon>
-            <span>{{ libro.categoria }}</span>
-          </div>
-          
-          <div class="detail-item">
+        <div class="book-info">
+          <ion-chip color="medium" size="small">
             <ion-icon name="location-outline"></ion-icon>
-            <span>{{ libro.ubicacion }}</span>
-          </div>
+            <ion-label>{{ libro.ubicacion }}</ion-label>
+          </ion-chip>
           
-          <div class="detail-item" *ngIf="libro.cantidad_disponible !== undefined">
-            <ion-icon name="copy-outline"></ion-icon>
-            <span>{{ libro.cantidad_disponible }}/{{ libro.cantidad_total }} disponibles</span>
-          </div>
+          <ion-chip color="tertiary" size="small">
+            <ion-icon name="library-outline"></ion-icon>
+            <ion-label>{{ libro.cantidad_disponible }}/{{ libro.cantidad_total }}</ion-label>
+          </ion-chip>
+        </div>
+        
+        <div class="book-actions">
+          <ion-button 
+            *ngIf="puedePrestar(libro)"
+            expand="block" 
+            fill="solid" 
+            color="success"
+            (click)="prestarLibro(libro); $event.stopPropagation()">
+            <ion-icon name="download-outline" slot="start"></ion-icon>
+            Prestar
+          </ion-button>
+          
+          <ion-button 
+            *ngIf="puedeReservar(libro)"
+            expand="block" 
+            fill="outline" 
+            color="warning"
+            (click)="reservarLibro(libro); $event.stopPropagation()">
+            <ion-icon name="bookmark-outline" slot="start"></ion-icon>
+            Reservar
+          </ion-button>
+          
+          <ion-button 
+            *ngIf="!puedePrestar(libro) && !puedeReservar(libro)"
+            expand="block" 
+            fill="outline" 
+            color="medium"
+            disabled>
+            <ion-icon name="ban-outline" slot="start"></ion-icon>
+            No disponible
+          </ion-button>
         </div>
       </ion-card-content>
-
-      <!-- Acciones rápidas -->
-      <div class="card-actions">
-        <ion-button 
-          *ngIf="libro.estado === 'Disponible' && libro.cantidad_disponible > 0"
-          size="small"
-          fill="outline"
-          (click)="solicitarPrestamo(libro, $event)">
-          <ion-icon name="download-outline" slot="start"></ion-icon>
-          Solicitar
-        </ion-button>
-        
-        <ion-button 
-          *ngIf="libro.estado !== 'Disponible' || libro.cantidad_disponible === 0"
-          size="small"
-          fill="outline"
-          color="warning"
-          (click)="crearReserva(libro, $event)">
-          <ion-icon name="bookmark-outline" slot="start"></ion-icon>
-          Reservar
-        </ion-button>
-        
-        <ion-button 
-          size="small"
-          fill="clear"
-          (click)="verDetalleLibro(libro, $event)">
-          <ion-icon name="information-circle-outline"></ion-icon>
-        </ion-button>
-      </div>
     </ion-card>
   </div>
 
-  <!-- Carga de más resultados -->
-  <div class="load-more" *ngIf="hasMorePages && !isLoading">
-    <ion-button 
-      expand="block" 
-      fill="outline"
-      (click)="cargarMasLibros()">
-      Cargar más libros
-    </ion-button>
+  <!-- Mensaje inicial cuando no hay libros cargados -->
+  <div class="empty-state" *ngIf="!isLoading && libros.length === 0">
+    <ion-icon name="library-outline" color="medium" size="large"></ion-icon>
+    <h3>No hay libros disponibles</h3>
+    <p>El catálogo está vacío en este momento</p>
   </div>
-
-  <!-- Spinner para cargar más -->
-  <div class="loading-more" *ngIf="isLoadingMore">
-    <ion-spinner name="dots"></ion-spinner>
-    <p>Cargando más libros...</p>
-  </div>
-
-  <!-- Botón flotante para agregar libro (solo Administradores) -->
-  <ion-fab 
-    *ngIf="isAdministrador()" 
-    vertical="bottom" 
-    horizontal="end" 
-    slot="fixed">
-    <ion-fab-button (click)="agregarLibro()">
-      <ion-icon name="add"></ion-icon>
-    </ion-fab-button>
-  </ion-fab>
 </ion-content>

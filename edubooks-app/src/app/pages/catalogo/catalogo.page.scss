@@ -1,4 +1,20 @@
-// src/app/pages/catalogo/catalogo.page.scss
+// Estilos para la página de catálogo
+
+// Header responsive
+ion-toolbar {
+  .title-text {
+    margin-left: 8px;
+    
+    @media (max-width: 480px) {
+      font-size: 18px;
+    }
+  }
+  
+  ion-back-button {
+    --color: white;
+    --icon-font-size: 24px;
+  }
+}
 
 .search-container {
   padding: 16px;
@@ -6,89 +22,152 @@
   
   ion-searchbar {
     --background: white;
+    --color: #333;
+    --placeholder-color: #666;
+    --icon-color: #666;
+    --clear-button-color: #666;
     --border-radius: 12px;
     --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    font-size: 16px;
   }
 }
 
-.quick-filters {
-  padding: 8px 16px;
-  overflow-x: auto;
-  white-space: nowrap;
+.filters-container {
+  padding: 0 16px 16px 16px;
   background: var(--ion-color-light);
   
-  ion-chip {
-    margin-right: 8px;
+  ion-select {
     --background: white;
-    --color: var(--ion-color-medium);
-    transition: all 0.3s ease;
+    --color: #333;
+    --placeholder-color: #666;
+    --border-radius: 8px;
+    --padding-start: 12px;
+    --padding-end: 12px;
+    border: 1px solid var(--ion-color-medium);
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: #333;
     
-    &[color="primary"] {
-      --background: var(--ion-color-primary);
-      --color: white;
-      transform: scale(1.05);
+    &::part(text) {
+      color: #333 !important;
+    }
+    
+    &::part(placeholder) {
+      color: #666 !important;
     }
   }
   
-  &::-webkit-scrollbar {
-    display: none;
+  .quick-filters {
+    display: flex;
+    gap: 8px;
+    padding: 8px 0;
+    overflow-x: auto;
+    white-space: nowrap;
+    
+    &::-webkit-scrollbar {
+      display: none;
+    }
+    
+    ion-chip {
+      flex-shrink: 0;
+      font-size: 12px;
+      height: 32px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      
+      &:hover {
+        transform: scale(1.05);
+      }
+      
+      ion-label {
+        font-weight: 500;
+      }
+    }
   }
 }
 
-.loading-container, .no-results, .loading-more {
+.loading-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px 20px;
+  padding: 60px 20px;
+  
+  ion-spinner {
+    margin-bottom: 16px;
+  }
+  
+  p {
+    color: var(--ion-color-medium);
+    font-size: 16px;
+    margin: 0;
+  }
+}
+
+.no-results, .empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
   text-align: center;
   
   ion-icon {
     font-size: 64px;
     margin-bottom: 16px;
-    opacity: 0.5;
   }
   
   h3 {
-    margin: 16px 0 8px 0;
-    color: var(--ion-color-medium);
+    color: var(--ion-color-dark);
+    margin: 0 0 8px 0;
+    font-size: 20px;
+    font-weight: 600;
   }
   
   p {
     color: var(--ion-color-medium);
-    margin: 0 0 20px 0;
+    margin: 0 0 24px 0;
+    font-size: 16px;
   }
 }
 
 .books-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 16px;
   padding: 16px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
   
   @media (max-width: 768px) {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    padding: 12px;
+    gap: 10px;
+  }
+  
+  @media (max-width: 480px) {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    padding: 8px;
+    gap: 8px;
   }
 }
 
 .book-card {
-  --background: white;
+  margin: 0;
   border-radius: 16px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
   transition: all 0.3s ease;
   cursor: pointer;
+  overflow: hidden;
   
   &:hover {
     transform: translateY(-4px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
   }
   
   .book-image-container {
     position: relative;
-    height: 200px;
+    height: 140px;
     overflow: hidden;
-    background: var(--ion-color-light);
+    background: linear-gradient(135deg, var(--ion-color-primary-tint), var(--ion-color-secondary-tint));
     
     .book-image {
       width: 100%;
@@ -97,29 +176,26 @@
       transition: transform 0.3s ease;
     }
     
-    .estado-badge {
+    .status-chip {
       position: absolute;
-      top: 12px;
-      right: 12px;
-      font-size: 12px;
+      top: 8px;
+      right: 8px;
+      font-size: 10px;
       font-weight: 600;
-      text-transform: uppercase;
-    }
-    
-    &:hover .book-image {
-      transform: scale(1.05);
+      border-radius: 8px;
+      height: 20px;
     }
   }
   
   ion-card-content {
-    padding: 16px;
+    padding: 12px;
     
     .book-title {
-      font-size: 18px;
-      font-weight: 600;
+      font-size: 14px;
+      font-weight: 700;
       color: var(--ion-color-dark);
-      margin: 0 0 8px 0;
-      line-height: 1.3;
+      margin: 0 0 6px 0;
+      line-height: 1.2;
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
@@ -127,112 +203,73 @@
     }
     
     .book-author {
-      font-size: 14px;
+      font-size: 12px;
       color: var(--ion-color-medium);
-      margin: 0 0 16px 0;
-      font-style: italic;
+      margin: 0 0 3px 0;
+      font-weight: 500;
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
     
-    .book-details {
-      .detail-item {
-        display: flex;
-        align-items: center;
-        margin-bottom: 8px;
-        font-size: 13px;
-        color: var(--ion-color-medium);
+    .book-category {
+      font-size: 10px;
+      color: var(--ion-color-primary);
+      margin: 0 0 8px 0;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    
+    .book-info {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+      
+      ion-chip {
+        font-size: 9px;
+        height: 18px;
         
         ion-icon {
-          margin-right: 8px;
-          font-size: 16px;
-          min-width: 16px;
-        }
-        
-        span {
-          line-height: 1.2;
+          font-size: 10px;
+          margin-right: 2px;
         }
       }
     }
-  }
-  
-  .card-actions {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 16px 16px 16px;
     
-    ion-button {
-      --border-radius: 8px;
-      height: 32px;
+    .book-actions {
+      margin-top: 10px;
       
-      &[size="small"] {
-        --padding-start: 12px;
-        --padding-end: 12px;
+      ion-button {
+        margin: 0;
+        font-weight: 600;
+        border-radius: 6px;
         font-size: 12px;
+        height: 32px;
+        
+        ion-icon {
+          font-size: 14px;
+        }
       }
     }
   }
 }
 
-.load-more {
-  padding: 20px 16px;
-  
-  ion-button {
-    --border-radius: 12px;
-    height: 48px;
-  }
-}
-
-// Estados especiales
-.book-card {
-  &.prestado {
-    .book-image-container::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(255, 193, 7, 0.2);
-    }
-  }
-  
-  &.no-disponible {
-    opacity: 0.7;
-    
-    .book-image-container::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(108, 117, 125, 0.3);
-    }
-  }
-}
-
-// Botón flotante
-ion-fab {
-  ion-fab-button {
-    --background: var(--ion-color-primary);
-    --box-shadow: 0 4px 16px rgba(var(--ion-color-primary-rgb), 0.4);
-    
-    &:hover {
-      --box-shadow: 0 6px 20px rgba(var(--ion-color-primary-rgb), 0.6);
-    }
-  }
-}
-
-// Responsive improvements
-@media (max-width: 480px) {
-  .books-grid {
+// Responsive design
+@media (max-width: 768px) {
+  .search-container {
     padding: 12px;
-    gap: 12px;
+  }
+  
+  .filters-container {
+    padding: 0 12px 12px 12px;
   }
   
   .book-card {
     .book-image-container {
-      height: 160px;
+      height: 180px;
     }
     
     ion-card-content {
@@ -241,16 +278,13 @@ ion-fab {
       .book-title {
         font-size: 16px;
       }
-    }
-    
-    .card-actions {
-      padding: 0 12px 12px 12px;
-      flex-wrap: wrap;
-      gap: 8px;
       
-      ion-button {
-        flex: 1;
-        min-width: 80px;
+      .book-author {
+        font-size: 13px;
+      }
+      
+      .book-category {
+        font-size: 12px;
       }
     }
   }
@@ -269,40 +303,39 @@ ion-fab {
 }
 
 .book-card {
-  animation: fadeInUp 0.5s ease-out backwards;
-  
-  &:nth-child(1) { animation-delay: 0.1s; }
-  &:nth-child(2) { animation-delay: 0.2s; }
-  &:nth-child(3) { animation-delay: 0.3s; }
-  &:nth-child(4) { animation-delay: 0.4s; }
-  &:nth-child(5) { animation-delay: 0.5s; }
-  &:nth-child(6) { animation-delay: 0.6s; }
+  animation: fadeInUp 0.5s ease-out;
 }
 
-// Dark mode support
-@media (prefers-color-scheme: dark) {
-  .search-container {
-    background: var(--ion-color-dark);
-    
-    ion-searchbar {
-      --background: var(--ion-color-step-100);
-    }
+// Estados de los chips
+ion-chip {
+  &[color="success"] {
+    --background: rgba(40, 167, 69, 0.1);
+    --color: #28a745;
   }
   
-  .quick-filters {
-    background: var(--ion-color-dark);
-    
-    ion-chip {
-      --background: var(--ion-color-step-100);
-      --color: var(--ion-color-light);
-    }
+  &[color="danger"] {
+    --background: rgba(220, 53, 69, 0.1);
+    --color: #dc3545;
   }
   
-  .book-card {
-    --background: var(--ion-color-step-50);
-    
-    .book-title {
-      color: var(--ion-color-light);
-    }
+  &[color="warning"] {
+    --background: rgba(255, 193, 7, 0.1);
+    --color: #ffc107;
   }
+  
+  &[color="medium"] {
+    --background: rgba(146, 148, 151, 0.1);
+    --color: #929497;
+  }
+}
+
+// Mejoras de accesibilidad
+.book-card:focus {
+  outline: 2px solid var(--ion-color-primary);
+  outline-offset: 2px;
+}
+
+ion-button:focus {
+  outline: 2px solid var(--ion-color-primary);
+  outline-offset: 2px;
 }

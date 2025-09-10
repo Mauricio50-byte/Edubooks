@@ -1,0 +1,12 @@
+<svg width="200" height="280" viewBox="0 0 200 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="280" fill="#064E3B"/>
+  <rect x="20" y="20" width="160" height="240" fill="#059669"/>
+  <rect x="40" y="40" width="120" height="8" fill="#D1FAE5"/>
+  <rect x="40" y="60" width="80" height="6" fill="#D1FAE5"/>
+  <rect x="40" y="80" width="100" height="6" fill="#D1FAE5"/>
+  <rect x="40" y="100" width="60" height="6" fill="#D1FAE5"/>
+  <circle cx="100" cy="160" r="25" fill="#047857"/>
+  <text x="100" y="170" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="18" font-weight="bold">⚗️</text>
+  <text x="100" y="200" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">CIENCIAS</text>
+  <text x="100" y="220" text-anchor="middle" fill="#D1FAE5" font-family="Arial, sans-serif" font-size="10">Física, Química, Biología</text>
+</svg>

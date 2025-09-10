@@ -42,7 +42,7 @@ export class AuthService {
   registro(userData: UsuarioRegistro): Observable<AuthResponse> {
     return this.apiService.post<AuthResponse>('/auth/registro/', userData)
       .pipe(
-        tap(response => this.handleAuthSuccess(response)),
+        // No llamamos handleAuthSuccess para que no se autentique automáticamente
         catchError(error => {
           console.error('Error en registro:', error);
           throw error;
@@ -56,7 +56,8 @@ export class AuthService {
       .pipe(
         tap(response => this.handleAuthSuccess(response)),
         catchError(error => {
-          console.error('Error en login:', error);
+          // console.error('Error en login:', error); // Comentado para evitar logs innecesarios
+          // Re-lanzar el error tal como viene del API service sin modificar el mensaje
           throw error;
         })
       );

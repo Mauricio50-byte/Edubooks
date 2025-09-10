@@ -33,13 +33,18 @@ export class ApiService {
         errorMessage = error.error.detail;
       } else if (error.status === 0) {
         errorMessage = 'No se pudo conectar con el servidor. Verifica que esté ejecutándose.';
+      } else if (error.status === 400 && error.url?.includes('/auth/login/')) {
+        // Error específico para login con credenciales inválidas
+        errorMessage = 'Credenciales inválidas. Por favor verifica tu email y contraseña.';
+      } else if (error.status === 401) {
+        errorMessage = 'Credenciales inválidas. Por favor verifica tu email y contraseña.';
       } else {
         errorMessage = `Error ${error.status}: ${error.message}`;
       }
     }
 
-    console.error('Error en API:', error);
-    return throwError(() => new Error(errorMessage));
+    // console.error('Error en API:', error); // Comentado para evitar logs innecesarios
+    return throwError(() => ({ message: errorMessage }));
   }
 
   // Métodos HTTP genéricos

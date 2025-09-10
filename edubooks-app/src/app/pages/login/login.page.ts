@@ -35,6 +35,9 @@ export class LoginPage implements OnInit {
     if (this.authService.isAuthenticated) {
       this.router.navigate(['/home']);
     }
+    
+    // Limpiar los campos del formulario al cargar la página
+    this.loginForm.reset();
   }
 
   async onSubmit() {
@@ -63,9 +66,10 @@ export class LoginPage implements OnInit {
         error: async (error) => {
           await loading.dismiss();
           
+          // Siempre mostrar un mensaje simple y claro para cualquier error de login
           const alert = await this.alertController.create({
             header: 'Error de Inicio de Sesión',
-            message: error.message || 'Credenciales inválidas. Por favor, verifica tu email y contraseña.',
+            message: 'Credenciales inválidas. Por favor, verifica tu email y contraseña.',
             buttons: ['OK']
           });
           await alert.present();
