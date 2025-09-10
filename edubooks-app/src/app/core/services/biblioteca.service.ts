@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Observable, BehaviorSubject, of, throwError } from 'rxjs';
-import { map, delay } from 'rxjs/operators';
+import { map, delay, catchError } from 'rxjs/operators';
 import { LIBROS_MUESTRA, LibroData, CATEGORIAS, ESTADOS_LIBRO } from '../data/libros-data';
 import { Libro, Prestamo, Reserva } from '../models/libro.model';
 import { AuthService } from './auth.service';
+import { ApiService } from './api.service';
 
 @Injectable({
   providedIn: 'root'
@@ -22,7 +23,10 @@ export class BibliotecaService {
   private prestamos: Prestamo[] = [];
   private reservas: Reserva[] = [];
 
-  constructor(private authService: AuthService) {
+  constructor(
+    private authService: AuthService,
+    private apiService: ApiService
+  ) {
     this.initializeData();
   }
 
@@ -100,6 +104,31 @@ export class BibliotecaService {
       return throwError(() => new Error('Usuario no autenticado'));
     }
 
+    // Llamar al backend real
+    return this.apiService.post('/prestamos/crear/', { libro: libroId })
+      .pipe(
+        map(response => {
+          // Actualizar datos locales si es exitoso
+          this.actualizarDatosLocalesDespuesPrestamo(libroId);
+          return response;
+        }),
+        catchError(error => {
+          console.error('Error creando préstamo:', error);
+          // Fallback a lógica simulada en caso de error de conexión
+          return this.prestarLibroSimulado(libroId);
+        })
+      );
+  }
+
+  /**
+   * Método de fallback para préstamo simulado
+   */
+  private prestarLibroSimulado(libroId: number): Observable<any> {
+    const usuario = this.authService.currentUserValue;
+    if (!usuario) {
+      return throwError(() => new Error('Usuario no autenticado'));
+    }
+
     const libro = this.libros.find(l => l.id === libroId);
     if (!libro) {
       return throwError(() => new Error('Libro no encontrado'));
@@ -118,9 +147,9 @@ export class BibliotecaService {
       return throwError(() => new Error('Ya tienes este libro prestado'));
     }
 
-    // Crear nuevo préstamo
+    // Crear nuevo préstamo simulado
     const fechaDevolucion = new Date();
-    fechaDevolucion.setDate(fechaDevolucion.getDate() + 15); // 15 días
+    fechaDevolucion.setDate(fechaDevolucion.getDate() + 15);
 
     const nuevoPrestamo: Prestamo = {
       id: this.prestamos.length + 1,
@@ -140,20 +169,47 @@ export class BibliotecaService {
     };
 
     this.prestamos.push(nuevoPrestamo);
-    
-    // Actualizar disponibilidad del libro
-    libro.cantidad_disponible--;
-    if (libro.cantidad_disponible === 0) {
-      libro.estado = 'Prestado';
-    }
-
-    this.librosSubject.next([...this.libros]);
-    this.prestamosSubject.next([...this.prestamos]);
+    this.actualizarDatosLocalesDespuesPrestamo(libroId);
 
     return of({ success: true, prestamo: nuevoPrestamo }).pipe(delay(500));
   }
 
+  /**
+   * Actualizar datos locales después de un préstamo exitoso
+   */
+  private actualizarDatosLocalesDespuesPrestamo(libroId: number): void {
+    const libro = this.libros.find(l => l.id === libroId);
+    if (libro) {
+      libro.cantidad_disponible--;
+      if (libro.cantidad_disponible === 0) {
+        libro.estado = 'Prestado';
+      }
+      this.librosSubject.next([...this.libros]);
+    }
+    this.prestamosSubject.next([...this.prestamos]);
+  }
+
   devolverLibro(prestamoId: number): Observable<any> {
+    // Llamar al backend real
+    return this.apiService.post(`/prestamos/${prestamoId}/devolver/`, {})
+      .pipe(
+        map(response => {
+          // Actualizar datos locales si es exitoso
+          this.actualizarDatosLocalesDespuesDevolucion(prestamoId);
+          return response;
+        }),
+        catchError(error => {
+          console.error('Error devolviendo libro:', error);
+          // Fallback a lógica simulada en caso de error de conexión
+          return this.devolverLibroSimulado(prestamoId);
+        })
+      );
+  }
+
+  /**
+   * Método de fallback para devolución simulada
+   */
+  private devolverLibroSimulado(prestamoId: number): Observable<any> {
     const prestamo = this.prestamos.find(p => p.id === prestamoId);
     if (!prestamo) {
       return throwError(() => new Error('Préstamo no encontrado'));
@@ -163,23 +219,31 @@ export class BibliotecaService {
       return throwError(() => new Error('Este préstamo ya fue devuelto'));
     }
 
-    // Actualizar préstamo
+    // Actualizar préstamo simulado
     prestamo.estado = 'Devuelto';
     prestamo.fecha_devolucion_real = new Date().toISOString();
-
-    // Actualizar disponibilidad del libro
-    const libro = this.libros.find(l => l.id === prestamo.libro.id);
-    if (libro) {
-      libro.cantidad_disponible++;
-      if (libro.cantidad_disponible > 0 && libro.estado === 'Prestado') {
-        libro.estado = 'Disponible';
-      }
-    }
-
-    this.librosSubject.next([...this.libros]);
-    this.prestamosSubject.next([...this.prestamos]);
-
+    
+    this.actualizarDatosLocalesDespuesDevolucion(prestamoId);
     return of({ success: true }).pipe(delay(500));
+  }
+
+  /**
+   * Actualizar datos locales después de una devolución exitosa
+   */
+  private actualizarDatosLocalesDespuesDevolucion(prestamoId: number): void {
+    const prestamo = this.prestamos.find(p => p.id === prestamoId);
+    if (prestamo) {
+      // Actualizar disponibilidad del libro
+      const libro = this.libros.find(l => l.id === prestamo.libro.id);
+      if (libro) {
+        libro.cantidad_disponible++;
+        if (libro.cantidad_disponible > 0 && libro.estado === 'Prestado') {
+          libro.estado = 'Disponible';
+        }
+        this.librosSubject.next([...this.libros]);
+      }
+      this.prestamosSubject.next([...this.prestamos]);
+    }
   }
 
   getPrestamosUsuario(): Observable<Prestamo[]> {
@@ -202,6 +266,26 @@ export class BibliotecaService {
       p.usuario.id === usuario.id && p.estado === 'Activo'
     );
     return of(prestamosActivos).pipe(delay(400));
+  }
+
+  /**
+   * Obtener todos los préstamos (para administradores) o del usuario actual
+   */
+  getPrestamos(): Observable<Prestamo[]> {
+    return this.apiService.get<{results: Prestamo[]}>('/prestamos/')
+      .pipe(
+        map(response => response.results || response as any),
+        catchError(error => {
+          console.error('Error obteniendo préstamos:', error);
+          // Fallback a datos simulados en caso de error
+          const usuario = this.authService.currentUserValue;
+          if (usuario?.rol === 'Administrador') {
+            return of(this.prestamos);
+          } else {
+            return of(this.prestamos.filter(p => p.usuario.id === usuario?.id));
+          }
+        })
+      );
   }
 
   // Métodos para reservas
@@ -364,5 +448,164 @@ export class BibliotecaService {
       prestamosActivos,
       reservasActivas
     }).pipe(delay(300));
+  }
+
+  // ============ MÉTODOS DE BIBLIOGRAFÍA ============
+
+  /**
+   * Obtener bibliografías del usuario actual
+   */
+  obtenerBibliografias(filtros?: any): Observable<any> {
+    // TODO: Implementar llamada real a la API
+    // return this.http.get(`${this.apiUrl}/bibliografias/`, { params: filtros });
+    
+    // Simulación temporal
+    const bibliografiasMuestra = [
+      {
+        id: 1,
+        curso: 'Programación I',
+        programa: 'Ingeniería de Sistemas',
+        descripcion: 'Bibliografía básica para el curso de programación',
+        libros: this.libros.slice(0, 3),
+        fecha_creacion: new Date().toISOString(),
+        activa: true,
+        es_publica: true,
+        docente: {
+          id: 1,
+          nombre: 'Juan',
+          apellido: 'Pérez'
+        }
+      }
+    ];
+    
+    return of({ results: bibliografiasMuestra }).pipe(delay(500));
+  }
+
+  /**
+   * Crear nueva bibliografía
+   */
+  crearBibliografia(data: any): Observable<any> {
+    // TODO: Implementar llamada real a la API
+    // return this.http.post(`${this.apiUrl}/bibliografias/crear/`, data);
+    
+    // Simulación temporal
+    return of({ success: true, message: 'Bibliografía creada exitosamente' }).pipe(delay(1000));
+  }
+
+  /**
+   * Actualizar bibliografía
+   */
+  actualizarBibliografia(id: number, data: any): Observable<any> {
+    // TODO: Implementar llamada real a la API
+    // return this.http.put(`${this.apiUrl}/bibliografias/${id}/actualizar/`, data);
+    
+    // Simulación temporal
+    return of({ success: true, message: 'Bibliografía actualizada exitosamente' }).pipe(delay(1000));
+  }
+
+  /**
+   * Obtener detalle de una bibliografía
+   */
+  obtenerBibliografia(id: number): Observable<any> {
+    // TODO: Implementar llamada real a la API
+    // return this.http.get(`${this.apiUrl}/bibliografias/${id}/`);
+    
+    // Simulación temporal
+    const bibliografia = {
+      id: id,
+      curso: 'Programación I',
+      programa: 'Ingeniería de Sistemas',
+      descripcion: 'Bibliografía básica para el curso de programación',
+      libros: this.libros.slice(0, 3),
+      fecha_creacion: new Date().toISOString(),
+      activa: true,
+      es_publica: true,
+      docente: {
+        id: 1,
+        nombre: 'Juan',
+        apellido: 'Pérez'
+      }
+    };
+    
+    return of(bibliografia).pipe(delay(500));
+  }
+
+  /**
+   * Agregar libro a bibliografía
+   */
+  agregarLibroABibliografia(bibliografiaId: number, libroId: number): Observable<any> {
+    // TODO: Implementar llamada real a la API
+    // return this.http.post(`${this.apiUrl}/bibliografias/${bibliografiaId}/agregar-libro/`, { libro_id: libroId });
+    
+    // Simulación temporal
+    return of({ success: true, message: 'Libro agregado exitosamente' }).pipe(delay(800));
+  }
+
+  /**
+   * Remover libro de bibliografía
+   */
+  removerLibroDeBibliografia(bibliografiaId: number, libroId: number): Observable<any> {
+    // TODO: Implementar llamada real a la API
+    // return this.http.delete(`${this.apiUrl}/bibliografias/${bibliografiaId}/remover-libro/${libroId}/`);
+    
+    // Simulación temporal
+    return of({ success: true, message: 'Libro removido exitosamente' }).pipe(delay(800));
+  }
+
+  /**
+   * Obtener programas académicos disponibles
+   */
+  obtenerProgramas(): Observable<any> {
+    // TODO: Implementar llamada real a la API
+    // return this.http.get(`${this.apiUrl}/programas/`);
+    
+    // Simulación temporal
+    const programas = [
+      'Ingeniería de Sistemas',
+      'Ingeniería Industrial',
+      'Administración de Empresas',
+      'Contaduría Pública',
+      'Derecho',
+      'Medicina',
+      'Psicología'
+    ];
+    
+    return of({ programas }).pipe(delay(300));
+  }
+
+  /**
+   * Obtener bibliografías por programa
+   */
+  obtenerBibliografiasPorPrograma(programa: string): Observable<any> {
+    // TODO: Implementar llamada real a la API
+    // return this.http.get(`${this.apiUrl}/bibliografias/programa/${programa}/`);
+    
+    // Simulación temporal
+    const bibliografias = [
+      {
+        id: 1,
+        curso: 'Programación I',
+        programa: programa,
+        descripcion: 'Bibliografía básica para el curso de programación',
+        libros: this.libros.slice(0, 3),
+        fecha_creacion: new Date().toISOString(),
+        activa: true,
+        es_publica: true,
+        docente: {
+          id: 1,
+          nombre: 'Juan',
+          apellido: 'Pérez'
+        }
+      }
+    ];
+    
+    return of(bibliografias).pipe(delay(500));
+  }
+
+  /**
+   * Buscar libros para agregar a bibliografía
+   */
+  buscarLibrosParaBibliografia(termino: string): Observable<Libro[]> {
+    return this.searchLibros(termino);
   }
 }

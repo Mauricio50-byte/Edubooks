@@ -1,0 +1,154 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Notificaciones</ion-title>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-buttons slot="end">
+      <ion-button (click)="marcarTodasComoLeidas()" *ngIf="notificacionesNoLeidas > 0">
+        <ion-icon name="mail-open" slot="icon-only"></ion-icon>
+      </ion-button>
+      <ion-button fill="clear" id="menu-trigger">
+        <ion-icon name="ellipsis-vertical" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Notificaciones</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <!-- Refresher -->
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Resumen de notificaciones -->
+  <ion-card *ngIf="notificacionesNoLeidas > 0">
+    <ion-card-content>
+      <div class="notificaciones-resumen">
+        <ion-chip color="primary">
+          <ion-icon name="notifications" slot="start"></ion-icon>
+          <ion-label>{{ notificacionesNoLeidas }} sin leer</ion-label>
+        </ion-chip>
+        <ion-button fill="clear" size="small" (click)="marcarTodasComoLeidas()">
+          <ion-icon name="mail-open" slot="start"></ion-icon>
+          Marcar todas como leídas
+        </ion-button>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Filtros -->
+  <ion-card>
+    <ion-card-content>
+      <div class="filtros-container">
+        <ion-item>
+          <ion-select 
+            [(ngModel)]="filtroTipo" 
+            placeholder="Filtrar por tipo"
+            (ionChange)="onFiltroTipoChange($event)">
+            <ion-select-option value="">Todos los tipos</ion-select-option>
+            <ion-select-option value="info">Información</ion-select-option>
+            <ion-select-option value="success">Éxito</ion-select-option>
+            <ion-select-option value="warning">Advertencia</ion-select-option>
+            <ion-select-option value="error">Error</ion-select-option>
+          </ion-select>
+          <ion-label slot="start">Tipo:</ion-label>
+        </ion-item>
+        
+        <ion-item>
+          <ion-checkbox 
+            [(ngModel)]="mostrarSoloNoLeidas" 
+            (ionChange)="toggleSoloNoLeidas()">
+          </ion-checkbox>
+          <ion-label slot="start">Solo no leídas</ion-label>
+        </ion-item>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Sin notificaciones -->
+  <div *ngIf="notificaciones.length === 0" class="empty-state">
+    <ion-icon name="notifications-outline" class="empty-icon"></ion-icon>
+    <h3>No hay notificaciones</h3>
+    <p>Cuando recibas notificaciones, aparecerán aquí.</p>
+    <ion-button (click)="generarNotificacionesPrueba()" fill="outline">
+      <ion-icon name="flask" slot="start"></ion-icon>
+      Generar Pruebas
+    </ion-button>
+  </div>
+
+  <!-- Lista de notificaciones -->
+  <div *ngIf="notificaciones.length > 0">
+    <ion-card 
+      *ngFor="let notificacion of notificaciones" 
+      class="notificacion-card"
+      [class.no-leida]="!notificacion.leida"
+      (click)="marcarComoLeida(notificacion)">
+      <ion-card-content>
+        <div class="notificacion-header">
+          <div class="notificacion-info">
+            <div class="notificacion-tipo">
+              <ion-icon 
+                [name]="getIconoTipo(notificacion.tipo)" 
+                [color]="getColorTipo(notificacion.tipo)">
+              </ion-icon>
+              <span class="tipo-label">{{ notificacion.tipo | titlecase }}</span>
+            </div>
+            <div class="notificacion-fecha">
+              {{ formatearFecha(notificacion.fecha) }}
+            </div>
+          </div>
+          <div class="notificacion-actions">
+            <ion-badge *ngIf="!notificacion.leida" color="primary">Nueva</ion-badge>
+            <ion-button fill="clear" size="small" (click)="mostrarOpciones(notificacion); $event.stopPropagation()">
+              <ion-icon name="ellipsis-horizontal" slot="icon-only"></ion-icon>
+            </ion-button>
+          </div>
+        </div>
+        
+        <div class="notificacion-contenido">
+          <h3>{{ notificacion.titulo }}</h3>
+          <p>{{ notificacion.mensaje }}</p>
+        </div>
+        
+        <div class="notificacion-footer" *ngIf="notificacion.accion">
+          <ion-button 
+            fill="outline" 
+            size="small" 
+            (click)="ejecutarAccion(notificacion); $event.stopPropagation()">
+            <ion-icon name="arrow-forward" slot="end"></ion-icon>
+            {{ notificacion.accion.texto }}
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Menú de opciones -->
+  <ion-popover trigger="menu-trigger" trigger-action="click">
+    <ng-template>
+      <ion-content>
+        <ion-list>
+          <ion-item button (click)="marcarTodasComoLeidas()" *ngIf="notificacionesNoLeidas > 0">
+            <ion-icon name="mail-open" slot="start"></ion-icon>
+            <ion-label>Marcar todas como leídas</ion-label>
+          </ion-item>
+          <ion-item button (click)="limpiarNotificaciones()">
+            <ion-icon name="trash" slot="start" color="danger"></ion-icon>
+            <ion-label color="danger">Limpiar todas</ion-label>
+          </ion-item>
+          <ion-item button (click)="generarNotificacionesPrueba()">
+            <ion-icon name="flask" slot="start"></ion-icon>
+            <ion-label>Generar pruebas</ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-content>
+    </ng-template>
+  </ion-popover>
+</ion-content>

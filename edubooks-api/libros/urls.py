@@ -30,6 +30,10 @@ urlpatterns = [
     path('bibliografias/crear/', views.BibliografiaCreateView.as_view(), name='bibliografia-create'),
     path('bibliografias/<int:pk>/', views.BibliografiaDetailView.as_view(), name='bibliografia-detail'),
     path('bibliografias/<int:pk>/actualizar/', views.BibliografiaUpdateView.as_view(), name='bibliografia-update'),
+    path('bibliografias/<int:bibliografia_id>/agregar-libro/', views.agregar_libro_bibliografia, name='agregar-libro-bibliografia'),
+    path('bibliografias/<int:bibliografia_id>/remover-libro/<int:libro_id>/', views.remover_libro_bibliografia, name='remover-libro-bibliografia'),
+    path('programas/', views.obtener_programas, name='obtener-programas'),
+    path('bibliografias/programa/<str:programa>/', views.bibliografias_por_programa, name='bibliografias-por-programa'),
     
     # URLs de Sanciones
     path('sanciones/', views.SancionListView.as_view(), name='sancion-list'),
@@ -39,4 +43,11 @@ urlpatterns = [
     # URLs de Estadísticas y Reportes
     path('estadisticas/', views.estadisticas_biblioteca, name='estadisticas'),
     path('prestamos-vencidos/', views.prestamos_vencidos, name='prestamos-vencidos'),
+    
+    # URLs de Gestión de Sanciones
+    path('procesar-prestamos-vencidos/', views.procesar_prestamos_vencidos, name='procesar-prestamos-vencidos'),
+    path('sanciones-pendientes/', views.sanciones_pendientes, name='sanciones-pendientes'),
+    path('sanciones/<int:sancion_id>/aprobar/', views.aprobar_sancion, name='aprobar-sancion'),
+    path('sanciones/<int:sancion_id>/rechazar/', views.rechazar_sancion, name='rechazar-sancion'),
+    path('dashboard-sanciones/', views.dashboard_sanciones, name='dashboard-sanciones'),
 ]

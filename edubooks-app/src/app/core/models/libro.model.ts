@@ -5,7 +5,7 @@ export interface Libro {
     autor: string;
     isbn?: string;
     editorial?: string;
-    año_publicacion?: number;
+    anio_publicacion?: number;
     categoria: string;
     ubicacion: string;
     estado: 'Disponible' | 'Prestado' | 'Reservado' | 'Mantenimiento';
@@ -31,6 +31,7 @@ export interface Prestamo {
     fecha_devolucion_real?: string;
     estado: 'Activo' | 'Devuelto' | 'Vencido';
     observaciones?: string;
+    renovaciones?: number;
 }
 
 export interface Reserva {
@@ -55,11 +56,22 @@ export interface Bibliografia {
         apellido: string;
     };
     curso: string;
+    programa: string;
     descripcion?: string;
     libros: Libro[];
     fecha_creacion: string;
     activa: boolean;
     es_publica: boolean;
+    total_libros?: number;
+}
+
+export interface BibliografiaRequest {
+    curso: string;
+    programa: string;
+    descripcion?: string;
+    libros_ids?: number[];
+    es_publica?: boolean;
+    activa?: boolean;
 }
 
 export interface Sancion {
@@ -103,7 +115,7 @@ export interface LibroRegistro {
     autor: string;
     isbn?: string;
     editorial?: string;
-    año_publicacion?: number;
+    anio_publicacion?: number;
     categoria: string;
     ubicacion?: string;
     cantidad_total: number;

@@ -276,18 +276,41 @@ def cancelar_reserva(request, reserva_id):
 # ============ VISTAS DE BIBLIOGRAFÍA ============
 
 class BibliografiaListView(generics.ListAPIView):
-    """Lista de bibliografías (propias para docentes, públicas para estudiantes)"""
+    """Lista de bibliografías (propias para docentes, filtradas por programa para estudiantes)"""
     serializer_class = BibliografiaSerializer
     pagination_class = StandardResultsSetPagination
     permission_classes = [permissions.IsAuthenticated]
     
     def get_queryset(self):
         user = self.request.user
+        queryset = Bibliografia.objects.none()
         
         if user.rol == 'Docente':
-            return Bibliografia.objects.filter(docente=user)
-        else:
-            return Bibliografia.objects.filter(es_publica=True)
+            queryset = Bibliografia.objects.filter(docente=user)
+        elif user.rol == 'Estudiante':
+            # Filtrar por programa del estudiante
+            if user.carrera:
+                queryset = Bibliografia.objects.filter(
+                    es_publica=True,
+                    activa=True,
+                    programa=user.carrera
+                )
+        elif user.rol == 'Administrador':
+            queryset = Bibliografia.objects.all()
+        
+        # Filtros adicionales
+        programa = self.request.query_params.get('programa', None)
+        curso = self.request.query_params.get('curso', None)
+        activa = self.request.query_params.get('activa', None)
+        
+        if programa:
+            queryset = queryset.filter(programa__icontains=programa)
+        if curso:
+            queryset = queryset.filter(curso__icontains=curso)
+        if activa is not None:
+            queryset = queryset.filter(activa=activa.lower() == 'true')
+        
+        return queryset.order_by('-fecha_creacion')
 
 class BibliografiaCreateView(generics.CreateAPIView):
     """Crear nueva bibliografía (solo docentes)"""
@@ -312,8 +335,131 @@ class BibliografiaDetailView(generics.RetrieveAPIView):
         user = self.request.user
         if user.rol == 'Docente':
             return Bibliografia.objects.filter(docente=user)
-        else:
-            return Bibliografia.objects.filter(es_publica=True)
+        elif user.rol == 'Estudiante':
+            # Solo bibliografías públicas y activas de su programa
+            if user.carrera:
+                return Bibliografia.objects.filter(
+                    es_publica=True,
+                    activa=True,
+                    programa=user.carrera
+                )
+            return Bibliografia.objects.none()
+        elif user.rol == 'Administrador':
+            return Bibliografia.objects.all()
+        return Bibliografia.objects.none()
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated, IsDocente])
+def agregar_libro_bibliografia(request, bibliografia_id):
+    """Agregar libro a una bibliografía (solo docente propietario)"""
+    try:
+        bibliografia = Bibliografia.objects.get(id=bibliografia_id, docente=request.user)
+        libro_id = request.data.get('libro_id')
+        
+        if not libro_id:
+            return Response(
+                {'error': 'El ID del libro es requerido'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            libro = Libro.objects.get(id=libro_id)
+        except Libro.DoesNotExist:
+            return Response(
+                {'error': 'El libro no existe'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Verificar si el libro ya está en la bibliografía
+        if bibliografia.libros.filter(id=libro_id).exists():
+            return Response(
+                {'error': 'El libro ya está en esta bibliografía'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        bibliografia.libros.add(libro)
+        serializer = BibliografiaSerializer(bibliografia)
+        return Response({
+            'message': 'Libro agregado exitosamente',
+            'bibliografia': serializer.data
+        })
+        
+    except Bibliografia.DoesNotExist:
+        return Response(
+            {'error': 'Bibliografía no encontrada o no tienes permisos'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+@api_view(['DELETE'])
+@permission_classes([permissions.IsAuthenticated, IsDocente])
+def remover_libro_bibliografia(request, bibliografia_id, libro_id):
+    """Remover libro de una bibliografía (solo docente propietario)"""
+    try:
+        bibliografia = Bibliografia.objects.get(id=bibliografia_id, docente=request.user)
+        
+        try:
+            libro = Libro.objects.get(id=libro_id)
+        except Libro.DoesNotExist:
+            return Response(
+                {'error': 'El libro no existe'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Verificar si el libro está en la bibliografía
+        if not bibliografia.libros.filter(id=libro_id).exists():
+            return Response(
+                {'error': 'El libro no está en esta bibliografía'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        bibliografia.libros.remove(libro)
+        serializer = BibliografiaSerializer(bibliografia)
+        return Response({
+            'message': 'Libro removido exitosamente',
+            'bibliografia': serializer.data
+        })
+        
+    except Bibliografia.DoesNotExist:
+        return Response(
+            {'error': 'Bibliografía no encontrada o no tienes permisos'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def obtener_programas(request):
+    """Obtener lista de programas académicos disponibles"""
+    from usuarios.models import Usuario
+    
+    # Obtener programas únicos de estudiantes
+    programas = Usuario.objects.filter(
+        rol='Estudiante',
+        carrera__isnull=False
+    ).values_list('carrera', flat=True).distinct().order_by('carrera')
+    
+    return Response({'programas': list(programas)})
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def bibliografias_por_programa(request, programa):
+    """Obtener bibliografías de un programa específico"""
+    user = request.user
+    
+    if user.rol == 'Estudiante':
+        # Solo bibliografías públicas y activas
+        bibliografias = Bibliografia.objects.filter(
+            programa=programa,
+            es_publica=True,
+            activa=True
+        )
+    elif user.rol in ['Docente', 'Administrador']:
+        # Todas las bibliografías del programa
+        bibliografias = Bibliografia.objects.filter(programa=programa)
+    else:
+        bibliografias = Bibliografia.objects.none()
+    
+    serializer = BibliografiaSerializer(bibliografias, many=True)
+    return Response(serializer.data)
 
 # ============ VISTAS DE SANCIONES ============
 
@@ -428,3 +574,142 @@ def prestamos_vencidos(request):
     
     serializer = PrestamoListSerializer(prestamos, many=True)
     return Response(serializer.data)
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated, IsAdministrador])
+def procesar_prestamos_vencidos(request):
+    """Procesar automáticamente préstamos vencidos y generar sanciones"""
+    from django.core.management import call_command
+    from io import StringIO
+    import sys
+    
+    try:
+        # Capturar la salida del comando
+        old_stdout = sys.stdout
+        sys.stdout = captured_output = StringIO()
+        
+        # Ejecutar el comando de procesamiento
+        call_command('procesar_prestamos_vencidos')
+        
+        # Restaurar stdout
+        sys.stdout = old_stdout
+        output = captured_output.getvalue()
+        
+        return Response({
+            'message': 'Procesamiento completado exitosamente',
+            'output': output,
+            'success': True
+        })
+        
+    except Exception as e:
+        sys.stdout = old_stdout
+        return Response({
+            'error': f'Error durante el procesamiento: {str(e)}',
+            'success': False
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated, IsAdministrador])
+def sanciones_pendientes(request):
+    """Obtener sanciones pendientes de revisión"""
+    sanciones = Sancion.objects.filter(
+        estado='Activa'
+    ).select_related('usuario', 'prestamo__libro').order_by('-fecha_inicio')
+    
+    serializer = SancionSerializer(sanciones, many=True)
+    return Response(serializer.data)
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated, IsAdministrador])
+def aprobar_sancion(request, sancion_id):
+    """Aprobar una sanción propuesta"""
+    try:
+        sancion = Sancion.objects.get(id=sancion_id)
+        
+        # Aquí se podría agregar lógica adicional de aprobación
+        # Por ahora, simplemente confirmamos que está activa
+        if sancion.estado != 'Activa':
+            sancion.estado = 'Activa'
+            sancion.save()
+        
+        serializer = SancionSerializer(sancion)
+        return Response({
+            'message': 'Sanción aprobada exitosamente',
+            'sancion': serializer.data
+        })
+        
+    except Sancion.DoesNotExist:
+        return Response(
+            {'error': 'Sanción no encontrada'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated, IsAdministrador])
+def rechazar_sancion(request, sancion_id):
+    """Rechazar una sanción propuesta"""
+    try:
+        sancion = Sancion.objects.get(id=sancion_id)
+        
+        # Marcar como completada (rechazada)
+        sancion.estado = 'Completada'
+        sancion.fecha_fin = timezone.now().date()
+        sancion.save()
+        
+        serializer = SancionSerializer(sancion)
+        return Response({
+            'message': 'Sanción rechazada exitosamente',
+            'sancion': serializer.data
+        })
+        
+    except Sancion.DoesNotExist:
+        return Response(
+            {'error': 'Sanción no encontrada'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated, IsAdministrador])
+def dashboard_sanciones(request):
+    """Dashboard con estadísticas de sanciones"""
+    from django.db.models import Count, Sum
+    
+    # Estadísticas generales
+    total_sanciones = Sancion.objects.count()
+    sanciones_activas = Sancion.objects.filter(estado='Activa').count()
+    sanciones_pagadas = Sancion.objects.filter(estado='Pagada').count()
+    
+    # Monto total de multas activas
+    monto_multas_activas = Sancion.objects.filter(
+        tipo='Multa',
+        estado='Activa'
+    ).aggregate(total=Sum('monto'))['total'] or 0
+    
+    # Préstamos vencidos sin sanción
+    prestamos_vencidos_sin_sancion = Prestamo.objects.filter(
+        estado='Activo',
+        fecha_devolucion_esperada__lt=timezone.now().date()
+    ).exclude(
+        sanciones__isnull=False
+    ).count()
+    
+    # Usuarios con más sanciones
+    usuarios_con_sanciones = Sancion.objects.filter(
+        estado='Activa'
+    ).values(
+        'usuario__nombre', 'usuario__apellido', 'usuario__email'
+    ).annotate(
+        total_sanciones=Count('id'),
+        total_monto=Sum('monto')
+    ).order_by('-total_sanciones')[:5]
+    
+    return Response({
+        'estadisticas': {
+            'total_sanciones': total_sanciones,
+            'sanciones_activas': sanciones_activas,
+            'sanciones_pagadas': sanciones_pagadas,
+            'monto_multas_activas': float(monto_multas_activas),
+            'prestamos_vencidos_sin_sancion': prestamos_vencidos_sin_sancion
+        },
+        'usuarios_con_sanciones': list(usuarios_con_sanciones)
+    })

@@ -31,7 +31,7 @@ export class AdminLibrosPage implements OnInit {
     private loadingController: LoadingController,
     private toastController: ToastController,
     private actionSheetController: ActionSheetController,
-    private router: Router
+    public router: Router
   ) {}
 
   ngOnInit() {
@@ -182,7 +182,7 @@ export class AdminLibrosPage implements OnInit {
           placeholder: 'Editorial'
         },
         {
-          name: 'año_publicacion',
+          name: 'anio_publicacion',
           type: 'number',
           placeholder: 'Año de publicación',
           min: 1900,
@@ -251,7 +251,7 @@ export class AdminLibrosPage implements OnInit {
         isbn: data.isbn.trim(),
         categoria: data.categoria.trim(),
         editorial: data.editorial?.trim() || '',
-        año_publicacion: data.año_publicacion || null,
+        anio_publicacion: data.anio_publicacion || null,
         cantidad_total: parseInt(data.cantidad_total) || 1,
         descripcion: data.descripcion?.trim() || '',
         estado: 'Disponible'
@@ -347,9 +347,9 @@ export class AdminLibrosPage implements OnInit {
           placeholder: 'Editorial'
         },
         {
-          name: 'año_publicacion',
+          name: 'anio_publicacion',
           type: 'number',
-          value: libro.año_publicacion,
+          value: libro.anio_publicacion,
           placeholder: 'Año de publicación'
         },
         {
@@ -404,7 +404,7 @@ export class AdminLibrosPage implements OnInit {
         isbn: data.isbn.trim(),
         categoria: data.categoria.trim(),
         editorial: data.editorial?.trim() || '',
-        año_publicacion: data.año_publicacion || null,
+        anio_publicacion: data.anio_publicacion || null,
         cantidad_total: parseInt(data.cantidad_total) || 1,
         descripcion: data.descripcion?.trim() || ''
       };
@@ -502,9 +502,60 @@ export class AdminLibrosPage implements OnInit {
   getEstadoColor(estado: string): string {
     switch (estado) {
       case 'Disponible': return 'success';
-      case 'No Disponible': return 'danger';
-      case 'En Mantenimiento': return 'warning';
+      case 'Prestado': return 'warning';
+      case 'Reservado': return 'tertiary';
+      case 'Mantenimiento': return 'danger';
       default: return 'medium';
     }
+  }
+
+  /**
+   * Obtener cantidad de libros disponibles
+   */
+  getLibrosDisponibles(): number {
+    return this.libros.filter(libro => libro.cantidad_disponible > 0).length;
+  }
+
+  /**
+   * Obtener cantidad de libros prestados
+   */
+  getLibrosPrestados(): number {
+    return this.libros.filter(libro => libro.estado === 'Prestado' || libro.cantidad_disponible === 0).length;
+  }
+
+  /**
+   * Crear formulario avanzado para registro de libro
+   */
+  async crearLibroAvanzado() {
+    // TODO: Implementar modal con formulario más completo
+    // Incluir campos como ubicación, imagen de portada, etc.
+    this.crearLibro();
+  }
+
+  /**
+   * Exportar catálogo de libros
+   */
+  async exportarCatalogo() {
+    const loading = await this.loadingController.create({
+      message: 'Generando reporte...'
+    });
+    await loading.present();
+
+    try {
+      // TODO: Implementar exportación a CSV/PDF
+      await loading.dismiss();
+      await this.mostrarToast('Funcionalidad de exportación en desarrollo', 'warning');
+    } catch (error: any) {
+      await loading.dismiss();
+      await this.mostrarToast('Error al generar reporte', 'danger');
+    }
+  }
+
+  /**
+   * Importar libros desde archivo
+   */
+  async importarLibros() {
+    // TODO: Implementar importación desde CSV/Excel
+    await this.mostrarToast('Funcionalidad de importación en desarrollo', 'warning');
   }
 }

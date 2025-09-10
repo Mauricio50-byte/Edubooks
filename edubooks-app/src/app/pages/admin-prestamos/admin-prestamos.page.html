@@ -1,0 +1,172 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Administrar Préstamos</ion-title>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Administrar Préstamos</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <!-- Refresher -->
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Filtros y búsqueda -->
+  <ion-card *ngIf="!isLoading">
+    <ion-card-content>
+      <ion-searchbar 
+        [(ngModel)]="searchTerm"
+        placeholder="Buscar por usuario, libro o autor"
+        show-clear-button="focus">
+      </ion-searchbar>
+      
+      <ion-item>
+        <ion-select 
+          [(ngModel)]="filtroEstado" 
+          placeholder="Filtrar por estado">
+          <ion-select-option value="">Todos los estados</ion-select-option>
+          <ion-select-option value="Activo">Activos</ion-select-option>
+          <ion-select-option value="Devuelto">Devueltos</ion-select-option>
+          <ion-select-option value="Vencido">Vencidos</ion-select-option>
+        </ion-select>
+        <ion-label slot="start">Estado:</ion-label>
+      </ion-item>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Estadísticas rápidas -->
+  <ion-card *ngIf="!isLoading && prestamos.length > 0">
+    <ion-card-header>
+      <ion-card-title>Resumen de Préstamos</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <div class="stats-container">
+        <div class="stat-item">
+          <ion-chip color="primary">
+            <ion-icon name="library" slot="start"></ion-icon>
+            <ion-label>{{ prestamos.length }} total</ion-label>
+          </ion-chip>
+        </div>
+        <div class="stat-item">
+          <ion-chip color="tertiary">
+            <ion-icon name="time" slot="start"></ion-icon>
+            <ion-label>{{ contarPrestamosPorEstado('Activo') }} activos</ion-label>
+          </ion-chip>
+        </div>
+        <div class="stat-item">
+          <ion-chip color="success">
+            <ion-icon name="checkmark-circle" slot="start"></ion-icon>
+            <ion-label>{{ contarPrestamosPorEstado('Devuelto') }} devueltos</ion-label>
+          </ion-chip>
+        </div>
+        <div class="stat-item">
+          <ion-chip color="danger">
+            <ion-icon name="warning" slot="start"></ion-icon>
+            <ion-label>{{ contarPrestamosPorEstado('Vencido') }} vencidos</ion-label>
+          </ion-chip>
+        </div>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loading-container">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Cargando préstamos...</p>
+  </div>
+
+  <!-- Error -->
+  <ion-card *ngIf="error && !isLoading" color="danger">
+    <ion-card-content>
+      <ion-icon name="alert-circle" class="error-icon"></ion-icon>
+      <p>{{ error }}</p>
+      <ion-button fill="clear" (click)="cargarPrestamos()">
+        <ion-icon name="refresh" slot="start"></ion-icon>
+        Reintentar
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Sin préstamos -->
+  <div *ngIf="!isLoading && !error && prestamosFiltrados.length === 0" class="empty-state">
+    <ion-icon name="library-outline" class="empty-icon"></ion-icon>
+    <h3 *ngIf="prestamos.length === 0">No hay préstamos registrados</h3>
+    <h3 *ngIf="prestamos.length > 0">No se encontraron resultados</h3>
+    <p *ngIf="prestamos.length === 0">Los préstamos aparecerán aquí cuando se registren.</p>
+    <p *ngIf="prestamos.length > 0">Intenta ajustar los filtros de búsqueda.</p>
+  </div>
+
+  <!-- Lista de préstamos -->
+  <div *ngIf="!isLoading && !error && prestamosFiltrados.length > 0">
+    <ion-card *ngFor="let prestamo of prestamosFiltrados" class="prestamo-card">
+      <ion-card-content>
+        <div class="prestamo-header">
+          <div class="prestamo-info">
+            <h3>{{ prestamo.libro.titulo }}</h3>
+            <p class="usuario">{{ prestamo.usuario.nombre }} {{ prestamo.usuario.apellido }}</p>
+            <div class="prestamo-meta">
+              <ion-chip [color]="getEstadoColor(prestamo.estado)" size="small">
+                <ion-label>{{ prestamo.estado }}</ion-label>
+              </ion-chip>
+              <ion-chip color="secondary" size="small">
+                <ion-label>{{ prestamo.libro.autor }}</ion-label>
+              </ion-chip>
+              <ion-chip *ngIf="prestamo.estado === 'Vencido'" color="danger" size="small">
+                <ion-icon name="warning" slot="start"></ion-icon>
+                <ion-label>{{ getDiasRetraso(prestamo) }} días de retraso</ion-label>
+              </ion-chip>
+            </div>
+          </div>
+          <div class="prestamo-actions">
+            <ion-button fill="clear" (click)="verDetallesPrestamo(prestamo)">
+              <ion-icon name="information-circle" slot="icon-only"></ion-icon>
+            </ion-button>
+          </div>
+        </div>
+        
+        <div class="prestamo-fechas">
+          <div class="fecha-item">
+            <span class="label">Préstamo:</span>
+            <span class="value">{{ formatearFecha(prestamo.fecha_prestamo) }}</span>
+          </div>
+          <div class="fecha-item">
+            <span class="label">Devolución esperada:</span>
+            <span class="value">{{ formatearFecha(prestamo.fecha_devolucion_esperada) }}</span>
+          </div>
+          <div class="fecha-item" *ngIf="prestamo.fecha_devolucion_real">
+            <span class="label">Devolución real:</span>
+            <span class="value">{{ formatearFecha(prestamo.fecha_devolucion_real) }}</span>
+          </div>
+          <div class="fecha-item">
+            <span class="label">Renovaciones:</span>
+            <span class="value">{{ prestamo.renovaciones }}/2</span>
+          </div>
+        </div>
+        
+        <div class="prestamo-footer">
+          <ion-button 
+            *ngIf="prestamo.estado === 'Activo' || prestamo.estado === 'Vencido'" 
+            fill="outline" 
+            size="small" 
+            color="success"
+            (click)="marcarComoDevuelto(prestamo)">
+            <ion-icon name="checkmark-circle" slot="start"></ion-icon>
+            Marcar como Devuelto
+          </ion-button>
+          <ion-button fill="outline" size="small" (click)="verDetallesPrestamo(prestamo)">
+            <ion-icon name="eye" slot="start"></ion-icon>
+            Ver Detalles
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

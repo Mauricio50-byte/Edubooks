@@ -124,18 +124,20 @@ class Bibliografia(models.Model):
         limit_choices_to={'rol': 'Docente'}
     )
     curso = models.CharField(max_length=200)
+    programa = models.CharField(max_length=100, default='General', help_text="Programa académico al que pertenece la bibliografía")
     descripcion = models.TextField(null=True, blank=True)
     libros = models.ManyToManyField(Libro, related_name='bibliografias', blank=True)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     activa = models.BooleanField(default=True)
+    es_publica = models.BooleanField(default=True, help_text="Si es visible para estudiantes del programa")
     
     class Meta:
         db_table = 'bibliografias'
         ordering = ['-fecha_creacion']
-        unique_together = ['docente', 'curso']
+        unique_together = ['docente', 'curso', 'programa']
     
     def __str__(self):
-        return f"{self.curso} - {self.docente.nombre} {self.docente.apellido}"
+        return f"{self.curso} - {self.programa} - {self.docente.nombre} {self.docente.apellido}"
 
 class Sancion(models.Model):
     TIPOS_CHOICES = [

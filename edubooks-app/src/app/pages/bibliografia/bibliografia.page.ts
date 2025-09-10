@@ -13,10 +13,16 @@ import { Bibliografia, Libro } from '../../core/models/libro.model';
 })
 export class BibliografiaPage implements OnInit {
   bibliografias: Bibliografia[] = [];
+  bibliografiasFiltradas: Bibliografia[] = [];
   librosDisponibles: Libro[] = [];
+  programasDisponibles: string[] = [];
   isLoading = true;
   error: string = '';
   usuarioActual: any = null;
+  terminoBusqueda: string = '';
+  filtroPrograma: string = '';
+  filtroEstado: string = '';
+  timeoutBusqueda: any;
 
   constructor(
     private bibliotecaService: BibliotecaService,
@@ -29,25 +35,37 @@ export class BibliografiaPage implements OnInit {
 
   ngOnInit() {
     this.usuarioActual = this.authService.currentUserValue;
-    this.cargarBibliografias();
-    this.cargarLibrosDisponibles();
+    this.cargarDatos();
   }
 
   /**
-   * Cargar bibliografías del docente
+   * Cargar todos los datos necesarios
+   */
+  async cargarDatos() {
+    await Promise.all([
+      this.cargarBibliografias(),
+      this.cargarLibrosDisponibles(),
+      this.cargarProgramasDisponibles()
+    ]);
+  }
+
+  /**
+   * Cargar bibliografías del usuario actual
    */
   async cargarBibliografias() {
     this.isLoading = true;
     this.error = '';
 
     try {
-      // const response = await this.bibliotecaService.obtenerMisBibliografias().toPromise(); // TODO: Implementar método
-      const response = { data: [] }; // Simulación temporal
+      const response = await this.bibliotecaService.obtenerBibliografias().toPromise();
       
-      if (response?.data && Array.isArray(response.data)) {
-        this.bibliografias = response.data;
+      if (response?.results && Array.isArray(response.results)) {
+        this.bibliografias = response.results;
+        this.bibliografiasFiltradas = [...this.bibliografias];
+        this.extraerProgramasUnicos();
       } else {
         this.bibliografias = [];
+        this.bibliografiasFiltradas = [];
       }
     } catch (error: any) {
       this.error = error.message || 'Error al cargar las bibliografías';
@@ -68,17 +86,8 @@ export class BibliografiaPage implements OnInit {
    */
   async cargarLibrosDisponibles() {
     try {
-      // const response = await this.bibliotecaService.buscarLibros({ // TODO: Implementar método
-      const response = { results: [] }; // Simulación temporal
-      /*
-        page: 1,
-        page_size: 100
-      }).toPromise();
-      */
-      
-      if (response?.results) {
-        this.librosDisponibles = response.results;
-      }
+      const libros = await this.bibliotecaService.getLibros().toPromise();
+      this.librosDisponibles = libros || [];
     } catch (error: any) {
       console.error('Error cargando libros:', error);
     }
@@ -100,6 +109,14 @@ export class BibliografiaPage implements OnInit {
           }
         },
         {
+          name: 'programa',
+          type: 'text',
+          placeholder: 'Programa académico',
+          attributes: {
+            required: true
+          }
+        },
+        {
           name: 'descripcion',
           type: 'textarea',
           placeholder: 'Descripción (opcional)'
@@ -113,11 +130,11 @@ export class BibliografiaPage implements OnInit {
         {
           text: 'Crear',
           handler: async (data) => {
-            if (data.curso && data.curso.trim()) {
+            if (data.curso && data.curso.trim() && data.programa && data.programa.trim()) {
               await this.procesarCreacionBibliografia(data);
               return true;
             } else {
-              this.mostrarToast('El nombre del curso es requerido', 'warning');
+              this.mostrarToast('El nombre del curso y programa son requeridos', 'warning');
               return false;
             }
           }
@@ -138,14 +155,15 @@ export class BibliografiaPage implements OnInit {
     await loading.present();
 
     try {
-      // const response = await this.bibliotecaService.crearBibliografia({ // TODO: Implementar método
-      const response = { success: true }; // Simulación temporal
-      /*
+      const bibliografiaData = {
         curso: data.curso.trim(),
+        programa: data.programa.trim(),
         descripcion: data.descripcion?.trim() || '',
-        es_publica: true
-      }).toPromise();
-      */
+        es_publica: true,
+        activa: true
+      };
+
+      const response = await this.bibliotecaService.crearBibliografia(bibliografiaData).toPromise();
 
       await loading.dismiss();
       await this.mostrarToast('Bibliografía creada exitosamente', 'success');
@@ -171,6 +189,12 @@ export class BibliografiaPage implements OnInit {
           placeholder: 'Nombre del curso'
         },
         {
+          name: 'programa',
+          type: 'text',
+          value: bibliografia.programa,
+          placeholder: 'Programa académico'
+        },
+        {
           name: 'descripcion',
           type: 'textarea',
           value: bibliografia.descripcion || '',
@@ -185,11 +209,11 @@ export class BibliografiaPage implements OnInit {
         {
           text: 'Guardar',
           handler: async (data) => {
-            if (data.curso && data.curso.trim()) {
+            if (data.curso && data.curso.trim() && data.programa && data.programa.trim()) {
               await this.procesarEdicionBibliografia(bibliografia.id, data);
               return true;
             } else {
-              this.mostrarToast('El nombre del curso es requerido', 'warning');
+              this.mostrarToast('El nombre del curso y programa son requeridos', 'warning');
               return false;
             }
           }
@@ -210,12 +234,13 @@ export class BibliografiaPage implements OnInit {
     await loading.present();
 
     try {
-      // await this.bibliotecaService.actualizarBibliografia(id, { // TODO: Implementar método
-      /*
+      const bibliografiaData = {
         curso: data.curso.trim(),
+        programa: data.programa.trim(),
         descripcion: data.descripcion?.trim() || ''
-      }).toPromise();
-      */
+      };
+
+      await this.bibliotecaService.actualizarBibliografia(id, bibliografiaData).toPromise();
 
       await loading.dismiss();
       await this.mostrarToast('Bibliografía actualizada exitosamente', 'success');
@@ -268,7 +293,7 @@ export class BibliografiaPage implements OnInit {
     await loading.present();
 
     try {
-      // await this.bibliotecaService.agregarLibroABibliografia(bibliografiaId, libroId).toPromise(); // TODO: Implementar método
+      await this.bibliotecaService.agregarLibroABibliografia(bibliografiaId, libroId).toPromise();
       
       await loading.dismiss();
       await this.mostrarToast('Libro agregado exitosamente', 'success');
@@ -314,7 +339,7 @@ export class BibliografiaPage implements OnInit {
     await loading.present();
 
     try {
-      // await this.bibliotecaService.removerLibroDeBibliografia(bibliografiaId, libroId).toPromise(); // TODO: Implementar método
+      await this.bibliotecaService.removerLibroDeBibliografia(bibliografiaId, libroId).toPromise();
       
       await loading.dismiss();
       await this.mostrarToast('Libro removido exitosamente', 'success');
@@ -327,11 +352,87 @@ export class BibliografiaPage implements OnInit {
   }
 
   /**
+   * Cargar programas disponibles
+   */
+  async cargarProgramasDisponibles() {
+    try {
+      const response = await this.bibliotecaService.obtenerProgramas().toPromise();
+      this.programasDisponibles = response?.programas || [];
+    } catch (error: any) {
+      console.error('Error cargando programas:', error);
+    }
+  }
+
+  /**
+   * Extraer programas únicos de las bibliografías cargadas
+   */
+  extraerProgramasUnicos() {
+    const programas = new Set(this.bibliografias.map(b => b.programa));
+    this.programasDisponibles = Array.from(programas).sort();
+  }
+
+  /**
+   * Buscar bibliografías por término
+   */
+  buscarBibliografias(event: any) {
+    const termino = event.target.value;
+    this.terminoBusqueda = termino;
+    
+    // Debounce para evitar búsquedas excesivas
+    if (this.timeoutBusqueda) {
+      clearTimeout(this.timeoutBusqueda);
+    }
+    
+    this.timeoutBusqueda = setTimeout(() => {
+      this.aplicarFiltros();
+    }, 300);
+  }
+
+  /**
+   * Aplicar todos los filtros
+   */
+  aplicarFiltros() {
+    this.bibliografiasFiltradas = this.bibliografias.filter(bibliografia => {
+      // Filtro por término de búsqueda
+      const cumpleBusqueda = !this.terminoBusqueda || 
+        bibliografia.curso.toLowerCase().includes(this.terminoBusqueda.toLowerCase()) ||
+        bibliografia.programa.toLowerCase().includes(this.terminoBusqueda.toLowerCase()) ||
+        (bibliografia.descripcion && bibliografia.descripcion.toLowerCase().includes(this.terminoBusqueda.toLowerCase()));
+      
+      // Filtro por programa
+      const cumplePrograma = !this.filtroPrograma || bibliografia.programa === this.filtroPrograma;
+      
+      // Filtro por estado
+      const cumpleEstado = !this.filtroEstado || 
+        (this.filtroEstado === 'true' && bibliografia.activa) ||
+        (this.filtroEstado === 'false' && !bibliografia.activa);
+      
+      return cumpleBusqueda && cumplePrograma && cumpleEstado;
+    });
+  }
+
+  /**
+   * Limpiar todos los filtros
+   */
+  limpiarFiltros() {
+    this.terminoBusqueda = '';
+    this.filtroPrograma = '';
+    this.filtroEstado = '';
+    this.bibliografiasFiltradas = [...this.bibliografias];
+  }
+
+  /**
+   * Verificar si hay filtros activos
+   */
+  hayFiltrosActivos(): boolean {
+    return !!(this.terminoBusqueda || this.filtroPrograma || this.filtroEstado);
+  }
+
+  /**
    * Refrescar datos
    */
   async doRefresh(event: any) {
-    await this.cargarBibliografias();
-    await this.cargarLibrosDisponibles();
+    await this.cargarDatos();
     event.target.complete();
   }
 

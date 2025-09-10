@@ -50,6 +50,31 @@ const routes: Routes = [
     canActivate: [AuthGuard] // Solo accesible si está autenticado
   },
   {
+    path: 'bibliografia-estudiante',
+    loadChildren: () => import('./pages/bibliografia-estudiante/bibliografia-estudiante.module').then( m => m.BibliografiaEstudiantePageModule),
+    canActivate: [AuthGuard] // Solo accesible si está autenticado
+  },
+  {
+    path: 'historial-prestamos',
+    loadChildren: () => import('./pages/historial-prestamos/historial-prestamos.module').then( m => m.HistorialPrestamosPageModule),
+    canActivate: [AuthGuard] // Solo accesible si está autenticado
+  },
+  {
+    path: 'notificaciones',
+    loadChildren: () => import('./pages/notificaciones/notificaciones.module').then( m => m.NotificacionesPageModule),
+    canActivate: [AuthGuard] // Solo accesible si está autenticado
+  },
+  {
+    path: 'admin-usuarios',
+    loadChildren: () => import('./pages/admin-usuarios/admin-usuarios.module').then( m => m.AdminUsuariosPageModule),
+    canActivate: [AuthGuard] // Solo accesible si está autenticado
+  },
+  {
+    path: 'admin-prestamos',
+    loadChildren: () => import('./pages/admin-prestamos/admin-prestamos.module').then( m => m.AdminPrestamosPageModule),
+    canActivate: [AuthGuard] // Solo accesible si está autenticado
+  },
+  {
     path: '**',
     redirectTo: 'login' // Ruta por defecto para páginas no encontradas
   }

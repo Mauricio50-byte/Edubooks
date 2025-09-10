@@ -1,21 +1,44 @@
-/* src/app/pages/bibliografia/bibliografia.page.scss */
+.filtros-container {
+  margin-top: 16px;
+  
+  ion-item {
+    --padding-start: 0;
+    --inner-padding-end: 0;
+    margin-bottom: 8px;
+    
+    ion-label {
+      font-weight: 500;
+      min-width: 80px;
+    }
+  }
+  
+  ion-button {
+    margin-top: 8px;
+  }
+}
 
 .loading-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
+  padding: 40px 20px;
   text-align: center;
-  
+
   ion-spinner {
-    margin-bottom: 1rem;
+    margin-bottom: 16px;
   }
-  
+
   p {
     color: var(--ion-color-medium);
     margin: 0;
   }
+}
+
+.error-icon {
+  font-size: 24px;
+  margin-right: 8px;
+  vertical-align: middle;
 }
 
 .empty-state {
@@ -23,112 +46,115 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 3rem 2rem;
+  padding: 60px 20px;
   text-align: center;
-  
+
   .empty-icon {
-    font-size: 4rem;
+    font-size: 64px;
     color: var(--ion-color-medium);
-    margin-bottom: 1rem;
+    margin-bottom: 16px;
   }
-  
+
   h3 {
     color: var(--ion-color-dark);
-    margin-bottom: 0.5rem;
+    margin-bottom: 8px;
   }
-  
+
   p {
     color: var(--ion-color-medium);
-    margin-bottom: 1.5rem;
-    max-width: 300px;
+    margin: 0 0 16px 0;
   }
-}
 
-.error-icon {
-  font-size: 1.5rem;
-  margin-right: 0.5rem;
-  vertical-align: middle;
+  ion-button {
+    margin-top: 8px;
+  }
 }
 
 .bibliografia-card {
-  margin: 1rem;
+  margin: 16px;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  
+
   ion-card-header {
-    padding-bottom: 0.5rem;
-    
+    padding-bottom: 8px;
+
     ion-card-title {
-      font-size: 1.2rem;
+      font-size: 1.2em;
       font-weight: 600;
-      color: var(--ion-color-primary);
+      color: var(--ion-color-dark);
     }
-    
+
     ion-card-subtitle {
       color: var(--ion-color-medium);
-      font-size: 0.9rem;
-      margin-top: 0.25rem;
+      margin-top: 4px;
     }
+  }
+
+  ion-card-content {
+    padding-top: 8px;
   }
 }
 
 .bibliografia-info {
   display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
   flex-wrap: wrap;
-  
+  gap: 8px;
+  margin-bottom: 16px;
+
   ion-chip {
-    font-size: 0.8rem;
-    height: 28px;
+    margin: 0;
   }
 }
 
 .libros-lista {
-  margin-top: 1rem;
-  
   h4 {
     color: var(--ion-color-dark);
-    font-size: 1rem;
+    font-size: 1em;
     font-weight: 600;
-    margin-bottom: 0.5rem;
+    margin: 16px 0 8px 0;
   }
-  
+
   .libro-item {
     --padding-start: 0;
     --padding-end: 0;
-    margin-bottom: 0.5rem;
+    --inner-padding-end: 8px;
+    margin-bottom: 8px;
     border-radius: 8px;
     background: var(--ion-color-light);
-    
+
     ion-avatar {
-      width: 40px;
-      height: 40px;
-      
+      width: 50px;
+      height: 50px;
+      margin-right: 12px;
+
       img {
         border-radius: 4px;
         object-fit: cover;
       }
     }
-    
+
     ion-label {
       h3 {
-        font-size: 0.9rem;
+        font-size: 0.95em;
         font-weight: 600;
-        margin-bottom: 0.25rem;
         color: var(--ion-color-dark);
+        margin: 0 0 4px 0;
       }
-      
+
       p {
-        font-size: 0.8rem;
+        font-size: 0.85em;
         color: var(--ion-color-medium);
-        margin: 0.1rem 0;
+        margin: 2px 0;
+
+        &.libro-categoria {
+          font-style: italic;
+        }
       }
-      
-      .libro-categoria {
-        color: var(--ion-color-primary);
-        font-weight: 500;
-      }
+    }
+
+    ion-button {
+      --padding-start: 8px;
+      --padding-end: 8px;
     }
   }
 }
@@ -137,51 +163,63 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 1.5rem;
+  padding: 20px;
   text-align: center;
-  
+
   .sin-libros-icon {
-    font-size: 2rem;
+    font-size: 32px;
     color: var(--ion-color-medium);
-    margin-bottom: 0.5rem;
+    margin-bottom: 8px;
   }
-  
+
   p {
     color: var(--ion-color-medium);
-    font-size: 0.9rem;
     margin: 0;
+    font-size: 0.9em;
   }
 }
 
 .acciones {
   display: flex;
-  gap: 0.5rem;
-  margin-top: 1rem;
+  gap: 8px;
+  margin-top: 16px;
   flex-wrap: wrap;
-  
+
   ion-button {
-    --border-radius: 8px;
-    font-size: 0.9rem;
-    height: 36px;
+    flex: 1;
+    min-width: 120px;
   }
 }
 
 // Responsive design
-@media (max-width: 768px) {
+@media (min-width: 768px) {
   .bibliografia-card {
-    margin: 0.5rem;
+    margin: 16px auto;
+    max-width: 800px;
   }
-  
-  .acciones {
-    flex-direction: column;
+
+  .filtros-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    align-items: center;
     
     ion-button {
-      width: 100%;
+      grid-column: span 2;
+      justify-self: start;
     }
   }
-  
+
   .bibliografia-info {
-    justify-content: center;
+    justify-content: flex-start;
+  }
+
+  .acciones {
+    justify-content: flex-start;
+    
+    ion-button {
+      flex: none;
+    }
   }
 }
 
@@ -190,44 +228,10 @@
   .bibliografia-card {
     box-shadow: 0 2px 8px rgba(255, 255, 255, 0.1);
   }
-  
-  .libro-item {
-    background: var(--ion-color-dark);
-  }
-}
 
-// Animation for cards
-.bibliografia-card {
-  animation: slideInUp 0.3s ease-out;
-}
-
-@keyframes slideInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-// Hover effects for desktop
-@media (hover: hover) {
-  .bibliografia-card {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-    }
-  }
-  
-  .libro-item {
-    transition: background-color 0.2s ease;
-    
-    &:hover {
-      background: var(--ion-color-step-100);
+  .libros-lista {
+    .libro-item {
+      background: var(--ion-color-dark);
     }
   }
 }

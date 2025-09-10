@@ -1,0 +1,161 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Administrar Usuarios</ion-title>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Administrar Usuarios</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <!-- Refresher -->
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Filtros y búsqueda -->
+  <ion-card *ngIf="!isLoading">
+    <ion-card-content>
+      <ion-searchbar 
+        [(ngModel)]="searchTerm"
+        placeholder="Buscar por nombre, apellido o email"
+        show-clear-button="focus">
+      </ion-searchbar>
+      
+      <ion-item>
+        <ion-select 
+          [(ngModel)]="filtroRol" 
+          placeholder="Filtrar por rol">
+          <ion-select-option value="">Todos los roles</ion-select-option>
+          <ion-select-option value="Estudiante">Estudiantes</ion-select-option>
+          <ion-select-option value="Docente">Docentes</ion-select-option>
+          <ion-select-option value="Administrador">Administradores</ion-select-option>
+        </ion-select>
+        <ion-label slot="start">Rol:</ion-label>
+      </ion-item>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Estadísticas rápidas -->
+  <ion-card *ngIf="!isLoading && usuarios.length > 0">
+    <ion-card-header>
+      <ion-card-title>Resumen de Usuarios</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <div class="stats-container">
+        <div class="stat-item">
+          <ion-chip color="primary">
+            <ion-icon name="people" slot="start"></ion-icon>
+            <ion-label>{{ usuarios.length }} total</ion-label>
+          </ion-chip>
+        </div>
+        <div class="stat-item">
+            <ion-chip color="success">
+              <ion-icon name="checkmark-circle" slot="start"></ion-icon>
+              <ion-label>{{ getUsuariosActivos() }} activos</ion-label>
+            </ion-chip>
+          </div>
+          <div class="stat-item">
+            <ion-chip color="danger">
+              <ion-icon name="close-circle" slot="start"></ion-icon>
+              <ion-label>{{ getUsuariosInactivos() }} inactivos</ion-label>
+            </ion-chip>
+          </div>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loading-container">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Cargando usuarios...</p>
+  </div>
+
+  <!-- Error -->
+  <ion-card *ngIf="error && !isLoading" color="danger">
+    <ion-card-content>
+      <ion-icon name="alert-circle" class="error-icon"></ion-icon>
+      <p>{{ error }}</p>
+      <ion-button fill="clear" (click)="cargarUsuarios()">
+        <ion-icon name="refresh" slot="start"></ion-icon>
+        Reintentar
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Sin usuarios -->
+  <div *ngIf="!isLoading && !error && usuariosFiltrados.length === 0" class="empty-state">
+    <ion-icon name="people-outline" class="empty-icon"></ion-icon>
+    <h3 *ngIf="usuarios.length === 0">No hay usuarios registrados</h3>
+    <h3 *ngIf="usuarios.length > 0">No se encontraron resultados</h3>
+    <p *ngIf="usuarios.length === 0">Los usuarios aparecerán aquí cuando se registren.</p>
+    <p *ngIf="usuarios.length > 0">Intenta ajustar los filtros de búsqueda.</p>
+  </div>
+
+  <!-- Lista de usuarios -->
+  <div *ngIf="!isLoading && !error && usuariosFiltrados.length > 0">
+    <ion-card *ngFor="let usuario of usuariosFiltrados" class="usuario-card">
+      <ion-card-content>
+        <div class="usuario-header">
+          <div class="usuario-info">
+            <h3>{{ usuario.nombre }} {{ usuario.apellido }}</h3>
+            <p class="email">{{ usuario.email }}</p>
+            <div class="usuario-meta">
+              <ion-chip [color]="getRolColor(usuario.rol)" size="small">
+                <ion-label>{{ usuario.rol }}</ion-label>
+              </ion-chip>
+              <ion-chip [color]="getEstadoColor(usuario.is_active)" size="small">
+          <ion-label>{{ usuario.is_active ? 'Activo' : 'Inactivo' }}</ion-label>
+              </ion-chip>
+            </div>
+          </div>
+          <div class="usuario-actions">
+            <ion-button fill="clear" (click)="verDetallesUsuario(usuario)">
+              <ion-icon name="information-circle" slot="icon-only"></ion-icon>
+            </ion-button>
+          </div>
+        </div>
+        
+        <div class="usuario-details">
+          <div class="detail-row">
+            <span class="label">Username:</span>
+            <span class="value">{{ usuario.username }}</span>
+          </div>
+          <div class="detail-row" *ngIf="usuario.matricula">
+            <span class="label">Matrícula:</span>
+            <span class="value">{{ usuario.matricula }}</span>
+          </div>
+          <div class="detail-row" *ngIf="usuario.carrera">
+            <span class="label">Carrera:</span>
+            <span class="value">{{ usuario.carrera }}</span>
+          </div>
+          <div class="detail-row" *ngIf="usuario.departamento">
+            <span class="label">Departamento:</span>
+            <span class="value">{{ usuario.departamento }}</span>
+          </div>
+        </div>
+        
+        <div class="usuario-footer">
+          <ion-button 
+            fill="outline" 
+            size="small" 
+            [color]="usuario.is_active ? 'danger' : 'success'"
+        (click)="toggleEstadoUsuario(usuario)">
+        <ion-icon [name]="usuario.is_active ? 'close-circle' : 'checkmark-circle'" slot="start"></ion-icon>
+        {{ usuario.is_active ? 'Desactivar' : 'Activar' }}
+          </ion-button>
+          <ion-button fill="outline" size="small" (click)="verDetallesUsuario(usuario)">
+            <ion-icon name="eye" slot="start"></ion-icon>
+            Ver Detalles
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

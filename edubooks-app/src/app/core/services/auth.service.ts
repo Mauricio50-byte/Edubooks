@@ -68,16 +68,23 @@ export class AuthService {
     try {
       const refreshToken = localStorage.getItem('refresh_token');
       if (refreshToken) {
-        // Intentar logout en el servidor
+        // Intentar logout en el servidor (sin bloquear si falla)
         this.apiService.post('/auth/logout/', { refresh_token: refreshToken }).subscribe({
-          error: (error) => console.log('Error en logout del servidor:', error)
+          next: () => console.log('Logout exitoso en el servidor'),
+          error: (error) => {
+            // Ignorar errores del servidor durante logout
+            // El token puede estar expirado o ser inválido, pero aún así queremos cerrar sesión
+            console.log('Token inválido o expirado durante logout (normal):', error.message);
+          }
         });
       }
       
+      // Siempre limpiar el almacenamiento local y redirigir
       this.clearStorage();
       this.router.navigate(['/login']);
     } catch (error) {
       console.error('Error durante logout:', error);
+      // Asegurar que siempre se limpie la sesión local
       this.clearStorage();
       this.router.navigate(['/login']);
     }

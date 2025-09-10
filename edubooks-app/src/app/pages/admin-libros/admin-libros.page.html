@@ -1,13 +1,191 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>admin-libros</ion-title>
+    <ion-title>Administración de Libros</ion-title>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-buttons slot="end">
+      <ion-button (click)="crearLibro()">
+        <ion-icon name="add" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
   <ion-header collapse="condense">
     <ion-toolbar>
-      <ion-title size="large">admin-libros</ion-title>
+      <ion-title size="large">Administración de Libros</ion-title>
     </ion-toolbar>
   </ion-header>
+
+  <!-- Refresher -->
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Filtros y búsqueda -->
+  <ion-card *ngIf="!isLoading">
+    <ion-card-content>
+      <ion-searchbar 
+        [(ngModel)]="searchTerm"
+        placeholder="Buscar por título, autor o ISBN"
+        (ionInput)="onSearchChange($event)"
+        show-clear-button="focus">
+      </ion-searchbar>
+      
+      <ion-item>
+        <ion-select 
+          [(ngModel)]="selectedCategory" 
+          placeholder="Filtrar por categoría"
+          (ionChange)="onCategoryChange($event)">
+          <ion-select-option value="">Todas las categorías</ion-select-option>
+          <ion-select-option *ngFor="let categoria of categorias" [value]="categoria">
+            {{ categoria }}
+          </ion-select-option>
+        </ion-select>
+        <ion-label slot="start">Categoría:</ion-label>
+      </ion-item>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Estadísticas rápidas -->
+  <ion-card *ngIf="!isLoading && libros.length > 0">
+    <ion-card-header>
+      <ion-card-title>Resumen del Catálogo</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <div class="stats-container">
+        <div class="stat-item">
+          <ion-chip color="primary">
+            <ion-icon name="library" slot="start"></ion-icon>
+            <ion-label>{{ libros.length }} libros</ion-label>
+          </ion-chip>
+        </div>
+        <div class="stat-item">
+          <ion-chip color="success">
+            <ion-icon name="checkmark-circle" slot="start"></ion-icon>
+            <ion-label>{{ getLibrosDisponibles() }} disponibles</ion-label>
+          </ion-chip>
+        </div>
+        <div class="stat-item">
+          <ion-chip color="warning">
+            <ion-icon name="time" slot="start"></ion-icon>
+            <ion-label>{{ getLibrosPrestados() }} prestados</ion-label>
+          </ion-chip>
+        </div>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loading-container">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Cargando libros...</p>
+  </div>
+
+  <!-- Error -->
+  <ion-card *ngIf="error && !isLoading" color="danger">
+    <ion-card-content>
+      <ion-icon name="alert-circle" class="error-icon"></ion-icon>
+      <p>{{ error }}</p>
+      <ion-button fill="clear" (click)="cargarLibros()">
+        <ion-icon name="refresh" slot="start"></ion-icon>
+        Reintentar
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Sin libros -->
+  <div *ngIf="!isLoading && !error && libros.length === 0" class="empty-state">
+    <ion-icon name="library-outline" class="empty-icon"></ion-icon>
+    <h3>No hay libros registrados</h3>
+    <p>Comienza registrando el primer libro en el catálogo.</p>
+    <ion-button (click)="crearLibro()" fill="outline">
+      <ion-icon name="add" slot="start"></ion-icon>
+      Registrar Primer Libro
+    </ion-button>
+  </div>
+
+  <!-- Lista de libros -->
+  <div *ngIf="!isLoading && !error && libros.length > 0">
+    <ion-card *ngFor="let libro of libros" class="libro-card">
+      <ion-card-content>
+        <div class="libro-header">
+          <div class="libro-info">
+            <h3>{{ libro.titulo }}</h3>
+            <p class="autor">{{ libro.autor }}</p>
+            <div class="libro-meta">
+              <ion-chip [color]="getEstadoColor(libro.estado)" size="small">
+                <ion-label>{{ libro.estado }}</ion-label>
+              </ion-chip>
+              <ion-chip color="secondary" size="small">
+                <ion-label>{{ libro.categoria }}</ion-label>
+              </ion-chip>
+            </div>
+          </div>
+          <div class="libro-actions">
+            <ion-button fill="clear" (click)="mostrarOpcionesLibro(libro)">
+              <ion-icon name="ellipsis-vertical" slot="icon-only"></ion-icon>
+            </ion-button>
+          </div>
+        </div>
+        
+        <div class="libro-details">
+          <div class="detail-row">
+            <span class="label">ISBN:</span>
+            <span class="value">{{ libro.isbn || 'No especificado' }}</span>
+          </div>
+          <div class="detail-row" *ngIf="libro.editorial">
+            <span class="label">Editorial:</span>
+            <span class="value">{{ libro.editorial }}</span>
+          </div>
+          <div class="detail-row" *ngIf="libro.anio_publicacion">
+             <span class="label">Año:</span>
+             <span class="value">{{ libro.anio_publicacion }}</span>
+           </div>
+          <div class="detail-row">
+            <span class="label">Disponibles:</span>
+            <span class="value">{{ libro.cantidad_disponible }} / {{ libro.cantidad_total }}</span>
+          </div>
+        </div>
+        
+        <div class="libro-description" *ngIf="libro.descripcion">
+          <p>{{ libro.descripcion }}</p>
+        </div>
+        
+        <div class="libro-footer">
+          <ion-button fill="outline" size="small" (click)="editarLibro(libro)">
+            <ion-icon name="create" slot="start"></ion-icon>
+            Editar
+          </ion-button>
+          <ion-button fill="outline" size="small" (click)="router.navigate(['/detalle-libro', libro.id])">
+            <ion-icon name="eye" slot="start"></ion-icon>
+            Ver Detalles
+          </ion-button>
+          <ion-button fill="clear" size="small" color="danger" (click)="confirmarEliminacion(libro)">
+            <ion-icon name="trash" slot="start"></ion-icon>
+            Eliminar
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Infinite scroll -->
+  <ion-infinite-scroll 
+    *ngIf="hasMoreData && !isLoading" 
+    (ionInfinite)="loadMoreData($event)">
+    <ion-infinite-scroll-content
+      loading-spinner="bubbles"
+      loading-text="Cargando más libros...">
+    </ion-infinite-scroll-content>
+  </ion-infinite-scroll>
+
+  <!-- FAB para agregar libro -->
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button (click)="crearLibro()">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
 </ion-content>

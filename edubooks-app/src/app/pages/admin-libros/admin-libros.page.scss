@@ -1,0 +1,283 @@
+.stats-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: space-around;
+
+  .stat-item {
+    flex: 1;
+    min-width: 120px;
+    text-align: center;
+  }
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+
+  ion-spinner {
+    margin-bottom: 16px;
+  }
+
+  p {
+    color: var(--ion-color-medium);
+    margin: 0;
+  }
+}
+
+.error-icon {
+  font-size: 24px;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+
+  .empty-icon {
+    font-size: 64px;
+    color: var(--ion-color-medium);
+    margin-bottom: 16px;
+  }
+
+  h3 {
+    color: var(--ion-color-dark);
+    margin-bottom: 8px;
+  }
+
+  p {
+    color: var(--ion-color-medium);
+    margin: 0 0 16px 0;
+  }
+}
+
+.libro-card {
+  margin: 16px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  }
+
+  ion-card-content {
+    padding: 16px;
+  }
+}
+
+.libro-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+
+  .libro-info {
+    flex: 1;
+
+    h3 {
+      font-size: 1.2em;
+      font-weight: 600;
+      color: var(--ion-color-dark);
+      margin: 0 0 4px 0;
+      line-height: 1.3;
+    }
+
+    .autor {
+      font-size: 0.95em;
+      color: var(--ion-color-medium);
+      margin: 0 0 8px 0;
+      font-style: italic;
+    }
+
+    .libro-meta {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+
+      ion-chip {
+        margin: 0;
+        font-size: 0.8em;
+      }
+    }
+  }
+
+  .libro-actions {
+    margin-left: 12px;
+  }
+}
+
+.libro-details {
+  margin: 12px 0;
+  padding: 12px;
+  background: var(--ion-color-light);
+  border-radius: 8px;
+
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    .label {
+      font-weight: 500;
+      color: var(--ion-color-dark);
+      font-size: 0.9em;
+    }
+
+    .value {
+      color: var(--ion-color-medium);
+      font-size: 0.9em;
+      text-align: right;
+      flex: 1;
+      margin-left: 12px;
+    }
+  }
+}
+
+.libro-description {
+  margin: 12px 0;
+  padding: 12px;
+  background: var(--ion-color-step-50);
+  border-radius: 8px;
+  border-left: 4px solid var(--ion-color-primary);
+
+  p {
+    margin: 0;
+    font-size: 0.9em;
+    line-height: 1.4;
+    color: var(--ion-color-dark);
+  }
+}
+
+.libro-footer {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+
+  ion-button {
+    flex: 1;
+    min-width: 80px;
+    font-size: 0.85em;
+    height: 32px;
+  }
+}
+
+// Responsive design
+@media (min-width: 768px) {
+  .libro-card {
+    margin: 16px auto;
+    max-width: 800px;
+  }
+
+  .stats-container {
+    justify-content: flex-start;
+    gap: 16px;
+
+    .stat-item {
+      flex: none;
+    }
+  }
+
+  .libro-footer {
+    justify-content: flex-start;
+
+    ion-button {
+      flex: none;
+      min-width: 100px;
+    }
+  }
+
+  .libro-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+
+    .detail-row {
+      margin-bottom: 0;
+    }
+  }
+}
+
+@media (min-width: 1024px) {
+  .libro-card {
+    max-width: 1000px;
+  }
+
+  .libro-details {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+// Dark mode support
+@media (prefers-color-scheme: dark) {
+  .libro-card {
+    box-shadow: 0 2px 8px rgba(255, 255, 255, 0.1);
+
+    &:hover {
+      box-shadow: 0 4px 16px rgba(255, 255, 255, 0.15);
+    }
+  }
+
+  .libro-details {
+    background: var(--ion-color-dark);
+  }
+
+  .libro-description {
+    background: var(--ion-color-step-150);
+  }
+}
+
+// Animation for new cards
+.libro-card {
+  animation: slideInUp 0.3s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Loading states
+.libro-card.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+// Search and filter styles
+ion-searchbar {
+  --background: var(--ion-color-light);
+  --border-radius: 12px;
+  margin-bottom: 8px;
+}
+
+ion-item {
+  --padding-start: 0;
+  --inner-padding-end: 0;
+
+  ion-label {
+    font-weight: 500;
+    min-width: 80px;
+  }
+}

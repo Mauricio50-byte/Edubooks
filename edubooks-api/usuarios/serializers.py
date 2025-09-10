@@ -83,3 +83,17 @@ class UsuarioPerfilSerializer(serializers.ModelSerializer):
             'numero_empleado', 'area'
         ]
         read_only_fields = ['id', 'fecha_registro']
+
+class UsuarioListSerializer(serializers.ModelSerializer):
+    """Serializer para lista de usuarios en administración"""
+    fecha_registro = serializers.DateField(format='%Y-%m-%d', read_only=True)
+    is_active = serializers.BooleanField(source='activo', read_only=True)
+    
+    class Meta:
+        model = Usuario
+        fields = [
+            'id', 'email', 'username', 'nombre', 'apellido', 'rol',
+            'is_active', 'fecha_registro',
+            'carrera', 'matricula', 'departamento', 'numero_empleado', 'area'
+        ]
+        read_only_fields = ['id', 'fecha_registro']

@@ -25,6 +25,50 @@
     <ion-refresher-content></ion-refresher-content>
   </ion-refresher>
 
+  <!-- Barra de búsqueda y filtros -->
+  <ion-card *ngIf="!isLoading">
+    <ion-card-content>
+      <ion-searchbar 
+        [(ngModel)]="terminoBusqueda"
+        placeholder="Buscar por curso o programa"
+        (ionInput)="buscarBibliografias($event)"
+        show-clear-button="focus">
+      </ion-searchbar>
+      
+      <div class="filtros-container">
+        <ion-item>
+          <ion-select 
+            [(ngModel)]="filtroPrograma" 
+            placeholder="Filtrar por programa"
+            (ionChange)="aplicarFiltros()">
+            <ion-select-option value="">Todos los programas</ion-select-option>
+            <ion-select-option *ngFor="let programa of programasDisponibles" [value]="programa">
+              {{ programa }}
+            </ion-select-option>
+          </ion-select>
+          <ion-label slot="start">Programa:</ion-label>
+        </ion-item>
+        
+        <ion-item>
+          <ion-select 
+            [(ngModel)]="filtroEstado" 
+            placeholder="Filtrar por estado"
+            (ionChange)="aplicarFiltros()">
+            <ion-select-option value="">Todos los estados</ion-select-option>
+            <ion-select-option value="true">Activas</ion-select-option>
+            <ion-select-option value="false">Inactivas</ion-select-option>
+          </ion-select>
+          <ion-label slot="start">Estado:</ion-label>
+        </ion-item>
+        
+        <ion-button fill="clear" (click)="limpiarFiltros()" *ngIf="hayFiltrosActivos()">
+          <ion-icon name="refresh" slot="start"></ion-icon>
+          Limpiar filtros
+        </ion-button>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
   <!-- Loading -->
   <div *ngIf="isLoading" class="loading-container">
     <ion-spinner name="crescent"></ion-spinner>
@@ -44,20 +88,26 @@
   </ion-card>
 
   <!-- Sin bibliografías -->
-  <div *ngIf="!isLoading && !error && bibliografias.length === 0" class="empty-state">
+  <div *ngIf="!isLoading && !error && bibliografiasFiltradas.length === 0" class="empty-state">
     <ion-icon name="library-outline" class="empty-icon"></ion-icon>
-    <h3>No hay bibliografías</h3>
-    <p *ngIf="esDocente">Crea tu primera bibliografía para organizar los libros de tus cursos.</p>
-    <p *ngIf="!esDocente">No tienes acceso para crear bibliografías. Solo los docentes pueden gestionar bibliografías.</p>
-    <ion-button *ngIf="esDocente" (click)="crearBibliografia()" fill="outline">
+    <h3 *ngIf="bibliografias.length === 0">No hay bibliografías</h3>
+    <h3 *ngIf="bibliografias.length > 0">No se encontraron resultados</h3>
+    <p *ngIf="esDocente && bibliografias.length === 0">Crea tu primera bibliografía para organizar los libros de tus cursos.</p>
+    <p *ngIf="!esDocente && bibliografias.length === 0">No tienes acceso para crear bibliografías. Solo los docentes pueden gestionar bibliografías.</p>
+    <p *ngIf="bibliografias.length > 0">Intenta ajustar los filtros de búsqueda.</p>
+    <ion-button *ngIf="esDocente && bibliografias.length === 0" (click)="crearBibliografia()" fill="outline">
       <ion-icon name="add" slot="start"></ion-icon>
       Crear Bibliografía
+    </ion-button>
+    <ion-button *ngIf="bibliografias.length > 0" (click)="limpiarFiltros()" fill="outline">
+      <ion-icon name="refresh" slot="start"></ion-icon>
+      Limpiar filtros
     </ion-button>
   </div>
 
   <!-- Lista de bibliografías -->
-  <div *ngIf="!isLoading && !error && bibliografias.length > 0">
-    <ion-card *ngFor="let bibliografia of bibliografias" class="bibliografia-card">
+  <div *ngIf="!isLoading && !error && bibliografiasFiltradas.length > 0">
+    <ion-card *ngFor="let bibliografia of bibliografiasFiltradas" class="bibliografia-card">
       <ion-card-header>
         <ion-card-title>{{ bibliografia.curso }}</ion-card-title>
         <ion-card-subtitle *ngIf="bibliografia.descripcion">
@@ -68,14 +118,24 @@
       <ion-card-content>
         <!-- Información de la bibliografía -->
         <div class="bibliografia-info">
+          <ion-chip color="secondary">
+            <ion-icon name="school" slot="start"></ion-icon>
+            <ion-label>{{ bibliografia.programa }}</ion-label>
+          </ion-chip>
+          
           <ion-chip color="primary">
             <ion-icon name="book" slot="start"></ion-icon>
-            <ion-label>{{ bibliografia.libros.length || 0 }} libros</ion-label>
+            <ion-label>{{ bibliografia.libros?.length || bibliografia.total_libros || 0 }} libros</ion-label>
           </ion-chip>
           
           <ion-chip [color]="bibliografia.es_publica ? 'success' : 'medium'">
             <ion-icon [name]="bibliografia.es_publica ? 'globe' : 'lock-closed'" slot="start"></ion-icon>
             <ion-label>{{ bibliografia.es_publica ? 'Pública' : 'Privada' }}</ion-label>
+          </ion-chip>
+          
+          <ion-chip [color]="bibliografia.activa ? 'success' : 'danger'">
+            <ion-icon [name]="bibliografia.activa ? 'checkmark-circle' : 'close-circle'" slot="start"></ion-icon>
+            <ion-label>{{ bibliografia.activa ? 'Activa' : 'Inactiva' }}</ion-label>
           </ion-chip>
         </div>
 

@@ -88,11 +88,25 @@ class BibliografiaSerializer(serializers.ModelSerializer):
         write_only=True,
         required=False
     )
+    total_libros = serializers.SerializerMethodField()
     
     class Meta:
         model = Bibliografia
         fields = '__all__'
         read_only_fields = ['fecha_creacion', 'docente']
+    
+    def get_total_libros(self, obj):
+        return obj.libros.count()
+    
+    def validate_programa(self, value):
+        if not value or not value.strip():
+            raise serializers.ValidationError("El programa académico es requerido.")
+        return value.strip()
+    
+    def validate_curso(self, value):
+        if not value or not value.strip():
+            raise serializers.ValidationError("El nombre del curso es requerido.")
+        return value.strip()
     
     def validate_libros_ids(self, value):
         if value:
@@ -101,6 +115,30 @@ class BibliografiaSerializer(serializers.ModelSerializer):
             if invalid_ids:
                 raise serializers.ValidationError(f"Los siguientes IDs de libros no existen: {list(invalid_ids)}")
         return value
+    
+    def validate(self, data):
+        # Validar unicidad de curso + programa para el docente
+        docente = self.context['request'].user
+        curso = data.get('curso')
+        programa = data.get('programa')
+        
+        if curso and programa:
+            queryset = Bibliografia.objects.filter(
+                docente=docente,
+                curso=curso,
+                programa=programa
+            )
+            
+            # Si estamos actualizando, excluir la instancia actual
+            if self.instance:
+                queryset = queryset.exclude(pk=self.instance.pk)
+            
+            if queryset.exists():
+                raise serializers.ValidationError(
+                    f"Ya existe una bibliografía para el curso '{curso}' en el programa '{programa}'."
+                )
+        
+        return data
     
     def create(self, validated_data):
         libros_ids = validated_data.pop('libros_ids', [])

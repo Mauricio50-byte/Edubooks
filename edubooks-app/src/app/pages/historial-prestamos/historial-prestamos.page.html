@@ -1,0 +1,194 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Historial de Préstamos</ion-title>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-buttons slot="end">
+      <ion-button (click)="toggleFiltros()">
+        <ion-icon name="filter" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Historial de Préstamos</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <!-- Refresher -->
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Estadísticas del usuario -->
+  <ion-card *ngIf="!isLoading && totalPrestamos > 0">
+    <ion-card-header>
+      <ion-card-title>Resumen de Préstamos</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <ion-chip color="primary">
+            <ion-icon name="library" slot="start"></ion-icon>
+            <ion-label>{{ totalPrestamos }} total</ion-label>
+          </ion-chip>
+        </div>
+        <div class="stat-item">
+          <ion-chip color="tertiary">
+            <ion-icon name="time" slot="start"></ion-icon>
+            <ion-label>{{ prestamosActivos }} activos</ion-label>
+          </ion-chip>
+        </div>
+        <div class="stat-item">
+          <ion-chip color="success">
+            <ion-icon name="checkmark-circle" slot="start"></ion-icon>
+            <ion-label>{{ prestamosDevueltos }} devueltos</ion-label>
+          </ion-chip>
+        </div>
+        <div class="stat-item" *ngIf="prestamosVencidos > 0">
+          <ion-chip color="danger">
+            <ion-icon name="warning" slot="start"></ion-icon>
+            <ion-label>{{ prestamosVencidos }} vencidos</ion-label>
+          </ion-chip>
+        </div>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Filtros -->
+  <ion-card *ngIf="mostrarFiltros">
+    <ion-card-header>
+      <ion-card-title>Filtros de Búsqueda</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-searchbar 
+        [(ngModel)]="terminoBusqueda"
+        placeholder="Buscar por título o autor"
+        (ionInput)="onSearchChange($event)"
+        show-clear-button="focus">
+      </ion-searchbar>
+      
+      <ion-item>
+        <ion-select 
+          [(ngModel)]="filtroEstado" 
+          placeholder="Filtrar por estado"
+          (ionChange)="onEstadoChange($event)">
+          <ion-select-option value="">Todos los estados</ion-select-option>
+          <ion-select-option value="Activo">Activos</ion-select-option>
+          <ion-select-option value="Devuelto">Devueltos</ion-select-option>
+          <ion-select-option value="Vencido">Vencidos</ion-select-option>
+        </ion-select>
+        <ion-label slot="start">Estado:</ion-label>
+      </ion-item>
+      
+      <ion-button fill="clear" (click)="limpiarFiltros()">
+        <ion-icon name="refresh" slot="start"></ion-icon>
+        Limpiar filtros
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loading-container">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Cargando historial...</p>
+  </div>
+
+  <!-- Error -->
+  <ion-card *ngIf="error && !isLoading" color="danger">
+    <ion-card-content>
+      <ion-icon name="alert-circle" class="error-icon"></ion-icon>
+      <p>{{ error }}</p>
+      <ion-button fill="clear" (click)="cargarHistorialPrestamos()">
+        <ion-icon name="refresh" slot="start"></ion-icon>
+        Reintentar
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Sin préstamos -->
+  <div *ngIf="!isLoading && !error && prestamosFiltrados.length === 0" class="empty-state">
+    <ion-icon name="library-outline" class="empty-icon"></ion-icon>
+    <h3 *ngIf="totalPrestamos === 0">No tienes préstamos registrados</h3>
+    <h3 *ngIf="totalPrestamos > 0">No se encontraron resultados</h3>
+    <p *ngIf="totalPrestamos === 0">Cuando solicites libros en préstamo, aparecerán aquí.</p>
+    <p *ngIf="totalPrestamos > 0">Intenta ajustar los filtros de búsqueda.</p>
+    <ion-button *ngIf="totalPrestamos > 0" (click)="limpiarFiltros()" fill="outline">
+      <ion-icon name="refresh" slot="start"></ion-icon>
+      Limpiar filtros
+    </ion-button>
+  </div>
+
+  <!-- Lista de préstamos -->
+  <div *ngIf="!isLoading && !error && prestamosFiltrados.length > 0">
+    <ion-card *ngFor="let prestamo of prestamosFiltrados" class="prestamo-card">
+      <ion-card-content>
+        <div class="prestamo-header">
+          <div class="libro-info">
+            <h3>{{ prestamo.libro.titulo }}</h3>
+            <p class="autor">{{ prestamo.libro.autor }}</p>
+            <div class="prestamo-meta">
+              <ion-chip [color]="getEstadoColor(prestamo.estado)" size="small">
+                <ion-label>{{ prestamo.estado }}</ion-label>
+              </ion-chip>
+              <ion-chip color="secondary" size="small">
+                <ion-label>{{ prestamo.libro.categoria }}</ion-label>
+              </ion-chip>
+              <ion-chip *ngIf="prestamo.estado === 'Vencido'" color="danger" size="small">
+                <ion-icon name="warning" slot="start"></ion-icon>
+                <ion-label>{{ getDiasRetraso(prestamo) }} días de retraso</ion-label>
+              </ion-chip>
+            </div>
+          </div>
+          <div class="prestamo-actions">
+            <ion-button fill="clear" (click)="verDetallesPrestamo(prestamo)">
+              <ion-icon name="information-circle" slot="icon-only"></ion-icon>
+            </ion-button>
+          </div>
+        </div>
+        
+        <div class="prestamo-fechas">
+          <div class="fecha-item">
+            <span class="label">Préstamo:</span>
+            <span class="value">{{ formatearFecha(prestamo.fecha_prestamo) }}</span>
+          </div>
+          <div class="fecha-item">
+            <span class="label">Devolución esperada:</span>
+            <span class="value">{{ formatearFecha(prestamo.fecha_devolucion_esperada) }}</span>
+          </div>
+          <div class="fecha-item" *ngIf="prestamo.fecha_devolucion_real">
+            <span class="label">Devolución real:</span>
+            <span class="value">{{ formatearFecha(prestamo.fecha_devolucion_real) }}</span>
+          </div>
+          <div class="fecha-item" *ngIf="prestamo.renovaciones && prestamo.renovaciones > 0">
+            <span class="label">Renovaciones:</span>
+            <span class="value">{{ prestamo.renovaciones }}/2</span>
+          </div>
+        </div>
+        
+        <div class="prestamo-observaciones" *ngIf="prestamo.observaciones">
+          <p><strong>Observaciones:</strong> {{ prestamo.observaciones }}</p>
+        </div>
+        
+        <div class="prestamo-footer" *ngIf="prestamo.estado === 'Activo'">
+          <ion-button 
+            *ngIf="puedeRenovar(prestamo)" 
+            fill="outline" 
+            size="small" 
+            (click)="renovarPrestamo(prestamo)">
+            <ion-icon name="refresh" slot="start"></ion-icon>
+            Renovar
+          </ion-button>
+          <ion-chip *ngIf="!puedeRenovar(prestamo)" color="warning" size="small">
+            <ion-icon name="lock-closed" slot="start"></ion-icon>
+            <ion-label>Máximo de renovaciones alcanzado</ion-label>
+          </ion-chip>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>
