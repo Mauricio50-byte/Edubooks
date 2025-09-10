@@ -149,6 +149,19 @@ export class CatalogoPage implements OnInit {
     this.aplicarFiltros();
   }
 
+  getCategoriaIcon(categoria: string): string {
+    const iconos: { [key: string]: string } = {
+      'Todas': '📚',
+      'Literatura': '📖',
+      'Programación': '💻',
+      'Matemáticas': '📊',
+      'Ciencias': '🔬',
+      'Ingeniería': '⚙️',
+      'Negocios': '💼'
+    };
+    return iconos[categoria] || '📚';
+  }
+
   async prestarLibro(libro: Libro) {
     const loading = await this.loadingController.create({
       message: 'Procesando préstamo...',

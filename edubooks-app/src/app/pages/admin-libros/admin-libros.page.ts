@@ -23,6 +23,7 @@ export class AdminLibrosPage implements OnInit {
   currentPage = 1;
   totalPages = 1;
   hasMoreData = true;
+  imagenSeleccionada: string = 'assets/images/book-placeholder.svg';
 
   constructor(
     private bibliotecaService: BibliotecaService,
@@ -82,17 +83,33 @@ export class AdminLibrosPage implements OnInit {
         filtros.categoria = this.selectedCategory;
       }
 
-      // const response = await this.bibliotecaService.buscarLibros(filtros).toPromise(); // TODO: Implementar método
-      const response = { results: [], count: 0 }; // Simulación temporal
+      // Llamar al servicio real para buscar libros
+      const response = await this.bibliotecaService.getLibros().toPromise();
+      let filteredBooks = response || [];
       
-      if (response?.results) {
+      // Aplicar filtros localmente
+      if (this.searchTerm) {
+        filteredBooks = filteredBooks.filter((libro: any) => 
+          libro.titulo.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+          libro.autor.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+          libro.isbn.includes(this.searchTerm)
+        );
+      }
+      
+      if (this.selectedCategory) {
+        filteredBooks = filteredBooks.filter((libro: any) => libro.categoria === this.selectedCategory);
+      }
+      
+      const formattedResponse = { results: filteredBooks, count: filteredBooks.length };
+      
+      if (formattedResponse?.results) {
         if (loadMore) {
-          this.libros = [...this.libros, ...response.results];
+          this.libros = [...this.libros, ...formattedResponse.results];
         } else {
-          this.libros = response.results;
+          this.libros = formattedResponse.results;
         }
         
-        this.totalPages = Math.ceil((response.count || 0) / 20);
+        this.totalPages = Math.ceil((formattedResponse.count || 0) / 20);
         this.hasMoreData = this.currentPage < this.totalPages;
       }
     } catch (error: any) {
@@ -149,9 +166,18 @@ export class AdminLibrosPage implements OnInit {
    * Crear nuevo libro
    */
   async crearLibro() {
+    const proximoId = await this.obtenerProximoId();
+    
     const alert = await this.alertController.create({
       header: 'Registrar Nuevo Libro',
       inputs: [
+        {
+          name: 'id',
+          type: 'text',
+          placeholder: 'ID del libro',
+          value: proximoId.toString(),
+          attributes: { readonly: true, disabled: true }
+        },
         {
           name: 'titulo',
           type: 'text',
@@ -195,6 +221,7 @@ export class AdminLibrosPage implements OnInit {
           min: 1,
           value: 1
         },
+
         {
           name: 'descripcion',
           type: 'textarea',
@@ -205,6 +232,13 @@ export class AdminLibrosPage implements OnInit {
         {
           text: 'Cancelar',
           role: 'cancel'
+        },
+        {
+          text: 'Seleccionar Imagen',
+          handler: async () => {
+            await this.mostrarSelectorImagenes(alert);
+            return false; // No cerrar el modal
+          }
         },
         {
           text: 'Registrar',
@@ -225,13 +259,125 @@ export class AdminLibrosPage implements OnInit {
   }
 
   /**
-   * Validar datos del libro
+   * Obtener el próximo ID disponible
    */
-  private validarDatosLibro(data: any): boolean {
-    return data.titulo?.trim() && 
-           data.autor?.trim() && 
-           data.isbn?.trim() && 
-           data.categoria?.trim() &&
+  private async obtenerProximoId(): Promise<number> {
+    try {
+      if (this.libros && this.libros.length > 0) {
+        const maxId = Math.max(...this.libros.map(libro => libro.id || 0));
+        return maxId + 1;
+      }
+      return 1;
+    } catch (error) {
+      console.error('Error obteniendo próximo ID:', error);
+      return 1;
+    }
+  }
+
+  /**
+   * Obtener imagen por defecto según categoría
+   */
+  private obtenerImagenPorDefecto(categoria: string): string {
+    const imagenesDisponibles = this.obtenerImagenesDisponibles();
+    const imagenPorCategoria = imagenesDisponibles.find(img => 
+      img.categoria.toLowerCase() === categoria.toLowerCase()
+    );
+    return imagenPorCategoria ? imagenPorCategoria.ruta : 'assets/images/book-placeholder.svg';
+  }
+
+  /**
+   * Obtener todas las imágenes SVG disponibles
+   */
+  private obtenerImagenesDisponibles() {
+    return [
+      { nombre: 'Literatura', categoria: 'Literatura', ruta: 'assets/images/book-literature.svg' },
+      { nombre: 'Programación', categoria: 'Programación', ruta: 'assets/images/book-programming.svg' },
+      { nombre: 'Matemáticas', categoria: 'Matemáticas', ruta: 'assets/images/book-mathematics.svg' },
+      { nombre: 'Ciencias', categoria: 'Ciencias', ruta: 'assets/images/book-science.svg' },
+      { nombre: 'Ingeniería', categoria: 'Ingeniería', ruta: 'assets/images/book-engineering.svg' },
+      { nombre: 'Negocios', categoria: 'Negocios', ruta: 'assets/images/book-business.svg' },
+      { nombre: 'Historia', categoria: 'Historia', ruta: 'assets/images/book-history.svg' },
+      { nombre: 'Arte', categoria: 'Arte', ruta: 'assets/images/book-art.svg' },
+      { nombre: 'Psicología', categoria: 'Psicología', ruta: 'assets/images/book-psychology.svg' },
+      { nombre: 'Filosofía', categoria: 'Filosofía', ruta: 'assets/images/book-philosophy.svg' },
+      { nombre: 'Medicina', categoria: 'Medicina', ruta: 'assets/images/book-medicine.svg' },
+      { nombre: 'Derecho', categoria: 'Derecho', ruta: 'assets/images/book-law.svg' },
+      { nombre: 'Genérico', categoria: 'Otros', ruta: 'assets/images/book-placeholder.svg' }
+    ];
+  }
+
+  /**
+    * Mostrar selector de imágenes SVG
+    */
+   async mostrarSelectorImagenes(parentAlert: any) {
+     const imagenesDisponibles = this.obtenerImagenesDisponibles();
+     
+     const alert = await this.alertController.create({
+       header: 'Seleccionar Imagen de Portada',
+       inputs: [
+          {
+            name: 'imagen_seleccionada',
+            type: 'radio' as any,
+            label: 'Genérico 📚',
+            value: 'assets/images/book-placeholder.svg',
+            checked: true
+          },
+          ...imagenesDisponibles.filter(img => img.categoria !== 'Otros').map(imagen => ({
+            name: 'imagen_seleccionada',
+            type: 'radio' as any,
+            label: `${imagen.nombre} ${this.obtenerIconoCategoria(imagen.categoria)}`,
+            value: imagen.ruta
+          }))
+        ],
+       buttons: [
+         {
+           text: 'Cancelar',
+           role: 'cancel'
+         },
+         {
+           text: 'Seleccionar',
+           handler: (data) => {
+             // Guardar la imagen seleccionada en la variable del componente
+             this.imagenSeleccionada = data;
+             const nombreImagen = imagenesDisponibles.find(img => img.ruta === data)?.nombre || 'Genérico';
+             this.mostrarToast(`Imagen seleccionada: ${nombreImagen}`, 'success');
+           }
+         }
+       ]
+     });
+     
+     await alert.present();
+   }
+
+   /**
+    * Obtener icono para cada categoría
+    */
+   private obtenerIconoCategoria(categoria: string): string {
+     const iconos: { [key: string]: string } = {
+       'Literatura': '📖',
+       'Programación': '💻',
+       'Matemáticas': '📊',
+       'Ciencias': '🔬',
+       'Ingeniería': '⚙️',
+       'Negocios': '💼',
+       'Historia': '🏛️',
+       'Arte': '🎨',
+       'Psicología': '🧠',
+       'Filosofía': '🤔',
+       'Medicina': '⚕️',
+       'Derecho': '⚖️'
+     };
+     return iconos[categoria] || '📚';
+   }
+
+   /**
+    * Validar datos del libro
+    */
+   private validarDatosLibro(data: any): boolean {
+     return data.titulo?.trim() && 
+            data.autor?.trim() && 
+            data.isbn?.trim() && 
+            data.categoria?.trim() &&
            data.cantidad_total > 0;
   }
 
@@ -245,22 +391,29 @@ export class AdminLibrosPage implements OnInit {
     await loading.present();
 
     try {
-      const libroData: LibroRegistro = {
+      const libroData: any = {
         titulo: data.titulo.trim(),
         autor: data.autor.trim(),
         isbn: data.isbn.trim(),
         categoria: data.categoria.trim(),
         editorial: data.editorial?.trim() || '',
-        anio_publicacion: data.anio_publicacion || null,
+        año_publicacion: data.anio_publicacion || null,
+        ubicacion: data.ubicacion?.trim() || 'A1-001',
         cantidad_total: parseInt(data.cantidad_total) || 1,
         descripcion: data.descripcion?.trim() || '',
+        imagen_portada: this.imagenSeleccionada || this.obtenerImagenPorDefecto(data.categoria?.trim() || ''),
         estado: 'Disponible'
       };
+      
+      console.log('Datos del formulario:', data);
+      console.log('Datos procesados para enviar:', libroData);
 
-      // await this.bibliotecaService.registrarLibro(libroData).toPromise(); // TODO: Implementar método
+      // Llamar al servicio real para registrar el libro
+      await this.bibliotecaService.registrarLibro(libroData).toPromise();
       
       await loading.dismiss();
       await this.mostrarToast('Libro registrado exitosamente', 'success');
+      this.imagenSeleccionada = 'assets/images/book-placeholder.svg'; // Reiniciar para el próximo registro
       this.cargarLibros();
 
     } catch (error: any) {

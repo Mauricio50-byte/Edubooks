@@ -1,5 +1,5 @@
 # libros/views.py
-from rest_framework import generics, status, permissions
+from rest_framework import generics, permissions, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
@@ -16,7 +16,7 @@ from .serializers import (
 from usuarios.permissions import IsAdministrador, IsDocente, IsEstudiante
 
 class StandardResultsSetPagination(PageNumberPagination):
-    page_size = 10
+    page_size = 50
     page_size_query_param = 'page_size'
     max_page_size = 100
 
@@ -62,6 +62,17 @@ class LibroCreateView(generics.CreateAPIView):
     queryset = Libro.objects.all()
     serializer_class = LibroSerializer
     permission_classes = [permissions.IsAuthenticated, IsAdministrador]
+    
+    def create(self, request, *args, **kwargs):
+        print(f"Datos recibidos para crear libro: {request.data}")
+        serializer = self.get_serializer(data=request.data)
+        if not serializer.is_valid():
+            print(f"Errores de validación: {serializer.errors}")
+            return Response(serializer.errors, status=400)
+        
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=201, headers=headers)
 
 class LibroUpdateView(generics.UpdateAPIView):
     """Actualización de libros (solo administradores)"""
@@ -712,4 +723,13 @@ def dashboard_sanciones(request):
             'prestamos_vencidos_sin_sancion': prestamos_vencidos_sin_sancion
         },
         'usuarios_con_sanciones': list(usuarios_con_sanciones)
+    })
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def obtener_categorias(request):
+    """Obtener todas las categorías únicas de libros"""
+    categorias = Libro.objects.values_list('categoria', flat=True).distinct().order_by('categoria')
+    return Response({
+        'categorias': list(categorias)
     })

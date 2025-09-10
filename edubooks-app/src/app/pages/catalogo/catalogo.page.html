@@ -38,13 +38,9 @@
           placeholder="Seleccionar Categoría"
           interface="action-sheet"
           class="category-select">
-          <ion-select-option value="Todas">📚 Todas las Categorías</ion-select-option>
-          <ion-select-option value="Programación y Desarrollo">💻 Programación y Desarrollo</ion-select-option>
-          <ion-select-option value="Matemáticas y Estadística">📊 Matemáticas y Estadística</ion-select-option>
-          <ion-select-option value="Ciencias Naturales">🔬 Ciencias Naturales</ion-select-option>
-          <ion-select-option value="Literatura y Humanidades">📖 Literatura y Humanidades</ion-select-option>
-          <ion-select-option value="Ingeniería">⚙️ Ingeniería</ion-select-option>
-          <ion-select-option value="Administración y Negocios">💼 Administración y Negocios</ion-select-option>
+          <ion-select-option *ngFor="let categoria of categorias" [value]="categoria">
+            {{ getCategoriaIcon(categoria) }} {{ categoria }}
+          </ion-select-option>
         </ion-select>
       </ion-col>
       <ion-col size="12" size-md="6">
@@ -68,27 +64,7 @@
       <ion-chip 
         [color]="categoriaSeleccionada === 'Todas' ? 'primary' : 'medium'"
         (click)="filtrarPorCategoria('Todas')">
-        <ion-label>Todas</ion-label>
-      </ion-chip>
-      <ion-chip 
-        [color]="categoriaSeleccionada === 'Programación y Desarrollo' ? 'primary' : 'medium'"
-        (click)="filtrarPorCategoria('Programación y Desarrollo')">
-        <ion-label>💻 Programación</ion-label>
-      </ion-chip>
-      <ion-chip 
-        [color]="categoriaSeleccionada === 'Matemáticas y Estadística' ? 'primary' : 'medium'"
-        (click)="filtrarPorCategoria('Matemáticas y Estadística')">
-        <ion-label>📊 Matemáticas</ion-label>
-      </ion-chip>
-      <ion-chip 
-        [color]="categoriaSeleccionada === 'Ingeniería' ? 'primary' : 'medium'"
-        (click)="filtrarPorCategoria('Ingeniería')">
-        <ion-label>⚙️ Ingeniería</ion-label>
-      </ion-chip>
-      <ion-chip 
-        [color]="categoriaSeleccionada === 'Ciencias Naturales' ? 'primary' : 'medium'"
-        (click)="filtrarPorCategoria('Ciencias Naturales')">
-        <ion-label>🔬 Ciencias</ion-label>
+        <ion-label>📚 Todas</ion-label>
       </ion-chip>
     </div>
   </div>

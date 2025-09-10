@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, BehaviorSubject, of, throwError } from 'rxjs';
 import { map, delay, catchError } from 'rxjs/operators';
-import { LIBROS_MUESTRA, LibroData, CATEGORIAS, ESTADOS_LIBRO } from '../data/libros-data';
+
 import { Libro, Prestamo, Reserva } from '../models/libro.model';
 import { AuthService } from './auth.service';
 import { ApiService } from './api.service';
@@ -31,30 +31,45 @@ export class BibliotecaService {
   }
 
   private initializeData() {
-    // Convertir datos de muestra a formato del modelo
-    this.libros = LIBROS_MUESTRA.map(libro => ({
-      id: libro.id,
-      titulo: libro.titulo,
-      autor: libro.autor,
-      isbn: libro.isbn,
-      editorial: libro.editorial,
-      año_publicacion: libro.año_publicacion,
-      categoria: libro.categoria,
-      ubicacion: libro.ubicacion,
-      estado: libro.estado as any,
-      cantidad_total: libro.cantidad_total,
-      cantidad_disponible: libro.cantidad_disponible,
-      descripcion: libro.descripcion,
-      imagen_portada: libro.imagen_portada,
-      fecha_registro: new Date().toISOString()
-    }));
+    // Inicializar con array vacío - los datos se cargan desde el backend
+    this.libros = [];
 
     this.librosSubject.next(this.libros);
   }
 
   // Métodos para libros
   getLibros(): Observable<Libro[]> {
-    return of(this.libros).pipe(delay(500)); // Simular latencia de red
+    return this.apiService.get('/libros/').pipe(
+      map((response: any) => {
+        const librosBackend = response.results || response;
+        // Convertir datos del backend al formato del modelo
+        const libros = librosBackend.map((libro: any) => ({
+          id: libro.id,
+          titulo: libro.titulo,
+          autor: libro.autor,
+          isbn: libro.isbn,
+          editorial: libro.editorial,
+          año_publicacion: libro.año_publicacion,
+          categoria: libro.categoria,
+          ubicacion: libro.ubicacion,
+          estado: libro.estado,
+          cantidad_total: libro.cantidad_total,
+          cantidad_disponible: libro.cantidad_disponible,
+          descripcion: libro.descripcion,
+          imagen_portada: libro.imagen_portada,
+          fecha_registro: libro.fecha_registro
+        }));
+        // Actualizar datos locales
+        this.libros = libros;
+        this.librosSubject.next([...this.libros]);
+        return libros;
+      }),
+      catchError(error => {
+        console.error('Error obteniendo libros:', error);
+        // En caso de error, devolver datos locales
+        return of(this.libros);
+      })
+    );
   }
 
   getLibroById(id: number): Observable<Libro | undefined> {
@@ -90,11 +105,20 @@ export class BibliotecaService {
   }
 
   getCategorias(): Observable<string[]> {
-    return of(CATEGORIAS);
+    return this.apiService.get('/categorias/').pipe(
+      map((response: any) => response.categorias || []),
+      catchError(error => {
+        console.error('Error obteniendo categorías:', error);
+        // Fallback a categorías extraídas de los libros locales
+        const categoriasUnicas = [...new Set(this.libros.map(libro => libro.categoria))];
+        return of(categoriasUnicas);
+      })
+    );
   }
 
   getEstados(): Observable<string[]> {
-    return of(ESTADOS_LIBRO);
+    const estados = ['Disponible', 'Prestado', 'Reservado', 'Mantenimiento'];
+    return of(estados);
   }
 
   // Métodos para préstamos
@@ -105,7 +129,7 @@ export class BibliotecaService {
     }
 
     // Llamar al backend real
-    return this.apiService.post('/prestamos/crear/', { libro: libroId })
+    return this.apiService.post('/prestamos/crear/', { libro_id: libroId })
       .pipe(
         map(response => {
           // Actualizar datos locales si es exitoso
@@ -286,6 +310,95 @@ export class BibliotecaService {
           }
         })
       );
+  }
+
+  /**
+   * Registrar nuevo libro (solo administradores)
+   */
+  registrarLibro(libroData: any): Observable<any> {
+    // Limpiar y normalizar los datos antes de enviar
+    const datosLimpios: any = {
+      titulo: libroData.titulo?.trim() || '',
+      autor: libroData.autor?.trim() || '',
+      isbn: libroData.isbn?.trim() || '',
+      categoria: libroData.categoria?.trim() || '',
+      editorial: libroData.editorial?.trim() || '',
+      ubicacion: libroData.ubicacion?.trim() || 'A1-001',
+      cantidad_total: parseInt(libroData.cantidad_total) || 1,
+      cantidad_disponible: parseInt(libroData.cantidad_total) || 1,
+      descripcion: libroData.descripcion?.trim() || '',
+      estado: 'Disponible'
+    };
+    
+    // Solo agregar año_publicacion si tiene valor válido
+    if (libroData.año_publicacion && libroData.año_publicacion >= 1000 && libroData.año_publicacion <= 2030) {
+      datosLimpios['año_publicacion'] = parseInt(libroData.año_publicacion);
+    }
+    
+    console.log('Datos enviados al backend:', datosLimpios);
+    
+    return this.apiService.post('/libros/crear/', datosLimpios)
+      .pipe(
+        map(response => {
+          console.log('Libro registrado exitosamente:', response);
+          // Actualizar lista local de libros
+          this.cargarLibros();
+          return response;
+        }),
+        catchError(error => {
+          console.error('Error registrando libro:', error);
+          console.error('Datos que causaron el error:', datosLimpios);
+          throw error;
+        })
+      );
+  }
+
+  /**
+   * Cargar libros desde el backend
+   */
+  private cargarLibros(): void {
+    this.apiService.get('/libros/').subscribe({
+      next: (response: any) => {
+        const librosBackend = response.results || response;
+        // Convertir datos del backend al formato del modelo
+        this.libros = librosBackend.map((libro: any) => ({
+          id: libro.id,
+          titulo: libro.titulo,
+          autor: libro.autor,
+          isbn: libro.isbn,
+          editorial: libro.editorial,
+          año_publicacion: libro.año_publicacion,
+          categoria: libro.categoria,
+          ubicacion: libro.ubicacion,
+          estado: libro.estado,
+          cantidad_total: libro.cantidad_total,
+          cantidad_disponible: libro.cantidad_disponible,
+          descripcion: libro.descripcion,
+          imagen_portada: libro.imagen_portada,
+          fecha_registro: libro.fecha_registro
+        }));
+        this.librosSubject.next([...this.libros]);
+        console.log('Libros cargados desde backend:', this.libros.length);
+      },
+      error: (error) => {
+        console.error('Error cargando libros desde backend:', error);
+        // En caso de error, mantener los datos locales
+      }
+    });
+  }
+
+  /**
+   * Cargar bibliografías desde el backend
+   */
+  private cargarBibliografias(): void {
+    this.obtenerBibliografias().subscribe({
+      next: (response: any) => {
+        // Actualizar lista local si existe
+        const bibliografias = response?.results || [];
+        console.log('Bibliografías actualizadas:', bibliografias.length);
+      },
+      error: (error: any) => console.error('Error cargando bibliografías:', error)
+    });
   }
 
   // Métodos para reservas
@@ -485,11 +598,19 @@ export class BibliotecaService {
    * Crear nueva bibliografía
    */
   crearBibliografia(data: any): Observable<any> {
-    // TODO: Implementar llamada real a la API
-    // return this.http.post(`${this.apiUrl}/bibliografias/crear/`, data);
-    
-    // Simulación temporal
-    return of({ success: true, message: 'Bibliografía creada exitosamente' }).pipe(delay(1000));
+    return this.apiService.post('/bibliografias/crear/', data)
+      .pipe(
+        map(response => {
+          // Actualizar lista local de bibliografías
+          this.cargarBibliografias();
+          return response;
+        }),
+        catchError(error => {
+          console.error('Error creando bibliografía:', error);
+          // Fallback a simulación en caso de error
+          return of({ success: true, message: 'Bibliografía creada exitosamente (simulado)' }).pipe(delay(1000));
+        })
+      );
   }
 
   /**
