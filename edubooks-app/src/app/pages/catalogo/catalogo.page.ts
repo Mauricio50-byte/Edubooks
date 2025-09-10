@@ -99,7 +99,7 @@ export class CatalogoPage implements OnInit {
     } catch (error) {
       console.error('Error buscando libros:', error);
       const toast = await this.toastController.create({
-        message: 'Error al cargar los libros. Intenta nuevamente.',
+        message: 'Error al cargar los libros. Verifica tu conexión.',
         duration: 3000,
         color: 'danger'
       });

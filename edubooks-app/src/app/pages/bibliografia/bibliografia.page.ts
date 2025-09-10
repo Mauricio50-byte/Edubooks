@@ -28,7 +28,7 @@ export class BibliografiaPage implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.usuarioActual = this.authService.getCurrentUser();
+    this.usuarioActual = this.authService.currentUserValue;
     this.cargarBibliografias();
     this.cargarLibrosDisponibles();
   }
@@ -43,7 +43,7 @@ export class BibliografiaPage implements OnInit {
     try {
       const response = await this.bibliotecaService.obtenerMisBibliografias().toPromise();
       
-      if (response?.success && response.data) {
+      if (response?.data && Array.isArray(response.data)) {
         this.bibliografias = response.data;
       } else {
         this.bibliografias = [];
@@ -51,6 +51,12 @@ export class BibliografiaPage implements OnInit {
     } catch (error: any) {
       this.error = error.message || 'Error al cargar las bibliografías';
       console.error('Error cargando bibliografías:', error);
+      const toast = await this.toastController.create({
+        message: 'Error al cargar las bibliografías. Verifica tu conexión.',
+        duration: 3000,
+        color: 'danger'
+      });
+      await toast.present();
     } finally {
       this.isLoading = false;
     }
@@ -105,6 +111,7 @@ export class BibliografiaPage implements OnInit {
           handler: async (data) => {
             if (data.curso && data.curso.trim()) {
               await this.procesarCreacionBibliografia(data);
+              return true;
             } else {
               this.mostrarToast('El nombre del curso es requerido', 'warning');
               return false;
@@ -173,6 +180,7 @@ export class BibliografiaPage implements OnInit {
           handler: async (data) => {
             if (data.curso && data.curso.trim()) {
               await this.procesarEdicionBibliografia(bibliografia.id, data);
+              return true;
             } else {
               this.mostrarToast('El nombre del curso es requerido', 'warning');
               return false;

@@ -71,13 +71,29 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
         return f"{self.nombre} {self.apellido} ({self.email})"
     
     def clean(self):
-        # Validaciones específicas según el rol
-        if self.rol == 'Estudiante' and not self.matricula:
-            from django.core.exceptions import ValidationError
-            raise ValidationError('Los estudiantes deben tener matrícula')
-        elif self.rol == 'Docente' and not self.numero_empleado:
-            from django.core.exceptions import ValidationError
-            raise ValidationError('Los docentes deben tener número de empleado')
+        from django.core.exceptions import ValidationError
+        
+        # Limpiar campos según el rol
+        if self.rol == 'Estudiante':
+            if not self.matricula:
+                raise ValidationError('Los estudiantes deben tener matrícula')
+            # Limpiar campos que no corresponden a estudiantes
+            self.numero_empleado = None
+            self.departamento = None
+            self.area = None
+        elif self.rol == 'Docente':
+            if not self.numero_empleado:
+                raise ValidationError('Los docentes deben tener número de empleado')
+            # Limpiar campos que no corresponden a docentes
+            self.matricula = None
+            self.carrera = None
+            self.area = None
+        elif self.rol == 'Administrador':
+            # Limpiar campos que no corresponden a administradores
+            self.matricula = None
+            self.carrera = None
+            self.numero_empleado = None
+            self.departamento = None
     
     def save(self, *args, **kwargs):
         self.full_clean()

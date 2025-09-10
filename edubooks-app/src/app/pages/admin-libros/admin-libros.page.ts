@@ -35,7 +35,7 @@ export class AdminLibrosPage implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.usuarioActual = this.authService.getCurrentUser();
+    this.usuarioActual = this.authService.currentUserValue;
     
     // Verificar que el usuario sea administrador
     if (!this.esAdministrador) {
@@ -108,8 +108,8 @@ export class AdminLibrosPage implements OnInit {
   async cargarCategorias() {
     try {
       const response = await this.bibliotecaService.obtenerCategorias().toPromise();
-      if (response?.categorias) {
-        this.categorias = response.categorias;
+      if (response?.data) {
+        this.categorias = response.data;
       }
     } catch (error: any) {
       console.error('Error cargando categorías:', error);
@@ -209,6 +209,7 @@ export class AdminLibrosPage implements OnInit {
           handler: async (data) => {
             if (this.validarDatosLibro(data)) {
               await this.procesarCreacionLibro(data);
+              return true;
             } else {
               this.mostrarToast('Por favor completa todos los campos requeridos', 'warning');
               return false;
@@ -372,6 +373,7 @@ export class AdminLibrosPage implements OnInit {
           handler: async (data) => {
             if (this.validarDatosLibro(data)) {
               await this.procesarEdicionLibro(libro.id, data);
+              return true;
             } else {
               this.mostrarToast('Por favor completa todos los campos requeridos', 'warning');
               return false;

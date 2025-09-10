@@ -59,6 +59,7 @@ export interface Bibliografia {
     libros: Libro[];
     fecha_creacion: string;
     activa: boolean;
+    es_publica: boolean;
 }
 
 export interface Sancion {
@@ -104,9 +105,10 @@ export interface LibroRegistro {
     editorial?: string;
     año_publicacion?: number;
     categoria: string;
-    ubicacion: string;
+    ubicacion?: string;
     cantidad_total: number;
     descripcion?: string;
+    estado?: string;
 }
 
 // Response types

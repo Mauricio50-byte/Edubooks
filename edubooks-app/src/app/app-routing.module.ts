@@ -35,19 +35,23 @@ const routes: Routes = [
   },
   {
     path: 'catalogo',
-    loadChildren: () => import('./pages/catalogo/catalogo.module').then( m => m.CatalogoPageModule)
+    loadChildren: () => import('./pages/catalogo/catalogo.module').then( m => m.CatalogoPageModule),
+    canActivate: [AuthGuard] // Solo accesible si está autenticado
   },
   {
     path: 'detalle-libro',
-    loadChildren: () => import('./pages/detalle-libro/detalle-libro.module').then( m => m.DetalleLibroPageModule)
+    loadChildren: () => import('./pages/detalle-libro/detalle-libro.module').then( m => m.DetalleLibroPageModule),
+    canActivate: [AuthGuard] // Solo accesible si está autenticado
   },
   {
     path: 'bibliografia',
-    loadChildren: () => import('./pages/bibliografia/bibliografia.module').then( m => m.BibliografiaPageModule)
+    loadChildren: () => import('./pages/bibliografia/bibliografia.module').then( m => m.BibliografiaPageModule),
+    canActivate: [AuthGuard] // Solo accesible si está autenticado
   },
   {
     path: 'admin-libros',
-    loadChildren: () => import('./pages/admin-libros/admin-libros.module').then( m => m.AdminLibrosPageModule)
+    loadChildren: () => import('./pages/admin-libros/admin-libros.module').then( m => m.AdminLibrosPageModule),
+    canActivate: [AuthGuard] // Solo accesible si está autenticado
   }
 ];
 

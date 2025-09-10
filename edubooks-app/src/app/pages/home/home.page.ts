@@ -49,4 +49,39 @@ export class HomePage implements OnInit {
 
     await alert.present();
   }
+
+  /**
+   * Navegar a una ruta específica
+   */
+  navigateTo(route: string) {
+    this.router.navigate([route]);
+  }
+
+  /**
+   * Verificar si el usuario es Administrador
+   */
+  isAdministrador(): boolean {
+    return this.currentUser?.rol === 'Administrador';
+  }
+
+  /**
+   * Verificar si el usuario es Estudiante o Docente
+   */
+  isEstudianteOrDocente(): boolean {
+    return this.currentUser?.rol === 'Estudiante' || this.currentUser?.rol === 'Docente';
+  }
+
+  /**
+   * Verificar si el usuario es Estudiante
+   */
+  isEstudiante(): boolean {
+    return this.currentUser?.rol === 'Estudiante';
+  }
+
+  /**
+   * Verificar si el usuario es Docente
+   */
+  isDocente(): boolean {
+    return this.currentUser?.rol === 'Docente';
+  }
 }

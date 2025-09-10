@@ -174,7 +174,7 @@ export class BibliotecaService {
   /**
    * Crear nueva bibliografía
    */
-  crearBibliografia(bibliografiaData: { curso: string; descripcion?: string; libros?: number[] }): Observable<ApiResponse<Bibliografia>> {
+  crearBibliografia(bibliografiaData: { curso: string; descripcion?: string; libros?: number[]; es_publica?: boolean }): Observable<ApiResponse<Bibliografia>> {
     return this.apiService.post<ApiResponse<Bibliografia>>('/bibliografias/crear/', bibliografiaData);
   }
 
