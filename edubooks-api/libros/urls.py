@@ -13,12 +13,23 @@ urlpatterns = [
     path('libros/<int:pk>/eliminar/', views.LibroDeleteView.as_view(), name='libro-delete'),
     path('categorias/', views.obtener_categorias, name='categorias'),
     
+    # URLs de Google Books API
+    path('google-books/imagen/', views.obtener_imagen_google_books, name='google-books-imagen'),
+    path('google-books/buscar/', views.buscar_libros_google_books, name='google-books-buscar'),
+    path('google-books/buscar-isbn/', views.buscar_libro_por_isbn, name='google-books-buscar-isbn'),
+    path('google-books/buscar-titulo/', views.buscar_libro_por_titulo, name='google-books-buscar-titulo'),
+    
     # URLs de Préstamos
     path('prestamos/', views.PrestamoListView.as_view(), name='prestamo-list'),
     path('prestamos/crear/', views.PrestamoCreateView.as_view(), name='prestamo-create'),
     path('prestamos/<int:pk>/', views.PrestamoDetailView.as_view(), name='prestamo-detail'),
     path('prestamos/<int:prestamo_id>/devolver/', views.devolver_libro, name='devolver-libro'),
     path('prestamos/<int:prestamo_id>/renovar/', views.renovar_prestamo, name='renovar-prestamo'),
+    
+    # URLs de Aprobación de Préstamos
+    path('prestamos/solicitudes-pendientes/', views.solicitudes_pendientes, name='solicitudes-pendientes'),
+    path('prestamos/<int:prestamo_id>/aprobar/', views.aprobar_prestamo, name='aprobar-prestamo'),
+    path('prestamos/<int:prestamo_id>/rechazar/', views.rechazar_prestamo, name='rechazar-prestamo'),
     
     # URLs de Reservas
     path('reservas/', views.ReservaListView.as_view(), name='reserva-list'),
@@ -43,11 +54,14 @@ urlpatterns = [
     # URLs de Estadísticas y Reportes
     path('estadisticas/', views.estadisticas_biblioteca, name='estadisticas'),
     path('prestamos-vencidos/', views.prestamos_vencidos, name='prestamos-vencidos'),
-    
-    # URLs de Gestión de Sanciones
     path('procesar-prestamos-vencidos/', views.procesar_prestamos_vencidos, name='procesar-prestamos-vencidos'),
     path('sanciones-pendientes/', views.sanciones_pendientes, name='sanciones-pendientes'),
     path('sanciones/<int:sancion_id>/aprobar/', views.aprobar_sancion, name='aprobar-sancion'),
     path('sanciones/<int:sancion_id>/rechazar/', views.rechazar_sancion, name='rechazar-sancion'),
     path('dashboard-sanciones/', views.dashboard_sanciones, name='dashboard-sanciones'),
+    
+    # URLs de Notificaciones
+    path('notificaciones/', views.obtener_notificaciones, name='obtener-notificaciones'),
+    path('notificaciones/<int:notificacion_id>/marcar-leida/', views.marcar_notificacion_leida, name='marcar-notificacion-leida'),
+    path('notificaciones/marcar-todas-leidas/', views.marcar_todas_leidas, name='marcar-todas-leidas'),
 ]

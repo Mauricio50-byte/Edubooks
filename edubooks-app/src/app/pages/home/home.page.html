@@ -93,6 +93,24 @@
             <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
           </ion-item>
 
+          <ion-item button (click)="navigateTo('/historial-prestamos')" *ngIf="isEstudianteOrDocente()">
+            <ion-icon name="time-outline" slot="start" color="secondary"></ion-icon>
+            <ion-label>
+              <h3>Historial de Préstamos</h3>
+              <p>Ver mi historial de préstamos</p>
+            </ion-label>
+            <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
+          </ion-item>
+
+          <ion-item button (click)="navigateTo('/sanciones')" *ngIf="isEstudianteOrDocente()">
+            <ion-icon name="warning-outline" slot="start" color="warning"></ion-icon>
+            <ion-label>
+              <h3>Mis Sanciones</h3>
+              <p>Ver y pagar multas pendientes</p>
+            </ion-label>
+            <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
+          </ion-item>
+
           <!-- Opciones solo para Administradores -->
           <ion-item button (click)="navigateTo('/admin-libros')" *ngIf="isAdministrador()">
             <ion-icon name="settings-outline" slot="start" color="tertiary"></ion-icon>
@@ -117,6 +135,25 @@
             <ion-label>
               <h3>Administrar Préstamos</h3>
               <p>Gestionar préstamos y devoluciones</p>
+            </ion-label>
+            <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
+          </ion-item>
+
+          <ion-item button (click)="navigateTo('/admin-solicitudes')" *ngIf="isAdministrador()">
+            <ion-icon name="document-text-outline" slot="start" color="tertiary"></ion-icon>
+            <ion-label>
+              <h3>Solicitudes Pendientes</h3>
+              <p>Aprobar o rechazar solicitudes de préstamo</p>
+            </ion-label>
+            <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
+          </ion-item>
+
+          <!-- Notificaciones para todos los usuarios -->
+          <ion-item button (click)="navigateTo('/notificaciones')">
+            <ion-icon name="notifications-outline" slot="start" color="success"></ion-icon>
+            <ion-label>
+              <h3>Notificaciones</h3>
+              <p>Ver mensajes y alertas del sistema</p>
             </ion-label>
             <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
           </ion-item>

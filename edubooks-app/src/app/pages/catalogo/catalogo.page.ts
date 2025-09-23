@@ -173,9 +173,9 @@ export class CatalogoPage implements OnInit {
         await loading.dismiss();
         
         const toast = await this.toastController.create({
-          message: `¡Préstamo exitoso! Tienes 15 días para devolver "${libro.titulo}".`,
+          message: `¡Solicitud enviada! Tu petición de préstamo para "${libro.titulo}" está pendiente de aprobación.`,
           duration: 4000,
-          color: 'success',
+          color: 'warning',
           position: 'top'
         });
         await toast.present();
@@ -247,10 +247,20 @@ export class CatalogoPage implements OnInit {
   }
 
   puedePrestar(libro: Libro): boolean {
-    return libro.cantidad_disponible > 0;
+    // No puede prestar si ya tiene un préstamo activo de este libro
+    if (libro.usuario_tiene_prestamo) {
+      return false;
+    }
+    // Puede prestar si hay copias disponibles y el libro no está en mantenimiento
+    return libro.cantidad_disponible > 0 && libro.estado !== 'Mantenimiento';
   }
 
   puedeReservar(libro: Libro): boolean {
+    // No puede reservar si ya tiene un préstamo activo de este libro
+    if (libro.usuario_tiene_prestamo) {
+      return false;
+    }
+    // Puede reservar si no hay copias disponibles y el libro no está en mantenimiento
     return libro.cantidad_disponible === 0 && libro.estado !== 'Mantenimiento';
   }
 }

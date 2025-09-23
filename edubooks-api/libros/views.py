@@ -6,12 +6,12 @@ from rest_framework.pagination import PageNumberPagination
 from django.db.models import Q, Count
 from django.utils import timezone
 from datetime import timedelta
-from .models import Libro, Prestamo, Reserva, Bibliografia, Sancion
+from .models import Libro, Prestamo, Reserva, Bibliografia, Sancion, Notificacion
 from .serializers import (
     LibroSerializer, LibroDetalleSerializer, LibroListSerializer,
     PrestamoSerializer, PrestamoListSerializer,
     ReservaSerializer, ReservaListSerializer,
-    BibliografiaSerializer, SancionSerializer
+    BibliografiaSerializer, SancionSerializer, NotificacionSerializer
 )
 from usuarios.permissions import IsAdministrador, IsDocente, IsEstudiante
 
@@ -121,6 +121,19 @@ class PrestamoCreateView(generics.CreateAPIView):
     serializer_class = PrestamoSerializer
     permission_classes = [permissions.IsAuthenticated]
     
+    def create(self, request, *args, **kwargs):
+        print(f"Datos recibidos para crear préstamo: {request.data}")
+        print(f"Usuario: {request.user}")
+        
+        serializer = self.get_serializer(data=request.data)
+        if not serializer.is_valid():
+            print(f"Errores de validación en préstamo: {serializer.errors}")
+            return Response(serializer.errors, status=400)
+        
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=201, headers=headers)
+    
     def perform_create(self, serializer):
         from rest_framework import serializers
         # Verificar si el usuario tiene sanciones activas
@@ -160,12 +173,12 @@ def devolver_libro(request, prestamo_id):
             )
         
         prestamo.estado = 'Devuelto'
-        prestamo.fecha_devolucion_real = timezone.now().date()
+        prestamo.fecha_devolucion_real = timezone.now()
         prestamo.save()
         
         # Verificar si hay retraso y aplicar sanción si es necesario
-        if prestamo.fecha_devolucion_real > prestamo.fecha_devolucion_esperada:
-            dias_retraso = (prestamo.fecha_devolucion_real - prestamo.fecha_devolucion_esperada).days
+        if prestamo.fecha_devolucion_real.date() > prestamo.fecha_devolucion_esperada:
+            dias_retraso = (prestamo.fecha_devolucion_real.date() - prestamo.fecha_devolucion_esperada).days
             monto_multa = dias_retraso * 5000  # $5000 por día de retraso
             
             Sancion.objects.create(
@@ -185,6 +198,108 @@ def devolver_libro(request, prestamo_id):
             {'error': 'Préstamo no encontrado'},
             status=status.HTTP_404_NOT_FOUND
         )
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated, IsAdministrador])
+def aprobar_prestamo(request, prestamo_id):
+    """Aprobar una solicitud de préstamo pendiente"""
+    try:
+        prestamo = Prestamo.objects.get(id=prestamo_id, estado='Pendiente')
+    except Prestamo.DoesNotExist:
+        return Response({'error': 'Solicitud de préstamo no encontrada o ya procesada'}, status=404)
+    
+    # Verificar disponibilidad del libro
+    if prestamo.libro.cantidad_disponible <= 0:
+        return Response({'error': 'El libro ya no está disponible'}, status=400)
+    
+    # Aprobar el préstamo (la disponibilidad se actualiza automáticamente en el modelo)
+    prestamo.estado = 'Activo'
+    prestamo.aprobado_por = request.user
+    prestamo.fecha_aprobacion = timezone.now()
+    prestamo.save()
+    
+    # Crear notificación para el usuario
+    Notificacion.objects.create(
+        usuario=prestamo.usuario,
+        tipo='prestamo',
+        titulo='Préstamo Aprobado',
+        mensaje=f'Tu solicitud de préstamo para "{prestamo.libro.titulo}" ha sido aprobada. Puedes recoger el libro.',
+        relacionado_id=prestamo.id
+    )
+    
+    return Response({
+        'message': 'Préstamo aprobado exitosamente',
+        'prestamo_id': prestamo.id,
+        'usuario': f"{prestamo.usuario.nombre} {prestamo.usuario.apellido}",
+        'libro': prestamo.libro.titulo
+    })
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated, IsAdministrador])
+def rechazar_prestamo(request, prestamo_id):
+    """Rechazar una solicitud de préstamo pendiente"""
+    try:
+        prestamo = Prestamo.objects.get(id=prestamo_id, estado='Pendiente')
+    except Prestamo.DoesNotExist:
+        return Response({'error': 'Solicitud de préstamo no encontrada o ya procesada'}, status=404)
+    
+    motivo = request.data.get('motivo', 'No especificado')
+    
+    # Rechazar el préstamo
+    prestamo.estado = 'Rechazado'
+    prestamo.aprobado_por = request.user
+    prestamo.motivo_rechazo = motivo
+    prestamo.fecha_aprobacion = timezone.now()
+    prestamo.save()
+    
+    # Crear notificación para el usuario
+    Notificacion.objects.create(
+        usuario=prestamo.usuario,
+        tipo='prestamo',
+        titulo='Préstamo Rechazado',
+        mensaje=f'Tu solicitud de préstamo para "{prestamo.libro.titulo}" ha sido rechazada. Motivo: {motivo}',
+        relacionado_id=prestamo.id
+    )
+    
+    return Response({
+        'message': 'Préstamo rechazado exitosamente',
+        'prestamo_id': prestamo.id,
+        'usuario': f"{prestamo.usuario.nombre} {prestamo.usuario.apellido}",
+        'libro': prestamo.libro.titulo,
+        'motivo': motivo
+    })
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated, IsAdministrador])
+def solicitudes_pendientes(request):
+    """Obtener todas las solicitudes de préstamo pendientes"""
+    solicitudes = Prestamo.objects.filter(estado='Pendiente').select_related('libro', 'usuario')
+    
+    data = []
+    for solicitud in solicitudes:
+        data.append({
+            'id': solicitud.id,
+            'libro': {
+                'id': solicitud.libro.id,
+                'titulo': solicitud.libro.titulo,
+                'autor': solicitud.libro.autor,
+                'imagen_portada': solicitud.libro.imagen_portada
+            },
+            'usuario': {
+                'id': solicitud.usuario.id,
+                'nombre': solicitud.usuario.nombre,
+                'apellido': solicitud.usuario.apellido,
+                'email': solicitud.usuario.email,
+                'rol': solicitud.usuario.rol
+            },
+            'fecha_solicitud': solicitud.fecha_prestamo,
+            'observaciones': solicitud.observaciones
+        })
+    
+    return Response({
+        'count': len(data),
+        'solicitudes': data
+    })
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
@@ -725,11 +840,199 @@ def dashboard_sanciones(request):
         'usuarios_con_sanciones': list(usuarios_con_sanciones)
     })
 
+# Función obtener_categorias movida arriba para evitar duplicación
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def obtener_imagen_google_books(request):
+    """Obtener imagen de portada desde Google Books API"""
+    from .google_books_service import GoogleBooksService
+    
+    titulo = request.data.get('titulo', '').strip()
+    autor = request.data.get('autor', '').strip()
+    categoria = request.data.get('categoria', '').strip()
+    
+    if not titulo:
+        return Response(
+            {'error': 'El título es requerido'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    try:
+        # Buscar imagen en Google Books
+        imagen_url = GoogleBooksService.obtener_imagen_por_categoria_y_titulo(
+            categoria=categoria,
+            titulo=titulo,
+            autor=autor
+        )
+        
+        if imagen_url:
+            return Response({
+                'imagen_portada': imagen_url,
+                'fuente': 'Google Books API'
+            })
+        else:
+            return Response(
+                {'error': 'No se encontró imagen para este libro'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+            
+    except Exception as e:
+        return Response(
+            {'error': f'Error al buscar imagen: {str(e)}'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+# Vistas para Notificaciones
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
-def obtener_categorias(request):
-    """Obtener todas las categorías únicas de libros"""
-    categorias = Libro.objects.values_list('categoria', flat=True).distinct().order_by('categoria')
+def obtener_notificaciones(request):
+    """Obtener notificaciones del usuario autenticado"""
+    notificaciones = Notificacion.objects.filter(usuario=request.user)
+    
+    # Filtrar por leídas/no leídas si se especifica
+    leidas = request.query_params.get('leidas')
+    if leidas is not None:
+        leidas_bool = leidas.lower() == 'true'
+        notificaciones = notificaciones.filter(leida=leidas_bool)
+    
+    # Limitar cantidad
+    limit = request.query_params.get('limit', 20)
+    try:
+        limit = int(limit)
+        notificaciones = notificaciones[:limit]
+    except ValueError:
+        notificaciones = notificaciones[:20]
+    
+    serializer = NotificacionSerializer(notificaciones, many=True)
+    
     return Response({
-        'categorias': list(categorias)
+        'notificaciones': serializer.data,
+        'no_leidas': Notificacion.objects.filter(usuario=request.user, leida=False).count()
     })
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def marcar_notificacion_leida(request, notificacion_id):
+    """Marcar una notificación como leída"""
+    try:
+        notificacion = Notificacion.objects.get(id=notificacion_id, usuario=request.user)
+        notificacion.leida = True
+        notificacion.save()
+        
+        return Response({
+            'message': 'Notificación marcada como leída',
+            'notificacion_id': notificacion.id
+        })
+    except Notificacion.DoesNotExist:
+        return Response({'error': 'Notificación no encontrada'}, status=404)
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def marcar_todas_leidas(request):
+    """Marcar todas las notificaciones del usuario como leídas"""
+    count = Notificacion.objects.filter(usuario=request.user, leida=False).update(leida=True)
+    
+    return Response({
+        'message': f'{count} notificaciones marcadas como leídas',
+        'count': count
+    })
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def buscar_libros_google_books(request):
+    """Buscar libros por categoría en Google Books API"""
+    from .google_books_service import GoogleBooksService
+    
+    categoria = request.data.get('categoria', '').strip()
+    limite = min(int(request.data.get('limite', 10)), 20)  # Máximo 20 resultados
+    
+    if not categoria:
+        return Response(
+            {'error': 'La categoría es requerida'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    try:
+        libros = GoogleBooksService.buscar_por_categoria(categoria, limite)
+        
+        return Response({
+            'libros': libros,
+            'total': len(libros),
+            'categoria': categoria,
+            'fuente': 'Google Books API'
+        })
+        
+    except Exception as e:
+        return Response(
+            {'error': f'Error al buscar libros: {str(e)}'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def buscar_libro_por_isbn(request):
+    """Buscar libro específico por ISBN en Google Books API"""
+    from .google_books_service import GoogleBooksService
+    
+    isbn = request.data.get('isbn', '').strip()
+    
+    if not isbn:
+        return Response(
+            {'error': 'El ISBN es requerido'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    try:
+        libro = GoogleBooksService.buscar_libro_por_isbn(isbn)
+        
+        if libro:
+            return Response({
+                'libro': libro,
+                'fuente': 'Google Books API'
+            })
+        else:
+            return Response(
+                {'error': 'No se encontró libro con ese ISBN'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+            
+    except Exception as e:
+        return Response(
+            {'error': f'Error al buscar libro: {str(e)}'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def buscar_libro_por_titulo(request):
+    """Buscar libro específico por título en Google Books API"""
+    from .google_books_service import GoogleBooksService
+    
+    titulo = request.data.get('titulo', '').strip()
+    
+    if not titulo:
+        return Response(
+            {'error': 'El título es requerido'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    try:
+        libro = GoogleBooksService.buscar_libro_por_titulo(titulo)
+        
+        if libro:
+            return Response({
+                'libro': libro,
+                'fuente': 'Google Books API'
+            })
+        else:
+            return Response(
+                {'error': 'No se encontró libro con ese título'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+            
+    except Exception as e:
+        return Response(
+            {'error': f'Error al buscar libro: {str(e)}'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )

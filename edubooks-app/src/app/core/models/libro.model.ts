@@ -14,6 +14,7 @@ export interface Libro {
     descripcion?: string;
     imagen_portada?: string;
     fecha_registro: string;
+    usuario_tiene_prestamo?: boolean;
 }
 
 export interface Prestamo {
@@ -28,8 +29,9 @@ export interface Prestamo {
     };
     fecha_prestamo: string;
     fecha_devolucion_esperada: string;
+    fecha_devolucion_esperada_formatted?: string;
     fecha_devolucion_real?: string;
-    estado: 'Activo' | 'Devuelto' | 'Vencido';
+    estado: 'Pendiente' | 'Activo' | 'Devuelto' | 'Vencido' | 'Rechazado';
     observaciones?: string;
     renovaciones?: number;
 }

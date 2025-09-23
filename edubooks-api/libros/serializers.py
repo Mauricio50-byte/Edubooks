@@ -1,6 +1,6 @@
 # libros/serializers.py
 from rest_framework import serializers
-from .models import Libro, Prestamo, Reserva, Bibliografia, Sancion
+from .models import Libro, Prestamo, Reserva, Bibliografia, Sancion, Notificacion
 from usuarios.serializers import UsuarioPerfilSerializer
 
 class LibroSerializer(serializers.ModelSerializer):
@@ -42,6 +42,22 @@ class PrestamoSerializer(serializers.ModelSerializer):
             return value
         except Libro.DoesNotExist:
             raise serializers.ValidationError("El libro no existe.")
+    
+    def validate(self, data):
+        libro_id = data.get('libro_id')
+        usuario = self.context['request'].user
+        
+        # Verificar si el usuario ya tiene un préstamo activo o pendiente de este libro
+        prestamo_existente = Prestamo.objects.filter(
+            libro_id=libro_id,
+            usuario=usuario,
+            estado__in=['Activo', 'Pendiente']
+        ).exists()
+        
+        if prestamo_existente:
+            raise serializers.ValidationError("Ya tienes una solicitud de préstamo activa o pendiente de este libro.")
+        
+        return data
     
     def create(self, validated_data):
         libro_id = validated_data.pop('libro_id')
@@ -198,18 +214,39 @@ class SancionSerializer(serializers.ModelSerializer):
 
 # Serializers para respuestas paginadas
 class LibroListSerializer(serializers.ModelSerializer):
+    usuario_tiene_prestamo = serializers.SerializerMethodField()
+    
     class Meta:
         model = Libro
-        fields = ['id', 'titulo', 'autor', 'categoria', 'estado', 'cantidad_disponible', 'imagen_portada']
+        fields = ['id', 'titulo', 'autor', 'categoria', 'estado', 'cantidad_disponible', 'imagen_portada', 'usuario_tiene_prestamo']
+    
+    def get_usuario_tiene_prestamo(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return Prestamo.objects.filter(
+                libro=obj,
+                usuario=request.user,
+                estado__in=['Activo', 'Pendiente']
+            ).exists()
+        return False
 
 class PrestamoListSerializer(serializers.ModelSerializer):
     libro = LibroListSerializer(read_only=True)
     usuario_nombre = serializers.CharField(source='usuario.nombre', read_only=True)
     usuario_apellido = serializers.CharField(source='usuario.apellido', read_only=True)
+    fecha_devolucion_esperada_formatted = serializers.SerializerMethodField()
     
     class Meta:
         model = Prestamo
-        fields = ['id', 'libro', 'usuario_nombre', 'usuario_apellido', 'fecha_prestamo', 'fecha_devolucion_esperada', 'estado']
+        fields = ['id', 'libro', 'usuario_nombre', 'usuario_apellido', 'fecha_prestamo', 'fecha_devolucion_esperada', 'fecha_devolucion_esperada_formatted', 'estado', 'observaciones', 'renovaciones']
+    
+    def get_fecha_devolucion_esperada_formatted(self, obj):
+        if obj.fecha_devolucion_esperada:
+            return obj.fecha_devolucion_esperada.strftime('%Y-%m-%d')
+        elif obj.estado == 'Pendiente':
+            return 'Pendiente de aprobación'
+        else:
+            return 'No establecida'
 
 class ReservaListSerializer(serializers.ModelSerializer):
     libro = LibroListSerializer(read_only=True)
@@ -219,3 +256,9 @@ class ReservaListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reserva
         fields = ['id', 'libro', 'usuario_nombre', 'usuario_apellido', 'fecha_reserva', 'estado', 'fecha_expiracion']
+
+class NotificacionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notificacion
+        fields = '__all__'
+        read_only_fields = ['fecha_creacion', 'usuario']

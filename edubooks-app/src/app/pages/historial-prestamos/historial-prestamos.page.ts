@@ -39,6 +39,11 @@ export class HistorialPrestamosPage implements OnInit {
     this.cargarHistorialPrestamos();
   }
 
+  ionViewWillEnter() {
+    // Recargar datos cada vez que se entra a la página
+    this.cargarHistorialPrestamos();
+  }
+
   /**
    * Cargar historial de préstamos del usuario
    */

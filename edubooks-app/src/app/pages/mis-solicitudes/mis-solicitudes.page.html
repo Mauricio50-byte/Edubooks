@@ -1,0 +1,175 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/catalogo"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Mis Solicitudes</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cargarDatos()">
+        <ion-icon name="refresh-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Segment para cambiar entre solicitudes y préstamos activos -->
+  <ion-segment [(ngModel)]="segmentValue" (ionChange)="onSegmentChange($event)" class="segment-container">
+    <ion-segment-button value="solicitudes">
+      <ion-label>Solicitudes</ion-label>
+      <ion-badge *ngIf="solicitudes.length > 0" color="warning">{{ solicitudes.length }}</ion-badge>
+    </ion-segment-button>
+    <ion-segment-button value="prestamos">
+      <ion-label>Préstamos Activos</ion-label>
+      <ion-badge *ngIf="prestamosActivos.length > 0" color="success">{{ prestamosActivos.length }}</ion-badge>
+    </ion-segment-button>
+  </ion-segment>
+
+  <!-- Loading state -->
+  <div class="loading-container" *ngIf="isLoading">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Cargando información...</p>
+  </div>
+
+  <!-- Error state -->
+  <div class="error-container" *ngIf="error && !isLoading">
+    <ion-icon name="alert-circle-outline" color="danger" size="large"></ion-icon>
+    <h3>Error</h3>
+    <p>{{ error }}</p>
+    <ion-button fill="outline" (click)="cargarDatos()">
+      <ion-icon name="refresh-outline" slot="start"></ion-icon>
+      Reintentar
+    </ion-button>
+  </div>
+
+  <!-- Solicitudes Tab -->
+  <div *ngIf="segmentValue === 'solicitudes' && !isLoading && !error">
+    <!-- Empty state para solicitudes -->
+    <div class="empty-state" *ngIf="solicitudes.length === 0">
+      <ion-icon name="document-text-outline" color="medium" size="large"></ion-icon>
+      <h3>No tienes solicitudes</h3>
+      <p>Cuando solicites un libro, aparecerá aquí</p>
+      <ion-button fill="outline" routerLink="/catalogo">
+        <ion-icon name="library-outline" slot="start"></ion-icon>
+        Explorar Catálogo
+      </ion-button>
+    </div>
+
+    <!-- Lista de solicitudes -->
+    <div class="solicitudes-container" *ngIf="solicitudes.length > 0">
+      <ion-card *ngFor="let solicitud of solicitudes" class="solicitud-card">
+        <ion-card-header>
+          <div class="solicitud-header">
+            <div class="libro-info">
+              <img [src]="solicitud.libro.imagen_portada" [alt]="solicitud.libro.titulo" class="libro-imagen"
+                   onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22400%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%23cccccc%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 font-family=%22Arial%22 font-size=%2218%22 fill=%22%23666666%22%3ELibro%3C/text%3E%3C/svg%3E'">
+              <div class="libro-detalles">
+                <ion-card-title>{{ solicitud.libro.titulo }}</ion-card-title>
+                <ion-card-subtitle>{{ solicitud.libro.autor }}</ion-card-subtitle>
+              </div>
+            </div>
+            <ion-chip [color]="getEstadoColor(solicitud.estado)">
+              <ion-icon [name]="getEstadoIcon(solicitud.estado)"></ion-icon>
+              <ion-label>{{ solicitud.estado }}</ion-label>
+            </ion-chip>
+          </div>
+        </ion-card-header>
+
+        <ion-card-content>
+          <div class="fecha-info">
+            <p><strong>Fecha de solicitud:</strong> {{ solicitud.fecha_prestamo | date:'dd/MM/yyyy HH:mm' }}</p>
+          </div>
+
+          <div class="motivo-rechazo" *ngIf="solicitud.estado === 'Rechazado' && solicitud.motivo_rechazo">
+            <h4>Motivo del rechazo:</h4>
+            <p>{{ solicitud.motivo_rechazo }}</p>
+          </div>
+
+          <div class="estado-info" [ngSwitch]="solicitud.estado">
+            <div *ngSwitchCase="'Pendiente'" class="estado-pendiente">
+              <ion-icon name="time-outline" color="warning"></ion-icon>
+              <span>Tu solicitud está siendo revisada por un administrador</span>
+            </div>
+            <div *ngSwitchCase="'Rechazado'" class="estado-rechazado">
+              <ion-icon name="close-circle-outline" color="danger"></ion-icon>
+              <span>Tu solicitud fue rechazada</span>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+  </div>
+
+  <!-- Préstamos Activos Tab -->
+  <div *ngIf="segmentValue === 'prestamos' && !isLoading && !error">
+    <!-- Empty state para préstamos -->
+    <div class="empty-state" *ngIf="prestamosActivos.length === 0">
+      <ion-icon name="library-outline" color="medium" size="large"></ion-icon>
+      <h3>No tienes préstamos activos</h3>
+      <p>Cuando tengas libros prestados, aparecerán aquí</p>
+      <ion-button fill="outline" routerLink="/catalogo">
+        <ion-icon name="search-outline" slot="start"></ion-icon>
+        Buscar Libros
+      </ion-button>
+    </div>
+
+    <!-- Lista de préstamos activos -->
+    <div class="prestamos-container" *ngIf="prestamosActivos.length > 0">
+      <ion-card *ngFor="let prestamo of prestamosActivos" class="prestamo-card">
+        <ion-card-header>
+          <div class="prestamo-header">
+            <div class="libro-info">
+              <img [src]="prestamo.libro.imagen_portada" [alt]="prestamo.libro.titulo" class="libro-imagen"
+                   onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22400%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%23cccccc%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 font-family=%22Arial%22 font-size=%2218%22 fill=%22%23666666%22%3ELibro%3C/text%3E%3C/svg%3E'">
+              <div class="libro-detalles">
+                <ion-card-title>{{ prestamo.libro.titulo }}</ion-card-title>
+                <ion-card-subtitle>{{ prestamo.libro.autor }}</ion-card-subtitle>
+              </div>
+            </div>
+            <ion-chip color="success">
+              <ion-icon name="checkmark-circle-outline"></ion-icon>
+              <ion-label>Activo</ion-label>
+            </ion-chip>
+          </div>
+        </ion-card-header>
+
+        <ion-card-content>
+          <div class="fechas-prestamo">
+            <div class="fecha-item">
+              <strong>Fecha de préstamo:</strong>
+              <span>{{ prestamo.fecha_prestamo | date:'dd/MM/yyyy' }}</span>
+            </div>
+            <div class="fecha-item">
+              <strong>Fecha de devolución:</strong>
+              <span>{{ prestamo.fecha_devolucion_esperada | date:'dd/MM/yyyy' }}</span>
+            </div>
+          </div>
+
+          <div class="dias-restantes">
+            <ng-container *ngIf="calcularDiasRestantes(prestamo.fecha_devolucion_esperada) > 0; else vencido">
+              <ion-chip color="primary">
+                <ion-icon name="calendar-outline"></ion-icon>
+                <ion-label>{{ calcularDiasRestantes(prestamo.fecha_devolucion_esperada) }} días restantes</ion-label>
+              </ion-chip>
+            </ng-container>
+            <ng-template #vencido>
+              <ion-chip color="danger">
+                <ion-icon name="warning-outline"></ion-icon>
+                <ion-label>Vencido hace {{ Math.abs(calcularDiasRestantes(prestamo.fecha_devolucion_esperada)) }} días</ion-label>
+              </ion-chip>
+            </ng-template>
+          </div>
+
+          <div class="observaciones" *ngIf="prestamo.observaciones">
+            <h4>Observaciones:</h4>
+            <p>{{ prestamo.observaciones }}</p>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+  </div>
+</ion-content>

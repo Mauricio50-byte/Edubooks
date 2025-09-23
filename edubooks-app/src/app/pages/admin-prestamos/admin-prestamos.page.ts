@@ -167,10 +167,10 @@ export class AdminPrestamosPage implements OnInit {
     
     return this.prestamos.filter(prestamo => {
       const cumpleBusqueda = !this.searchTerm || 
-        prestamo.usuario.nombre.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        prestamo.usuario.apellido.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        prestamo.libro.titulo.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        prestamo.libro.autor.toLowerCase().includes(this.searchTerm.toLowerCase());
+        (prestamo.usuario?.nombre?.toLowerCase().includes(this.searchTerm.toLowerCase())) ||
+        (prestamo.usuario?.apellido?.toLowerCase().includes(this.searchTerm.toLowerCase())) ||
+        (prestamo.libro?.titulo?.toLowerCase().includes(this.searchTerm.toLowerCase())) ||
+        (prestamo.libro?.autor?.toLowerCase().includes(this.searchTerm.toLowerCase()));
       
       const cumpleEstado = !this.filtroEstado || prestamo.estado === this.filtroEstado;
       
@@ -194,7 +194,7 @@ export class AdminPrestamosPage implements OnInit {
   async marcarComoDevuelto(prestamo: any) {
     const alert = await this.alertController.create({
       header: 'Confirmar Devolución',
-      message: `¿Confirmas que ${prestamo.usuario.nombre} ${prestamo.usuario.apellido} ha devuelto "${prestamo.libro.titulo}"?`,
+      message: `¿Confirmas que ${prestamo.usuario?.nombre || 'Usuario'} ${prestamo.usuario?.apellido || ''} ha devuelto "${prestamo.libro?.titulo || 'Libro'}"?`,
       buttons: [
         {
           text: 'Cancelar',
@@ -222,14 +222,18 @@ export class AdminPrestamosPage implements OnInit {
     await loading.present();
 
     try {
-      // TODO: Implementar llamada al servicio
-      // await this.prestamoService.marcarDevuelto(prestamo.id).toPromise();
+      // Llamar al servicio real para devolver libro
+      await this.bibliotecaService.devolverLibro(prestamo.id).toPromise();
       
+      // Actualizar estado local
       prestamo.estado = 'Devuelto';
-      prestamo.fecha_devolucion_real = new Date().toISOString().split('T')[0];
+      prestamo.fecha_devolucion_real = new Date().toISOString();
       
       await loading.dismiss();
       await this.mostrarToast('Devolución registrada exitosamente', 'success');
+      
+      // Recargar la lista
+      this.cargarPrestamos();
 
     } catch (error: any) {
       await loading.dismiss();
@@ -244,13 +248,13 @@ export class AdminPrestamosPage implements OnInit {
     const alert = await this.alertController.create({
       header: 'Detalles del Préstamo',
       message: `
-        <strong>Usuario:</strong> ${prestamo.usuario.nombre} ${prestamo.usuario.apellido}<br>
-        <strong>Email:</strong> ${prestamo.usuario.email}<br><br>
-        <strong>Libro:</strong> ${prestamo.libro.titulo}<br>
-        <strong>Autor:</strong> ${prestamo.libro.autor}<br>
-        <strong>ISBN:</strong> ${prestamo.libro.isbn}<br><br>
+        <strong>Usuario:</strong> ${prestamo.usuario?.nombre || 'N/A'} ${prestamo.usuario?.apellido || ''}<br>
+        <strong>Email:</strong> ${prestamo.usuario?.email || 'N/A'}<br><br>
+        <strong>Libro:</strong> ${prestamo.libro?.titulo || 'N/A'}<br>
+        <strong>Autor:</strong> ${prestamo.libro?.autor || 'N/A'}<br>
+        <strong>ISBN:</strong> ${prestamo.libro?.isbn || 'No disponible'}<br><br>
         <strong>Fecha de préstamo:</strong> ${this.formatearFecha(prestamo.fecha_prestamo)}<br>
-        <strong>Fecha de devolución esperada:</strong> ${this.formatearFecha(prestamo.fecha_devolucion_esperada)}<br>
+        <strong>Fecha de devolución esperada:</strong> ${prestamo.fecha_devolucion_esperada_formatted || 'Pendiente de aprobación'}<br>
         ${prestamo.fecha_devolucion_real ? `<strong>Fecha de devolución real:</strong> ${this.formatearFecha(prestamo.fecha_devolucion_real)}<br>` : ''}
         <strong>Renovaciones:</strong> ${prestamo.renovaciones}/2<br>
         <strong>Estado:</strong> ${prestamo.estado}

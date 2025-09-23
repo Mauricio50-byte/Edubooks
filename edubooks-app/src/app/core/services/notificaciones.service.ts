@@ -1,18 +1,18 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { ToastController, AlertController } from '@ionic/angular';
+import { ApiService } from './api.service';
+import { map, catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 export interface Notificacion {
-  id: string;
-  tipo: 'info' | 'success' | 'warning' | 'error';
+  id: number;
+  tipo: 'prestamo' | 'devolucion' | 'sancion' | 'general';
   titulo: string;
   mensaje: string;
-  fecha: Date;
+  fecha_creacion: string;
   leida: boolean;
-  accion?: {
-    texto: string;
-    callback: () => void;
-  };
+  relacionado_id?: number;
 }
 
 @Injectable({
@@ -26,69 +26,85 @@ export class NotificacionesService {
 
   constructor(
     private toastController: ToastController,
-    private alertController: AlertController
+    private alertController: AlertController,
+    private apiService: ApiService
   ) {
-    this.cargarNotificacionesLocales();
+    this.cargarNotificaciones();
   }
 
   /**
-   * Agregar nueva notificación
+   * Cargar notificaciones desde el backend
    */
-  agregarNotificacion(notificacion: Omit<Notificacion, 'id' | 'fecha' | 'leida'>) {
-    const nuevaNotificacion: Notificacion = {
-      ...notificacion,
-      id: this.generarId(),
-      fecha: new Date(),
-      leida: false
-    };
-
-    this.notificaciones.unshift(nuevaNotificacion);
-    this.notificacionesSubject.next([...this.notificaciones]);
-    this.guardarNotificacionesLocales();
-
-    // Mostrar toast para notificaciones importantes
-    if (notificacion.tipo === 'warning' || notificacion.tipo === 'error') {
-      this.mostrarToast(notificacion.titulo, notificacion.tipo);
-    }
+  cargarNotificaciones(): Observable<Notificacion[]> {
+    return this.apiService.get('/notificaciones/').pipe(
+      map((response: any) => {
+        const notificaciones = response.results || response || [];
+        this.notificaciones = Array.isArray(notificaciones) ? notificaciones : [];
+        this.notificacionesSubject.next([...this.notificaciones]);
+        return this.notificaciones;
+      }),
+      catchError(error => {
+        console.error('Error cargando notificaciones:', error);
+        this.notificaciones = [];
+        this.notificacionesSubject.next([]);
+        return of([]);
+      })
+    );
   }
 
   /**
    * Marcar notificación como leída
    */
-  marcarComoLeida(id: string) {
-    const notificacion = this.notificaciones.find(n => n.id === id);
-    if (notificacion) {
-      notificacion.leida = true;
-      this.notificacionesSubject.next([...this.notificaciones]);
-      this.guardarNotificacionesLocales();
-    }
+  marcarComoLeida(id: number): Observable<any> {
+    return this.apiService.post(`/notificaciones/${id}/marcar-leida/`, {}).pipe(
+      map(response => {
+        // Actualizar estado local
+        const notificacion = this.notificaciones.find(n => n.id === id);
+        if (notificacion) {
+          notificacion.leida = true;
+          this.notificacionesSubject.next([...this.notificaciones]);
+        }
+        return response;
+      }),
+      catchError(error => {
+        console.error('Error marcando notificación como leída:', error);
+        return of(null);
+      })
+    );
   }
 
   /**
-   * Marcar todas como leídas
+   * Marcar todas las notificaciones como leídas
    */
-  marcarTodasComoLeidas() {
-    this.notificaciones.forEach(n => n.leida = true);
-    this.notificacionesSubject.next([...this.notificaciones]);
-    this.guardarNotificacionesLocales();
+  marcarTodasComoLeidas(): Observable<any> {
+    return this.apiService.post('/notificaciones/marcar-todas-leidas/', {}).pipe(
+      map(response => {
+        // Actualizar estado local
+        this.notificaciones.forEach(n => n.leida = true);
+        this.notificacionesSubject.next([...this.notificaciones]);
+        return response;
+      }),
+      catchError(error => {
+        console.error('Error marcando todas las notificaciones como leídas:', error);
+        return of(null);
+      })
+    );
   }
 
   /**
-   * Eliminar notificación
+   * Eliminar notificación (TODO: implementar en backend)
    */
-  eliminarNotificacion(id: string) {
-    this.notificaciones = this.notificaciones.filter(n => n.id !== id);
-    this.notificacionesSubject.next([...this.notificaciones]);
-    this.guardarNotificacionesLocales();
+  eliminarNotificacion(id: number) {
+    // TODO: Implementar endpoint en backend
+    console.log('Eliminar notificación:', id);
   }
 
   /**
-   * Limpiar todas las notificaciones
+   * Limpiar todas las notificaciones (TODO: implementar en backend)
    */
   limpiarNotificaciones() {
-    this.notificaciones = [];
-    this.notificacionesSubject.next([]);
-    this.guardarNotificacionesLocales();
+    // TODO: Implementar endpoint en backend
+    console.log('Limpiar todas las notificaciones');
   }
 
   /**
@@ -97,81 +113,39 @@ export class NotificacionesService {
   getNotificacionesNoLeidas(): Observable<number> {
     return new Observable(observer => {
       this.notificaciones$.subscribe(notificaciones => {
-        const noLeidas = notificaciones.filter(n => !n.leida).length;
+        const notificacionesArray = Array.isArray(notificaciones) ? notificaciones : [];
+        const noLeidas = notificacionesArray.filter(n => n && !n.leida).length;
         observer.next(noLeidas);
       });
     });
   }
 
   /**
-   * Notificaciones específicas del sistema de biblioteca
+   * Métodos de notificación específicos (TODO: implementar con backend)
    */
   notificarLibroDisponible(tituloLibro: string) {
-    this.agregarNotificacion({
-      tipo: 'success',
-      titulo: 'Libro Disponible',
-      mensaje: `El libro "${tituloLibro}" ya está disponible para préstamo.`,
-      accion: {
-        texto: 'Ver Catálogo',
-        callback: () => {
-          // TODO: Navegar al catálogo
-          console.log('Navegar al catálogo');
-        }
-      }
-    });
+    console.log(`Libro disponible: ${tituloLibro}`);
+    // TODO: Las notificaciones se crean desde el backend
   }
 
   notificarPrestamoVencido(tituloLibro: string, diasRetraso: number) {
-    this.agregarNotificacion({
-      tipo: 'error',
-      titulo: 'Préstamo Vencido',
-      mensaje: `El libro "${tituloLibro}" tiene ${diasRetraso} días de retraso. Devuélvelo para evitar sanciones.`,
-      accion: {
-        texto: 'Ver Historial',
-        callback: () => {
-          // TODO: Navegar al historial
-          console.log('Navegar al historial');
-        }
-      }
-    });
+    console.log(`Préstamo vencido: ${tituloLibro}, ${diasRetraso} días`);
+    // TODO: Las notificaciones se crean desde el backend
   }
 
   notificarSancionAplicada(monto: number) {
-    this.agregarNotificacion({
-      tipo: 'warning',
-      titulo: 'Sanción Aplicada',
-      mensaje: `Se ha aplicado una multa de $${monto.toLocaleString()} por devolución tardía.`,
-      accion: {
-        texto: 'Ver Sanciones',
-        callback: () => {
-          // TODO: Navegar a sanciones
-          console.log('Navegar a sanciones');
-        }
-      }
-    });
+    console.log(`Sanción aplicada: $${monto}`);
+    // TODO: Las notificaciones se crean desde el backend
   }
 
   notificarReservaExpirada(tituloLibro: string) {
-    this.agregarNotificacion({
-      tipo: 'warning',
-      titulo: 'Reserva Expirada',
-      mensaje: `Tu reserva para "${tituloLibro}" ha expirado.`
-    });
+    console.log(`Reserva expirada: ${tituloLibro}`);
+    // TODO: Las notificaciones se crean desde el backend
   }
 
   notificarNuevaBibliografia(curso: string, programa: string) {
-    this.agregarNotificacion({
-      tipo: 'info',
-      titulo: 'Nueva Bibliografía',
-      mensaje: `Se ha agregado una nueva bibliografía para el curso "${curso}" en ${programa}.`,
-      accion: {
-        texto: 'Ver Bibliografías',
-        callback: () => {
-          // TODO: Navegar a bibliografías
-          console.log('Navegar a bibliografías');
-        }
-      }
-    });
+    console.log(`Nueva bibliografía: ${curso} en ${programa}`);
+    // TODO: Las notificaciones se crean desde el backend
   }
 
   /**
@@ -194,49 +168,10 @@ export class NotificacionesService {
   }
 
   /**
-   * Generar ID único
-   */
-  private generarId(): string {
-    return Date.now().toString(36) + Math.random().toString(36).substr(2);
-  }
-
-  /**
-   * Guardar notificaciones en localStorage
-   */
-  private guardarNotificacionesLocales() {
-    try {
-      localStorage.setItem('edubooks_notificaciones', JSON.stringify(this.notificaciones));
-    } catch (error) {
-      console.error('Error guardando notificaciones:', error);
-    }
-  }
-
-  /**
-   * Cargar notificaciones desde localStorage
-   */
-  private cargarNotificacionesLocales() {
-    try {
-      const notificacionesGuardadas = localStorage.getItem('edubooks_notificaciones');
-      if (notificacionesGuardadas) {
-        this.notificaciones = JSON.parse(notificacionesGuardadas).map((n: any) => ({
-          ...n,
-          fecha: new Date(n.fecha)
-        }));
-        this.notificacionesSubject.next([...this.notificaciones]);
-      }
-    } catch (error) {
-      console.error('Error cargando notificaciones:', error);
-      this.notificaciones = [];
-    }
-  }
-
-  /**
-   * Simular notificaciones de prueba (para desarrollo)
+   * Generar notificaciones de prueba (para desarrollo)
    */
   generarNotificacionesPrueba() {
-    this.notificarLibroDisponible('El Quijote de la Mancha');
-    this.notificarPrestamoVencido('Cien años de soledad', 3);
-    this.notificarSancionAplicada(15000);
-    this.notificarNuevaBibliografia('Programación Avanzada', 'Ingeniería de Sistemas');
+    console.log('Generar notificaciones de prueba');
+    // TODO: Implementar con datos del backend
   }
 }

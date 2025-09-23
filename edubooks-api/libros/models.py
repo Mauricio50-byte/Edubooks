@@ -49,19 +49,27 @@ class Libro(models.Model):
 
 class Prestamo(models.Model):
     ESTADOS_CHOICES = [
+        ('Pendiente', 'Pendiente'),
         ('Activo', 'Activo'),
         ('Devuelto', 'Devuelto'),
         ('Vencido', 'Vencido'),
+        ('Rechazado', 'Rechazado'),
     ]
     
     libro = models.ForeignKey(Libro, on_delete=models.CASCADE, related_name='prestamos')
     usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='prestamos')
     fecha_prestamo = models.DateTimeField(auto_now_add=True)
-    fecha_devolucion_esperada = models.DateField()
+    fecha_devolucion_esperada = models.DateField(null=True, blank=True)
     fecha_devolucion_real = models.DateTimeField(null=True, blank=True)
-    estado = models.CharField(max_length=10, choices=ESTADOS_CHOICES, default='Activo')
+    estado = models.CharField(max_length=10, choices=ESTADOS_CHOICES, default='Pendiente')
     observaciones = models.TextField(null=True, blank=True)
     renovaciones = models.PositiveIntegerField(default=0)
+    
+    # Campos para sistema de aprobación
+    aprobado_por = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='prestamos_aprobados')
+    fecha_aprobacion = models.DateTimeField(null=True, blank=True)
+    motivo_rechazo = models.TextField(null=True, blank=True)
+    notificado = models.BooleanField(default=False)
     
     class Meta:
         db_table = 'prestamos'
@@ -71,23 +79,78 @@ class Prestamo(models.Model):
         return f"{self.libro.titulo} - {self.usuario.nombre} {self.usuario.apellido}"
     
     def save(self, *args, **kwargs):
-        # Establecer fecha de devolución esperada (15 días por defecto)
-        if not self.fecha_devolucion_esperada:
+        # Establecer fecha de devolución esperada solo cuando se aprueba
+        if self.estado == 'Activo' and not self.fecha_devolucion_esperada:
             self.fecha_devolucion_esperada = date.today() + timedelta(days=15)
         
+        # Establecer fecha de aprobación cuando cambia a Activo
+        if self.estado == 'Activo' and not self.fecha_aprobacion:
+            self.fecha_aprobacion = timezone.now()
+        
         # Actualizar estado si está vencido
-        if self.estado == 'Activo' and date.today() > self.fecha_devolucion_esperada:
+        if self.estado == 'Activo' and self.fecha_devolucion_esperada and date.today() > self.fecha_devolucion_esperada:
             self.estado = 'Vencido'
+        
+        # Verificar si es una actualización de estado para disponibilidad
+        es_actualizacion = self.pk is not None
+        estado_anterior = None
+        if es_actualizacion:
+            try:
+                estado_anterior = Prestamo.objects.get(pk=self.pk).estado
+            except Prestamo.DoesNotExist:
+                estado_anterior = None
         
         super().save(*args, **kwargs)
         
+        # Actualizar disponibilidad del libro solo cuando cambia el estado
+        if es_actualizacion and estado_anterior != self.estado:
+            if estado_anterior == 'Pendiente' and self.estado == 'Activo':
+                # Préstamo aprobado: reducir disponibilidad
+                if self.libro.cantidad_disponible > 0:
+                    self.libro.cantidad_disponible -= 1
+                    if self.libro.cantidad_disponible == 0:
+                        self.libro.estado = 'Prestado'
+                    self.libro.save()
+            elif estado_anterior == 'Activo' and self.estado in ['Devuelto', 'Rechazado', 'Vencido']:
+                # Préstamo devuelto/rechazado: aumentar disponibilidad
+                self.libro.cantidad_disponible += 1
+                if self.libro.estado == 'Prestado':
+                    self.libro.estado = 'Disponible'
+                self.libro.save()
+        
+        # Crear notificación cuando cambia el estado
+        if es_actualizacion and estado_anterior != self.estado and self.estado in ['Activo', 'Rechazado'] and not self.notificado:
+            mensaje = f"Tu solicitud de préstamo para '{self.libro.titulo}' ha sido "
+            if self.estado == 'Activo':
+                mensaje += "aprobada. Puedes recoger el libro."
+            else:
+                mensaje += f"rechazada. Motivo: {self.motivo_rechazo or 'No especificado'}"
+            
+            Notificacion.objects.create(
+                usuario=self.usuario,
+                titulo="Solicitud de Préstamo",
+                mensaje=mensaje,
+                tipo='prestamo',
+                relacionado_id=self.id
+            )
+            self.notificado = True
+            Prestamo.objects.filter(pk=self.pk).update(notificado=True)
+        
         # Actualizar disponibilidad del libro
-        if self.estado == 'Activo' and not self.pk:
-            self.libro.cantidad_disponible -= 1
-            self.libro.save()
-        elif self.estado == 'Devuelto' and self.fecha_devolucion_real:
-            self.libro.cantidad_disponible += 1
-            self.libro.save()
+        if es_actualizacion and estado_anterior != self.estado:
+            if estado_anterior == 'Pendiente' and self.estado == 'Activo':
+                # Préstamo aprobado: reducir disponibilidad
+                if self.libro.cantidad_disponible > 0:
+                    self.libro.cantidad_disponible -= 1
+                    self.libro.save()
+            elif estado_anterior == 'Activo' and self.estado == 'Devuelto':
+                # Libro devuelto: aumentar disponibilidad
+                self.libro.cantidad_disponible += 1
+                self.libro.save()
+            elif estado_anterior == 'Activo' and self.estado in ['Rechazado', 'Vencido']:
+                # Préstamo rechazado o vencido: aumentar disponibilidad
+                self.libro.cantidad_disponible += 1
+                self.libro.save()
 
 class Reserva(models.Model):
     ESTADOS_CHOICES = [
@@ -111,9 +174,14 @@ class Reserva(models.Model):
         return f"Reserva: {self.libro.titulo} - {self.usuario.nombre} {self.usuario.apellido}"
     
     def save(self, *args, **kwargs):
-        # Establecer fecha de expiración (3 días por defecto)
+        # Establecer fecha de expiración (3 días desde la reserva)
         if not self.fecha_expiracion:
             self.fecha_expiracion = timezone.now() + timedelta(days=3)
+        
+        # Verificar si la reserva ha expirado
+        if self.estado == 'Activa' and timezone.now() > self.fecha_expiracion:
+            self.estado = 'Cancelada'
+        
         super().save(*args, **kwargs)
 
 class Bibliografia(models.Model):
@@ -173,9 +241,32 @@ class Sancion(models.Model):
     
     def __str__(self):
         return f"{self.tipo} - {self.usuario.nombre} {self.usuario.apellido}"
-    
+
     def save(self, *args, **kwargs):
-        # Establecer fecha fin para suspensiones
+        # Calcular fecha de fin para suspensiones
         if self.tipo == 'Suspensión' and self.dias_suspension and not self.fecha_fin:
-            self.fecha_fin = timezone.now() + timedelta(days=self.dias_suspension)
+            self.fecha_fin = self.fecha_inicio + timedelta(days=self.dias_suspension)
         super().save(*args, **kwargs)
+
+class Notificacion(models.Model):
+    TIPOS_CHOICES = [
+        ('prestamo', 'Préstamo'),
+        ('devolucion', 'Devolución'),
+        ('sancion', 'Sanción'),
+        ('general', 'General'),
+    ]
+    
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notificaciones')
+    titulo = models.CharField(max_length=200)
+    mensaje = models.TextField()
+    tipo = models.CharField(max_length=20, choices=TIPOS_CHOICES, default='general')
+    leida = models.BooleanField(default=False)
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    relacionado_id = models.PositiveIntegerField(null=True, blank=True)
+    
+    class Meta:
+        db_table = 'notificaciones'
+        ordering = ['-fecha_creacion']
+    
+    def __str__(self):
+        return f"{self.titulo} - {self.usuario.nombre} {self.usuario.apellido}"

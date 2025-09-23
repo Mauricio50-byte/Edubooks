@@ -26,6 +26,11 @@ export class NotificacionesPage implements OnInit, OnDestroy {
     this.cargarNotificaciones();
   }
 
+  ionViewWillEnter() {
+    // Recargar notificaciones cada vez que se entra a la página
+    this.notificacionesService.cargarNotificaciones().subscribe();
+  }
+
   ngOnDestroy() {
     this.subscription.unsubscribe();
   }
@@ -34,6 +39,12 @@ export class NotificacionesPage implements OnInit, OnDestroy {
    * Cargar notificaciones
    */
   cargarNotificaciones() {
+    // Cargar desde el backend
+    this.subscription.add(
+      this.notificacionesService.cargarNotificaciones().subscribe()
+    );
+
+    // Suscribirse a cambios
     this.subscription.add(
       this.notificacionesService.notificaciones$.subscribe(notificaciones => {
         this.notificaciones = this.aplicarFiltros(notificaciones);
@@ -87,7 +98,14 @@ export class NotificacionesPage implements OnInit, OnDestroy {
    */
   marcarComoLeida(notificacion: Notificacion) {
     if (!notificacion.leida) {
-      this.notificacionesService.marcarComoLeida(notificacion.id);
+      this.notificacionesService.marcarComoLeida(notificacion.id).subscribe({
+        next: () => {
+          console.log('Notificación marcada como leída');
+        },
+        error: (error) => {
+          console.error('Error marcando notificación:', error);
+        }
+      });
     }
   }
 
@@ -95,9 +113,23 @@ export class NotificacionesPage implements OnInit, OnDestroy {
    * Ejecutar acción de notificación
    */
   ejecutarAccion(notificacion: Notificacion) {
-    if (notificacion.accion) {
-      notificacion.accion.callback();
-      this.marcarComoLeida(notificacion);
+    // Marcar como leída al hacer clic
+    this.marcarComoLeida(notificacion);
+    
+    // Navegar según el tipo de notificación
+    if (notificacion.relacionado_id) {
+      switch (notificacion.tipo) {
+        case 'prestamo':
+          // Navegar a historial de préstamos
+          console.log('Navegar a préstamos');
+          break;
+        case 'sancion':
+          // Navegar a sanciones
+          console.log('Navegar a sanciones');
+          break;
+        default:
+          console.log('Acción no definida para este tipo');
+      }
     }
   }
 
@@ -155,7 +187,8 @@ export class NotificacionesPage implements OnInit, OnDestroy {
           text: 'Eliminar',
           role: 'destructive',
           handler: () => {
-            this.notificacionesService.eliminarNotificacion(notificacion.id);
+            // TODO: Implementar eliminación de notificación en el backend
+            console.log('Eliminar notificación:', notificacion.id);
           }
         }
       ]
@@ -179,7 +212,14 @@ export class NotificacionesPage implements OnInit, OnDestroy {
         {
           text: 'Confirmar',
           handler: () => {
-            this.notificacionesService.marcarTodasComoLeidas();
+            this.notificacionesService.marcarTodasComoLeidas().subscribe({
+              next: () => {
+                console.log('Todas las notificaciones marcadas como leídas');
+              },
+              error: (error) => {
+                console.error('Error marcando todas las notificaciones:', error);
+              }
+            });
           }
         }
       ]
@@ -204,7 +244,8 @@ export class NotificacionesPage implements OnInit, OnDestroy {
           text: 'Eliminar Todas',
           role: 'destructive',
           handler: () => {
-            this.notificacionesService.limpiarNotificaciones();
+            // TODO: Implementar limpieza de notificaciones en el backend
+            console.log('Limpiar todas las notificaciones');
           }
         }
       ]
@@ -217,7 +258,8 @@ export class NotificacionesPage implements OnInit, OnDestroy {
    * Generar notificaciones de prueba (solo para desarrollo)
    */
   generarNotificacionesPrueba() {
-    this.notificacionesService.generarNotificacionesPrueba();
+    // TODO: Implementar generación de notificaciones de prueba
+    console.log('Generar notificaciones de prueba');
   }
 
   /**
@@ -225,10 +267,10 @@ export class NotificacionesPage implements OnInit, OnDestroy {
    */
   getIconoTipo(tipo: string): string {
     switch (tipo) {
-      case 'success': return 'checkmark-circle';
-      case 'warning': return 'warning';
-      case 'error': return 'alert-circle';
-      case 'info':
+      case 'prestamo': return 'library-outline';
+      case 'devolucion': return 'checkmark-circle';
+      case 'sancion': return 'warning';
+      case 'general':
       default: return 'information-circle';
     }
   }
@@ -238,18 +280,19 @@ export class NotificacionesPage implements OnInit, OnDestroy {
    */
   getColorTipo(tipo: string): string {
     switch (tipo) {
-      case 'success': return 'success';
-      case 'warning': return 'warning';
-      case 'error': return 'danger';
-      case 'info':
-      default: return 'primary';
+      case 'prestamo': return 'primary';
+      case 'devolucion': return 'success';
+      case 'sancion': return 'warning';
+      case 'general':
+      default: return 'medium';
     }
   }
 
   /**
    * Formatear fecha de notificación
    */
-  formatearFecha(fecha: Date): string {
+  formatearFecha(fechaString: string): string {
+    const fecha = new Date(fechaString);
     const ahora = new Date();
     const diferencia = ahora.getTime() - fecha.getTime();
     const minutos = Math.floor(diferencia / (1000 * 60));
@@ -277,9 +320,14 @@ export class NotificacionesPage implements OnInit, OnDestroy {
    * Refrescar notificaciones
    */
   doRefresh(event: any) {
-    // En una implementación real, aquí se consultarían las notificaciones del servidor
-    setTimeout(() => {
-      event.target.complete();
-    }, 1000);
+    this.notificacionesService.cargarNotificaciones().subscribe({
+      next: () => {
+        event.target.complete();
+      },
+      error: (error) => {
+        console.error('Error refrescando notificaciones:', error);
+        event.target.complete();
+      }
+    });
   }
 }

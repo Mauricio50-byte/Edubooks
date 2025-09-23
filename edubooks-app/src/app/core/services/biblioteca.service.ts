@@ -271,25 +271,31 @@ export class BibliotecaService {
   }
 
   getPrestamosUsuario(): Observable<Prestamo[]> {
-    const usuario = this.authService.currentUserValue;
-    if (!usuario) {
-      return of([]);
-    }
-
-    const prestamosUsuario = this.prestamos.filter(p => p.usuario.id === usuario.id);
-    return of(prestamosUsuario).pipe(delay(400));
+    return this.apiService.get<{results: Prestamo[]}>('/prestamos/')
+      .pipe(
+        map(response => {
+          const prestamos = response.results || response as any;
+          return Array.isArray(prestamos) ? prestamos : [];
+        }),
+        catchError(error => {
+          console.error('Error obteniendo préstamos del usuario:', error);
+          return of([]);
+        })
+      );
   }
 
   getPrestamosActivos(): Observable<Prestamo[]> {
-    const usuario = this.authService.currentUserValue;
-    if (!usuario) {
-      return of([]);
-    }
-
-    const prestamosActivos = this.prestamos.filter(p => 
-      p.usuario.id === usuario.id && p.estado === 'Activo'
-    );
-    return of(prestamosActivos).pipe(delay(400));
+    return this.apiService.get<{results: Prestamo[]}>('/prestamos/?estado=Activo')
+      .pipe(
+        map(response => {
+          const prestamos = response.results || response as any;
+          return Array.isArray(prestamos) ? prestamos : [];
+        }),
+        catchError(error => {
+          console.error('Error obteniendo préstamos activos:', error);
+          return of([]);
+        })
+      );
   }
 
   /**
@@ -313,6 +319,24 @@ export class BibliotecaService {
   }
 
   /**
+   * Eliminar libro (solo administradores)
+   */
+  eliminarLibro(id: number): Observable<any> {
+    return this.apiService.delete(`/libros/${id}/eliminar/`).pipe(
+      map(response => {
+        // Actualizar lista local de libros
+        this.libros = this.libros.filter(libro => libro.id !== id);
+        this.librosSubject.next([...this.libros]);
+        return response;
+      }),
+      catchError(error => {
+        console.error('Error eliminando libro:', error);
+        throw error;
+      })
+    );
+  }
+
+  /**
    * Registrar nuevo libro (solo administradores)
    */
   registrarLibro(libroData: any): Observable<any> {
@@ -327,6 +351,7 @@ export class BibliotecaService {
       cantidad_total: parseInt(libroData.cantidad_total) || 1,
       cantidad_disponible: parseInt(libroData.cantidad_total) || 1,
       descripcion: libroData.descripcion?.trim() || '',
+      imagen_portada: libroData.imagen_portada || null,
       estado: 'Disponible'
     };
     
@@ -728,5 +753,49 @@ export class BibliotecaService {
    */
   buscarLibrosParaBibliografia(termino: string): Observable<Libro[]> {
     return this.searchLibros(termino);
+  }
+
+  // Métodos para gestión de solicitudes de préstamo
+  obtenerSolicitudesPendientes(): Observable<any> {
+    return this.apiService.get('/prestamos/solicitudes-pendientes/');
+  }
+
+  aprobarPrestamo(prestamoId: number): Observable<any> {
+    return this.apiService.post(`/prestamos/${prestamoId}/aprobar/`, {});
+  }
+
+  rechazarPrestamo(prestamoId: number, motivo: string): Observable<any> {
+    return this.apiService.post(`/prestamos/${prestamoId}/rechazar/`, { motivo });
+  }
+
+  obtenerMisSolicitudes(): Observable<any> {
+    return this.apiService.get('/prestamos/').pipe(
+      map((response: any) => {
+        const prestamos = response.results || response;
+        return prestamos.filter((prestamo: any) => 
+          ['Pendiente', 'Rechazado'].includes(prestamo.estado)
+        );
+      })
+    );
+  }
+
+  // Métodos para notificaciones
+  obtenerNotificaciones(leidas?: boolean, limit?: number): Observable<any> {
+    let params = '';
+    if (leidas !== undefined) {
+      params += `?leidas=${leidas}`;
+    }
+    if (limit) {
+      params += params ? `&limit=${limit}` : `?limit=${limit}`;
+    }
+    return this.apiService.get(`/notificaciones/${params}`);
+  }
+
+  marcarNotificacionLeida(notificacionId: number): Observable<any> {
+    return this.apiService.post(`/notificaciones/${notificacionId}/marcar-leida/`, {});
+  }
+
+  marcarTodasNotificacionesLeidas(): Observable<any> {
+    return this.apiService.post('/notificaciones/marcar-todas-leidas/', {});
   }
 }

@@ -1,3 +1,165 @@
 INFO 2025-09-09 00:49:29,844 autoreload 14904 25400 Watching for file changes with StatReloader
 INFO 2025-09-09 00:49:33,189 autoreload 14904 25400 C:\Users\ASUS\OneDrive\Escritorio\Logica de Programacion\edubooks2\edubooks-api\usuarios\models.py changed, reloading.
 INFO 2025-09-09 00:49:34,500 autoreload 22332 17508 Watching for file changes with StatReloader
+INFO 2025-09-16 07:14:17,807 autoreload 20332 14760 Watching for file changes with StatReloader
+INFO 2025-09-16 07:15:25,927 basehttp 20332 19048 "OPTIONS /api/libros/ HTTP/1.1" 200 0
+INFO 2025-09-16 07:15:25,930 basehttp 20332 20600 "OPTIONS /api/categorias/ HTTP/1.1" 200 0
+INFO 2025-09-16 07:15:25,934 basehttp 20332 19048 "OPTIONS /api/libros/ HTTP/1.1" 200 0
+INFO 2025-09-16 07:15:25,934 basehttp 20332 20600 "OPTIONS /api/categorias/ HTTP/1.1" 200 0
+WARNING 2025-09-16 07:15:26,001 log 20332 19048 Unauthorized: /api/libros/
+WARNING 2025-09-16 07:15:26,002 log 20332 20600 Unauthorized: /api/categorias/
+WARNING 2025-09-16 07:15:26,003 basehttp 20332 19048 "GET /api/libros/ HTTP/1.1" 401 184
+WARNING 2025-09-16 07:15:26,004 basehttp 20332 20600 "GET /api/categorias/ HTTP/1.1" 401 184
+WARNING 2025-09-16 07:15:26,012 log 20332 19048 Unauthorized: /api/libros/
+WARNING 2025-09-16 07:15:26,040 log 20332 20600 Unauthorized: /api/categorias/
+WARNING 2025-09-16 07:15:26,044 basehttp 20332 20600 "GET /api/categorias/ HTTP/1.1" 401 184
+WARNING 2025-09-16 07:15:26,052 basehttp 20332 19048 "GET /api/libros/ HTTP/1.1" 401 184
+INFO 2025-09-16 07:15:53,684 basehttp 20332 19048 "OPTIONS /api/auth/login/ HTTP/1.1" 200 0
+INFO 2025-09-16 07:15:54,518 basehttp 20332 19048 "POST /api/auth/login/ HTTP/1.1" 200 804
+INFO 2025-09-16 07:15:57,339 basehttp 20332 20600 "GET /api/categorias/ HTTP/1.1" 200 26
+INFO 2025-09-16 07:15:57,357 basehttp 20332 19048 "GET /api/libros/ HTTP/1.1" 200 686
+INFO 2025-09-16 07:15:57,623 basehttp 20332 6628 "GET /api/categorias/ HTTP/1.1" 200 26
+INFO 2025-09-16 07:15:57,636 basehttp 20332 20600 "GET /api/libros/ HTTP/1.1" 200 686
+WARNING 2025-09-16 07:16:03,907 log 20332 20600 Bad Request: /api/prestamos/crear/
+WARNING 2025-09-16 07:16:03,908 basehttp 20332 20600 "POST /api/prestamos/crear/ HTTP/1.1" 400 95
+INFO 2025-09-16 07:16:05,191 basehttp 20332 20600 "GET /api/libros/ HTTP/1.1" 200 686
+INFO 2025-09-16 07:16:05,196 basehttp 20332 6628 "GET /api/categorias/ HTTP/1.1" 200 26
+INFO 2025-09-16 07:16:33,370 basehttp 20332 6628 "GET /api/sanciones/ HTTP/1.1" 200 52
+INFO 2025-09-16 07:16:38,171 basehttp 20332 6628 "POST /api/auth/logout/ HTTP/1.1" 200 42
+INFO 2025-09-16 07:16:45,231 basehttp 20332 6628 "POST /api/auth/login/ HTTP/1.1" 200 797
+INFO 2025-09-16 07:16:49,766 basehttp 20332 6628 "GET /api/prestamos/ HTTP/1.1" 200 665
+INFO 2025-09-16 07:20:44,936 basehttp 20332 6628 "GET /api/prestamos/ HTTP/1.1" 200 665
+INFO 2025-09-16 07:22:50,812 basehttp 20332 6628 "GET /api/prestamos/ HTTP/1.1" 200 665
+INFO 2025-09-16 07:23:08,667 basehttp 20332 6628 "GET /api/prestamos/ HTTP/1.1" 200 665
+INFO 2025-09-16 07:37:37,863 basehttp 20332 12460 "OPTIONS /api/prestamos/ HTTP/1.1" 200 0
+INFO 2025-09-16 07:37:38,349 basehttp 20332 12460 "GET /api/prestamos/ HTTP/1.1" 200 665
+INFO 2025-09-16 07:37:46,232 basehttp 20332 12460 "OPTIONS /api/auth/logout/ HTTP/1.1" 200 0
+INFO 2025-09-16 07:37:46,595 basehttp 20332 12460 "POST /api/auth/logout/ HTTP/1.1" 200 42
+INFO 2025-09-16 07:38:01,012 basehttp 20332 12460 "POST /api/auth/login/ HTTP/1.1" 200 804
+INFO 2025-09-16 07:38:07,073 basehttp 20332 12460 "POST /api/auth/logout/ HTTP/1.1" 200 42
+INFO 2025-09-16 07:38:48,819 autoreload 3936 11504 Watching for file changes with StatReloader
+INFO 2025-09-16 08:03:58,465 basehttp 3936 16704 "POST /api/auth/login/ HTTP/1.1" 200 797
+INFO 2025-09-16 08:04:10,158 basehttp 3936 16704 "OPTIONS /api/notificaciones/ HTTP/1.1" 200 0
+INFO 2025-09-16 08:04:10,585 basehttp 3936 16704 "GET /api/notificaciones/ HTTP/1.1" 200 35
+INFO 2025-09-16 08:04:24,334 basehttp 3936 16704 "OPTIONS /api/prestamos/solicitudes-pendientes/ HTTP/1.1" 200 0
+INFO 2025-09-16 08:04:24,720 basehttp 3936 16704 "GET /api/prestamos/solicitudes-pendientes/ HTTP/1.1" 200 449
+INFO 2025-09-16 08:04:24,994 basehttp 3936 16704 "GET /api/prestamos/solicitudes-pendientes/ HTTP/1.1" 200 449
+INFO 2025-09-16 08:04:29,840 basehttp 3936 16704 "GET /api/prestamos/ HTTP/1.1" 200 665
+INFO 2025-09-16 08:10:23,239 basehttp 3936 16128 "GET /api/notificaciones/ HTTP/1.1" 200 35
+INFO 2025-09-16 08:11:10,405 basehttp 3936 16128 "GET /api/notificaciones/ HTTP/1.1" 200 35
+INFO 2025-09-16 08:14:33,996 autoreload 18264 14936 Watching for file changes with StatReloader
+INFO 2025-09-16 08:15:52,338 basehttp 18264 1084 "GET /api/notificaciones/ HTTP/1.1" 200 35
+INFO 2025-09-16 08:16:00,603 basehttp 18264 1084 "GET /api/prestamos/solicitudes-pendientes/ HTTP/1.1" 200 449
+INFO 2025-09-16 08:16:00,986 basehttp 18264 16620 "GET /api/prestamos/solicitudes-pendientes/ HTTP/1.1" 200 449
+INFO 2025-09-16 08:16:05,587 basehttp 18264 16620 "GET /api/prestamos/ HTTP/1.1" 200 665
+INFO 2025-09-16 08:16:10,142 basehttp 18264 1084 "GET /api/libros/ HTTP/1.1" 200 687
+INFO 2025-09-16 08:16:10,155 basehttp 18264 16620 "GET /api/categorias/ HTTP/1.1" 200 26
+INFO 2025-09-16 08:16:15,597 basehttp 18264 1084 "GET /api/categorias/ HTTP/1.1" 200 26
+INFO 2025-09-16 08:16:15,705 basehttp 18264 16620 "GET /api/libros/ HTTP/1.1" 200 687
+INFO 2025-09-16 08:16:16,013 basehttp 18264 1084 "GET /api/categorias/ HTTP/1.1" 200 26
+INFO 2025-09-16 08:16:16,053 basehttp 18264 16620 "GET /api/libros/ HTTP/1.1" 200 687
+INFO 2025-09-16 08:16:24,450 basehttp 18264 16620 "POST /api/auth/logout/ HTTP/1.1" 200 42
+INFO 2025-09-16 08:16:39,350 basehttp 18264 16620 "POST /api/auth/login/ HTTP/1.1" 200 804
+INFO 2025-09-16 08:16:46,343 basehttp 18264 16620 "POST /api/auth/logout/ HTTP/1.1" 200 42
+INFO 2025-09-16 08:17:01,974 basehttp 18264 16620 "POST /api/auth/login/ HTTP/1.1" 200 804
+INFO 2025-09-16 08:17:08,282 basehttp 18264 16620 "GET /api/notificaciones/ HTTP/1.1" 200 35
+INFO 2025-09-16 08:17:17,946 basehttp 18264 16620 "GET /api/sanciones/ HTTP/1.1" 200 52
+INFO 2025-09-16 08:17:37,994 basehttp 18264 16620 "POST /api/auth/logout/ HTTP/1.1" 200 42
+INFO 2025-09-16 08:17:47,375 basehttp 18264 16620 "POST /api/auth/login/ HTTP/1.1" 200 797
+INFO 2025-09-16 08:17:52,693 basehttp 18264 16620 "GET /api/prestamos/solicitudes-pendientes/ HTTP/1.1" 200 449
+INFO 2025-09-16 08:17:53,136 basehttp 18264 1084 "GET /api/prestamos/solicitudes-pendientes/ HTTP/1.1" 200 449
+INFO 2025-09-16 08:18:04,350 basehttp 18264 1084 "OPTIONS /api/prestamos/1/aprobar/ HTTP/1.1" 200 0
+INFO 2025-09-16 08:18:04,592 basehttp 18264 1084 "POST /api/prestamos/1/aprobar/ HTTP/1.1" 200 154
+INFO 2025-09-16 08:18:05,471 basehttp 18264 1084 "GET /api/prestamos/solicitudes-pendientes/ HTTP/1.1" 200 28
+INFO 2025-09-16 08:19:00,553 basehttp 18264 16620 "GET /api/categorias/ HTTP/1.1" 200 26
+INFO 2025-09-16 08:19:00,616 basehttp 18264 1084 "GET /api/libros/ HTTP/1.1" 200 686
+INFO 2025-09-16 08:19:00,919 basehttp 18264 16620 "GET /api/categorias/ HTTP/1.1" 200 26
+INFO 2025-09-16 08:19:00,969 basehttp 18264 1084 "GET /api/libros/ HTTP/1.1" 200 686
+INFO 2025-09-16 08:19:09,138 basehttp 18264 1084 "GET /api/libros/ HTTP/1.1" 200 686
+INFO 2025-09-16 08:19:09,151 basehttp 18264 16620 "GET /api/categorias/ HTTP/1.1" 200 26
+INFO 2025-09-16 08:19:14,425 basehttp 18264 16620 "GET /api/prestamos/ HTTP/1.1" 200 655
+INFO 2025-09-16 08:21:22,233 basehttp 18264 16620 "POST /api/auth/logout/ HTTP/1.1" 200 42
+INFO 2025-09-16 08:21:31,908 basehttp 18264 16620 "POST /api/auth/login/ HTTP/1.1" 200 804
+INFO 2025-09-16 08:21:46,093 basehttp 18264 16620 "GET /api/notificaciones/ HTTP/1.1" 200 334
+INFO 2025-09-16 08:22:04,922 basehttp 18264 16620 "GET /api/libros/ HTTP/1.1" 200 685
+INFO 2025-09-16 08:22:20,860 basehttp 18264 16620 "GET /api/sanciones/ HTTP/1.1" 200 52
+INFO 2025-09-16 08:22:54,196 basehttp 18264 16620 "GET /api/notificaciones/ HTTP/1.1" 200 334
+INFO 2025-09-16 08:23:11,617 basehttp 18264 1084 "GET /api/categorias/ HTTP/1.1" 200 26
+INFO 2025-09-16 08:23:11,701 basehttp 18264 16620 "GET /api/libros/ HTTP/1.1" 200 685
+INFO 2025-09-16 08:23:12,442 basehttp 18264 1084 "GET /api/categorias/ HTTP/1.1" 200 26
+INFO 2025-09-16 08:23:12,517 basehttp 18264 16620 "GET /api/libros/ HTTP/1.1" 200 685
+INFO 2025-09-16 08:24:03,440 basehttp 18264 16620 "POST /api/auth/logout/ HTTP/1.1" 200 42
+INFO 2025-09-16 08:24:14,816 basehttp 18264 16620 "POST /api/auth/login/ HTTP/1.1" 200 797
+INFO 2025-09-16 08:24:21,854 basehttp 18264 16620 "GET /api/prestamos/solicitudes-pendientes/ HTTP/1.1" 200 28
+INFO 2025-09-16 08:24:22,182 basehttp 18264 1084 "GET /api/prestamos/solicitudes-pendientes/ HTTP/1.1" 200 28
+INFO 2025-09-16 08:24:25,052 basehttp 18264 1084 "GET /api/notificaciones/ HTTP/1.1" 200 35
+INFO 2025-09-16 08:29:21,866 basehttp 18264 1084 "GET /api/notificaciones/ HTTP/1.1" 200 35
+INFO 2025-09-16 08:29:32,415 basehttp 18264 1084 "GET /api/libros/ HTTP/1.1" 200 686
+INFO 2025-09-16 08:29:32,868 basehttp 18264 14420 "GET /api/categorias/ HTTP/1.1" 200 26
+INFO 2025-09-16 08:29:42,565 basehttp 18264 14420 "OPTIONS /api/auth/usuarios/ HTTP/1.1" 200 0
+INFO 2025-09-16 08:29:43,382 basehttp 18264 14420 "GET /api/auth/usuarios/ HTTP/1.1" 200 596
+INFO 2025-09-16 08:30:02,885 basehttp 18264 14420 "GET /api/notificaciones/ HTTP/1.1" 200 35
+INFO 2025-09-16 08:32:24,941 autoreload 18264 14936 C:\Users\ASUS\OneDrive\Escritorio\Logica de Programacion\Edubooks\edubooks-api\libros\views.py changed, reloading.
+INFO 2025-09-16 08:32:26,281 autoreload 5304 8088 Watching for file changes with StatReloader
+INFO 2025-09-16 08:32:40,384 autoreload 5304 8088 C:\Users\ASUS\OneDrive\Escritorio\Logica de Programacion\Edubooks\edubooks-api\libros\views.py changed, reloading.
+INFO 2025-09-16 08:32:45,700 autoreload 8264 13260 Watching for file changes with StatReloader
+INFO 2025-09-16 08:33:58,663 autoreload 21088 7108 Watching for file changes with StatReloader
+INFO 2025-09-16 08:36:05,372 basehttp 21088 20864 "POST /api/auth/logout/ HTTP/1.1" 200 42
+INFO 2025-09-16 08:36:16,491 basehttp 21088 20864 "POST /api/auth/login/ HTTP/1.1" 200 804
+INFO 2025-09-16 08:36:45,382 basehttp 21088 20864 "GET /api/notificaciones/ HTTP/1.1" 200 334
+INFO 2025-09-16 08:36:45,502 basehttp 21088 5924 "GET /api/notificaciones/ HTTP/1.1" 200 334
+INFO 2025-09-16 08:36:48,826 basehttp 21088 5924 "GET /api/libros/ HTTP/1.1" 200 685
+INFO 2025-09-16 08:36:59,769 basehttp 21088 5924 "GET /api/libros/ HTTP/1.1" 200 685
+INFO 2025-09-16 08:37:05,368 basehttp 21088 20864 "GET /api/categorias/ HTTP/1.1" 200 26
+INFO 2025-09-16 08:37:05,376 basehttp 21088 5924 "GET /api/libros/ HTTP/1.1" 200 685
+INFO 2025-09-16 08:37:05,604 basehttp 21088 20864 "GET /api/categorias/ HTTP/1.1" 200 26
+INFO 2025-09-16 08:37:05,625 basehttp 21088 5924 "GET /api/libros/ HTTP/1.1" 200 685
+INFO 2025-09-16 08:44:58,575 basehttp 21088 18612 "GET /api/libros/ HTTP/1.1" 200 685
+INFO 2025-09-16 08:45:03,810 basehttp 21088 18612 "GET /api/prestamos/ HTTP/1.1" 200 654
+INFO 2025-09-16 08:45:04,119 basehttp 21088 7092 "GET /api/prestamos/ HTTP/1.1" 200 654
+INFO 2025-09-16 08:45:19,129 basehttp 21088 7092 "OPTIONS /api/sanciones/ HTTP/1.1" 200 0
+INFO 2025-09-16 08:45:19,405 basehttp 21088 7092 "GET /api/sanciones/ HTTP/1.1" 200 52
+INFO 2025-09-16 08:45:22,221 basehttp 21088 7092 "GET /api/notificaciones/ HTTP/1.1" 200 334
+INFO 2025-09-16 08:45:22,544 basehttp 21088 18612 "GET /api/notificaciones/ HTTP/1.1" 200 334
+INFO 2025-09-16 08:47:44,683 basehttp 21088 20784 "GET /api/notificaciones/ HTTP/1.1" 200 334
+INFO 2025-09-16 08:47:45,256 basehttp 21088 20784 "GET /api/notificaciones/ HTTP/1.1" 200 334
+INFO 2025-09-16 08:47:56,194 basehttp 21088 14004 "GET /api/notificaciones/ HTTP/1.1" 200 334
+INFO 2025-09-16 08:47:56,413 basehttp 21088 19464 "GET /api/notificaciones/ HTTP/1.1" 200 334
+INFO 2025-09-16 08:49:13,221 basehttp 21088 21756 "GET /api/categorias/ HTTP/1.1" 200 26
+INFO 2025-09-16 08:49:13,238 basehttp 21088 21760 "GET /api/libros/ HTTP/1.1" 200 685
+INFO 2025-09-16 08:49:13,893 basehttp 21088 21712 "GET /api/libros/ HTTP/1.1" 200 685
+INFO 2025-09-16 08:49:14,067 basehttp 21088 21756 "GET /api/categorias/ HTTP/1.1" 200 26
+INFO 2025-09-16 08:49:16,151 basehttp 21088 21756 "OPTIONS /api/prestamos/crear/ HTTP/1.1" 200 0
+INFO 2025-09-16 08:49:16,679 basehttp 21088 21756 "POST /api/prestamos/crear/ HTTP/1.1" 201 1644
+INFO 2025-09-16 08:49:17,762 basehttp 21088 21712 "GET /api/categorias/ HTTP/1.1" 200 26
+INFO 2025-09-16 08:49:17,779 basehttp 21088 21756 "GET /api/libros/ HTTP/1.1" 200 684
+INFO 2025-09-16 08:49:32,787 basehttp 21088 21756 "GET /api/sanciones/ HTTP/1.1" 200 52
+INFO 2025-09-16 08:49:37,760 basehttp 21088 21756 "GET /api/prestamos/ HTTP/1.1" 200 1241
+INFO 2025-09-16 08:49:37,985 basehttp 21088 21712 "GET /api/prestamos/ HTTP/1.1" 200 1241
+INFO 2025-09-16 08:50:02,641 basehttp 21088 21712 "POST /api/auth/logout/ HTTP/1.1" 200 42
+INFO 2025-09-16 08:50:16,423 basehttp 21088 21712 "POST /api/auth/login/ HTTP/1.1" 200 797
+INFO 2025-09-16 08:50:37,425 basehttp 21088 21712 "GET /api/notificaciones/ HTTP/1.1" 200 35
+INFO 2025-09-16 08:50:37,710 basehttp 21088 21756 "GET /api/notificaciones/ HTTP/1.1" 200 35
+INFO 2025-09-16 08:50:42,317 basehttp 21088 21756 "GET /api/prestamos/solicitudes-pendientes/ HTTP/1.1" 200 423
+INFO 2025-09-16 08:50:42,585 basehttp 21088 21712 "GET /api/prestamos/solicitudes-pendientes/ HTTP/1.1" 200 423
+INFO 2025-09-16 08:50:54,276 basehttp 21088 21712 "OPTIONS /api/prestamos/2/aprobar/ HTTP/1.1" 200 0
+INFO 2025-09-16 08:50:54,504 basehttp 21088 21712 "POST /api/prestamos/2/aprobar/ HTTP/1.1" 200 128
+INFO 2025-09-16 08:50:55,399 basehttp 21088 21712 "GET /api/prestamos/solicitudes-pendientes/ HTTP/1.1" 200 28
+INFO 2025-09-16 08:51:02,786 basehttp 21088 21712 "GET /api/prestamos/ HTTP/1.1" 200 1233
+INFO 2025-09-16 08:51:19,263 basehttp 21088 21712 "GET /api/libros/ HTTP/1.1" 200 685
+INFO 2025-09-16 08:51:19,296 basehttp 21088 21756 "GET /api/categorias/ HTTP/1.1" 200 26
+INFO 2025-09-16 08:51:19,736 basehttp 21088 21712 "GET /api/categorias/ HTTP/1.1" 200 26
+INFO 2025-09-16 08:51:19,748 basehttp 21088 21760 "GET /api/libros/ HTTP/1.1" 200 685
+INFO 2025-09-16 08:53:25,004 autoreload 21088 7108 C:\Users\ASUS\OneDrive\Escritorio\Logica de Programacion\Edubooks\edubooks-api\libros\models.py changed, reloading.
+INFO 2025-09-16 08:53:29,050 autoreload 4048 16988 Watching for file changes with StatReloader
+INFO 2025-09-16 08:53:38,059 autoreload 4048 16988 C:\Users\ASUS\OneDrive\Escritorio\Logica de Programacion\Edubooks\edubooks-api\libros\views.py changed, reloading.
+INFO 2025-09-16 08:53:40,508 autoreload 19316 11632 Watching for file changes with StatReloader
+INFO 2025-09-16 08:56:26,317 autoreload 7932 10528 Watching for file changes with StatReloader
+INFO 2025-09-17 20:04:48,736 autoreload 24492 10940 Watching for file changes with StatReloader
+INFO 2025-09-17 20:11:37,304 basehttp 24492 21308 "OPTIONS /api/auth/login/ HTTP/1.1" 200 0
+INFO 2025-09-17 20:11:38,738 basehttp 24492 21308 "POST /api/auth/login/ HTTP/1.1" 200 804
+INFO 2025-09-17 20:11:46,578 basehttp 24492 21308 "OPTIONS /api/libros/ HTTP/1.1" 200 0
+INFO 2025-09-17 20:11:46,911 basehttp 24492 21308 "GET /api/libros/ HTTP/1.1" 200 683
+INFO 2025-09-17 20:11:50,034 basehttp 24492 21308 "OPTIONS /api/prestamos/ HTTP/1.1" 200 0
+INFO 2025-09-17 20:11:50,303 basehttp 24492 21308 "GET /api/prestamos/ HTTP/1.1" 200 1231
+INFO 2025-09-17 20:11:50,584 basehttp 24492 14548 "GET /api/prestamos/ HTTP/1.1" 200 1231

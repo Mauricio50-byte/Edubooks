@@ -112,6 +112,12 @@
     <ion-card *ngFor="let libro of libros" class="libro-card">
       <ion-card-content>
         <div class="libro-header">
+          <div class="libro-imagen-container">
+            <img [src]="libro.imagen_portada || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjY2NjY2NjIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzY2NjY2NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkxpYnJvPC90ZXh0Pjwvc3ZnPg=='"
+                 [alt]="libro.titulo" 
+                 class="libro-imagen"
+                 onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjY2NjY2NjIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzY2NjY2NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkxpYnJvPC90ZXh0Pjwvc3ZnPg=='">
+          </div>
           <div class="libro-info">
             <h3>{{ libro.titulo }}</h3>
             <p class="autor">{{ libro.autor }}</p>
@@ -159,7 +165,7 @@
             <ion-icon name="create" slot="start"></ion-icon>
             Editar
           </ion-button>
-          <ion-button fill="outline" size="small" (click)="router.navigate(['/detalle-libro', libro.id])">
+          <ion-button fill="outline" size="small" (click)="router.navigate(['/detalle-libro'], { queryParams: { id: libro.id } })">
             <ion-icon name="eye" slot="start"></ion-icon>
             Ver Detalles
           </ion-button>

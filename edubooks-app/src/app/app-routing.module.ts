@@ -75,9 +75,25 @@ const routes: Routes = [
     canActivate: [AuthGuard] // Solo accesible si está autenticado
   },
   {
+    path: 'sanciones',
+    loadChildren: () => import('./pages/sanciones/sanciones.module').then( m => m.SancionesPageModule),
+    canActivate: [AuthGuard] // Solo accesible si está autenticado
+  },
+  {
+    path: 'admin-solicitudes',
+    loadChildren: () => import('./pages/admin-solicitudes/admin-solicitudes.module').then( m => m.AdminSolicitudesPageModule),
+    canActivate: [AuthGuard] // Solo accesible si está autenticado
+  },
+  {
+    path: 'mis-solicitudes',
+    loadChildren: () => import('./pages/mis-solicitudes/mis-solicitudes.module').then( m => m.MisSolicitudesPageModule),
+    canActivate: [AuthGuard] // Solo accesible si está autenticado
+  },
+  {
     path: '**',
     redirectTo: 'login' // Ruta por defecto para páginas no encontradas
   }
+
 ];
 
 @NgModule({

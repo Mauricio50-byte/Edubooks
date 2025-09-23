@@ -91,7 +91,7 @@
     <ion-card *ngFor="let libro of librosFiltrados" class="book-card" (click)="verDetalle(libro)">
       <div class="book-image-container">
         <img [src]="libro.imagen_portada" [alt]="libro.titulo" class="book-image" 
-              onerror="this.src='assets/images/book-placeholder.svg'">
+              onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjY2NjY2NjIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzY2NjY2NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkxpYnJvPC90ZXh0Pjwvc3ZnPg=='">
         <ion-chip class="status-chip" [color]="getEstadoColor(libro.estado)">
           {{ libro.estado }}
         </ion-chip>
@@ -121,8 +121,8 @@
             fill="solid" 
             color="success"
             (click)="prestarLibro(libro); $event.stopPropagation()">
-            <ion-icon name="download-outline" slot="start"></ion-icon>
-            Prestar
+            <ion-icon name="send-outline" slot="start"></ion-icon>
+            Solicitar
           </ion-button>
           
           <ion-button 
@@ -136,7 +136,17 @@
           </ion-button>
           
           <ion-button 
-            *ngIf="!puedePrestar(libro) && !puedeReservar(libro)"
+            *ngIf="libro.usuario_tiene_prestamo"
+            expand="block" 
+            fill="outline" 
+            color="warning"
+            disabled>
+            <ion-icon name="time-outline" slot="start"></ion-icon>
+            Solicitud enviada
+          </ion-button>
+          
+          <ion-button 
+            *ngIf="!puedePrestar(libro) && !puedeReservar(libro) && !libro.usuario_tiene_prestamo"
             expand="block" 
             fill="outline" 
             color="medium"

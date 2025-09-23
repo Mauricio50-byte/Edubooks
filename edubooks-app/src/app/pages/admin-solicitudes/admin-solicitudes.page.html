@@ -1,0 +1,105 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/admin-libros"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Solicitudes de Préstamo</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cargarSolicitudes()">
+        <ion-icon name="refresh-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Loading state -->
+  <div class="loading-container" *ngIf="isLoading">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Cargando solicitudes...</p>
+  </div>
+
+  <!-- Error state -->
+  <div class="error-container" *ngIf="error && !isLoading">
+    <ion-icon name="alert-circle-outline" color="danger" size="large"></ion-icon>
+    <h3>Error</h3>
+    <p>{{ error }}</p>
+    <ion-button fill="outline" (click)="cargarSolicitudes()">
+      <ion-icon name="refresh-outline" slot="start"></ion-icon>
+      Reintentar
+    </ion-button>
+  </div>
+
+  <!-- Empty state -->
+  <div class="empty-state" *ngIf="!isLoading && !error && solicitudes.length === 0">
+    <ion-icon name="document-outline" color="medium" size="large"></ion-icon>
+    <h3>No hay solicitudes pendientes</h3>
+    <p>Todas las solicitudes han sido procesadas</p>
+  </div>
+
+  <!-- Solicitudes list -->
+  <div class="solicitudes-container" *ngIf="!isLoading && !error && solicitudes.length > 0">
+    <ion-card *ngFor="let solicitud of solicitudes" class="solicitud-card">
+      <ion-card-header>
+        <div class="solicitud-header">
+          <div class="libro-info">
+            <img [src]="solicitud.libro.imagen_portada" [alt]="solicitud.libro.titulo" class="libro-imagen"
+                 onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22400%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%23cccccc%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 font-family=%22Arial%22 font-size=%2218%22 fill=%22%23666666%22%3ELibro%3C/text%3E%3C/svg%3E'">
+            <div class="libro-detalles">
+              <ion-card-title>{{ solicitud.libro.titulo }}</ion-card-title>
+              <ion-card-subtitle>{{ solicitud.libro.autor }}</ion-card-subtitle>
+            </div>
+          </div>
+          <ion-chip color="warning">
+            <ion-icon name="time-outline"></ion-icon>
+            <ion-label>Pendiente</ion-label>
+          </ion-chip>
+        </div>
+      </ion-card-header>
+
+      <ion-card-content>
+        <div class="usuario-info">
+          <h4>Solicitante:</h4>
+          <p><strong>{{ solicitud.usuario.nombre }} {{ solicitud.usuario.apellido }}</strong></p>
+          <p>{{ solicitud.usuario.email }}</p>
+          <ion-chip [color]="solicitud.usuario.rol === 'Estudiante' ? 'primary' : 'secondary'" size="small">
+            {{ solicitud.usuario.rol }}
+          </ion-chip>
+        </div>
+
+        <div class="fecha-info">
+          <p><strong>Fecha de solicitud:</strong> {{ solicitud.fecha_solicitud | date:'dd/MM/yyyy HH:mm' }}</p>
+        </div>
+
+        <div class="observaciones" *ngIf="solicitud.observaciones">
+          <h4>Observaciones:</h4>
+          <p>{{ solicitud.observaciones }}</p>
+        </div>
+
+        <div class="acciones">
+          <ion-button 
+            expand="block" 
+            fill="solid" 
+            color="success"
+            (click)="aprobarSolicitud(solicitud)">
+            <ion-icon name="checkmark-outline" slot="start"></ion-icon>
+            Aprobar
+          </ion-button>
+          
+          <ion-button 
+            expand="block" 
+            fill="outline" 
+            color="danger"
+            (click)="rechazarSolicitud(solicitud)">
+            <ion-icon name="close-outline" slot="start"></ion-icon>
+            Rechazar
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

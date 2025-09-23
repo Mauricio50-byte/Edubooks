@@ -35,7 +35,7 @@
     <div class="libro-hero">
       <div class="imagen-container">
         <img 
-          [src]="libro.imagen_portada || 'assets/images/book-placeholder.png'" 
+          [src]="libro.imagen_portada || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjY2NjY2NjIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzY2NjY2NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkxpYnJvPC90ZXh0Pjwvc3ZnPg=='" 
           [alt]="libro.titulo"
           class="libro-imagen">
         
@@ -199,7 +199,7 @@
           (click)="verLibroRelacionado(libroRel)">
           
           <img 
-            [src]="libroRel.imagen_portada || 'assets/images/book-placeholder.png'" 
+            [src]="libroRel.imagen_portada || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22400%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%23cccccc%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 font-family=%22Arial%22 font-size=%2218%22 fill=%22%23666666%22%3ELibro%3C/text%3E%3C/svg%3E'" 
             [alt]="libroRel.titulo">
           
           <div class="libro-info">

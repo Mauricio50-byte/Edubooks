@@ -101,7 +101,7 @@
               <span class="tipo-label">{{ notificacion.tipo | titlecase }}</span>
             </div>
             <div class="notificacion-fecha">
-              {{ formatearFecha(notificacion.fecha) }}
+              {{ formatearFecha(notificacion.fecha_creacion) }}
             </div>
           </div>
           <div class="notificacion-actions">
@@ -117,13 +117,13 @@
           <p>{{ notificacion.mensaje }}</p>
         </div>
         
-        <div class="notificacion-footer" *ngIf="notificacion.accion">
+        <div class="notificacion-footer" *ngIf="notificacion.relacionado_id">
           <ion-button 
             fill="outline" 
             size="small" 
             (click)="ejecutarAccion(notificacion); $event.stopPropagation()">
             <ion-icon name="arrow-forward" slot="end"></ion-icon>
-            {{ notificacion.accion.texto }}
+            Ver detalles
           </ion-button>
         </div>
       </ion-card-content>
