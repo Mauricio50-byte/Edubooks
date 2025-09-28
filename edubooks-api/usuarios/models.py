@@ -1,6 +1,7 @@
 # usuarios/models.py
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
+from edubooks.supabase_adapter import SupabaseModelMixin
 
 class UsuarioManager(BaseUserManager):
     def create_user(self, email, username, password=None, **extra_fields):
@@ -27,7 +28,7 @@ class UsuarioManager(BaseUserManager):
         
         return self.create_user(email, username, password, **extra_fields)
 
-class Usuario(AbstractBaseUser, PermissionsMixin):
+class Usuario(AbstractBaseUser, PermissionsMixin, SupabaseModelMixin):
     ROLES_CHOICES = [
         ('Estudiante', 'Estudiante'),
         ('Docente', 'Docente'),

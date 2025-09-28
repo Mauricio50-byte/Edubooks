@@ -1,5 +1,7 @@
 from pathlib import Path
 from datetime import timedelta
+import os
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -112,14 +114,20 @@ TEMPLATES = [
 WSGI_APPLICATION = 'edubooks.wsgi.application'
 
 # Database
+# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+
+# Configuración para Supabase (PostgreSQL)
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'edubooks',
-        'USER': 'postgres',
-        'PASSWORD': 'root',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': config('SUPABASE_DB_NAME', default='postgres'),
+        'USER': config('SUPABASE_DB_USER', default='postgres'),
+        'PASSWORD': config('SUPABASE_DB_PASSWORD', default=''),
+        'HOST': config('SUPABASE_DB_HOST', default='localhost'),
+        'PORT': config('SUPABASE_DB_PORT', default='5432'),
+        'OPTIONS': {
+            'sslmode': 'require',
+        },
     }
 }
 
@@ -151,7 +159,11 @@ STATIC_URL = 'static/'
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Configuración de Logging
+# Configuración de Supabase Client
+SUPABASE_URL = config('SUPABASE_URL', default='')
+SUPABASE_KEY = config('SUPABASE_ANON_KEY', default='')
+
+# Configuración de logging
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
