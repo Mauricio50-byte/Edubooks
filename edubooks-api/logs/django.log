@@ -1520,3 +1520,138 @@ INFO 2025-09-28 01:22:38,723 basehttp 23472 15180 "POST /api/auth/registro/ HTTP
 INFO 2025-09-28 01:24:38,855 basehttp 23472 9692 "POST /api/auth/registro/ HTTP/1.1" 201 791
 INFO 2025-09-28 01:46:16,797 supabase_client 22504 2432 Cliente de Supabase inicializado correctamente
 INFO 2025-09-28 01:46:29,839 supabase_client 15652 2560 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 01:58:11,080 autoreload 23472 23176 C:\Users\ASUS\OneDrive\Escritorio\Logica de Programacion\Edubooks\edubooks-api\edubooks\settings.py changed, reloading.
+INFO 2025-09-28 01:58:11,379 autoreload 16800 19744 C:\Users\ASUS\OneDrive\Escritorio\Logica de Programacion\Edubooks\edubooks-api\edubooks\settings.py changed, reloading.
+INFO 2025-09-28 01:58:19,359 supabase_client 11196 15220 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 01:58:19,439 autoreload 11196 15220 Watching for file changes with StatReloader
+INFO 2025-09-28 01:58:19,560 supabase_client 24188 19636 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 01:58:19,666 autoreload 24188 19636 Watching for file changes with StatReloader
+INFO 2025-09-28 01:59:20,443 autoreload 24188 19636 C:\Users\ASUS\OneDrive\Escritorio\Logica de Programacion\Edubooks\edubooks-api\edubooks\settings.py changed, reloading.
+INFO 2025-09-28 01:59:21,050 autoreload 11196 15220 C:\Users\ASUS\OneDrive\Escritorio\Logica de Programacion\Edubooks\edubooks-api\edubooks\settings.py changed, reloading.
+INFO 2025-09-28 01:59:25,974 supabase_client 20928 9044 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 01:59:26,041 autoreload 20928 9044 Watching for file changes with StatReloader
+INFO 2025-09-28 01:59:26,175 supabase_client 5928 14356 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 01:59:26,234 autoreload 5928 14356 Watching for file changes with StatReloader
+INFO 2025-09-28 02:02:13,180 autoreload 5928 14356 C:\Users\ASUS\OneDrive\Escritorio\Logica de Programacion\Edubooks\edubooks-api\usuarios\models.py changed, reloading.
+INFO 2025-09-28 02:02:13,387 autoreload 20928 9044 C:\Users\ASUS\OneDrive\Escritorio\Logica de Programacion\Edubooks\edubooks-api\usuarios\models.py changed, reloading.
+INFO 2025-09-28 02:02:20,752 supabase_client 17540 17556 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 02:02:20,864 autoreload 17540 17556 Watching for file changes with StatReloader
+INFO 2025-09-28 02:02:20,891 supabase_client 2176 14380 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 02:02:21,053 autoreload 2176 14380 Watching for file changes with StatReloader
+INFO 2025-09-28 02:02:49,639 autoreload 17540 17556 C:\Users\ASUS\OneDrive\Escritorio\Logica de Programacion\Edubooks\edubooks-api\usuarios\models.py changed, reloading.
+INFO 2025-09-28 02:02:50,022 autoreload 2176 14380 C:\Users\ASUS\OneDrive\Escritorio\Logica de Programacion\Edubooks\edubooks-api\usuarios\models.py changed, reloading.
+INFO 2025-09-28 02:02:55,063 supabase_client 18900 21064 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 02:02:55,138 autoreload 18900 21064 Watching for file changes with StatReloader
+INFO 2025-09-28 02:02:55,353 supabase_client 2068 12012 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 02:02:55,421 autoreload 2068 12012 Watching for file changes with StatReloader
+INFO 2025-09-28 02:04:00,785 autoreload 18900 21064 C:\Users\ASUS\OneDrive\Escritorio\Logica de Programacion\Edubooks\edubooks-api\usuarios\serializers.py changed, reloading.
+INFO 2025-09-28 02:04:00,993 autoreload 2068 12012 C:\Users\ASUS\OneDrive\Escritorio\Logica de Programacion\Edubooks\edubooks-api\usuarios\serializers.py changed, reloading.
+INFO 2025-09-28 02:04:06,078 supabase_client 21120 12828 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 02:04:06,142 autoreload 21120 12828 Watching for file changes with StatReloader
+INFO 2025-09-28 02:04:06,145 supabase_client 20640 14576 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 02:04:06,221 autoreload 20640 14576 Watching for file changes with StatReloader
+INFO 2025-09-28 02:06:28,482 autoreload 21120 12828 C:\Users\ASUS\OneDrive\Escritorio\Logica de Programacion\Edubooks\edubooks-api\usuarios\views.py changed, reloading.
+INFO 2025-09-28 02:06:28,601 autoreload 20640 14576 C:\Users\ASUS\OneDrive\Escritorio\Logica de Programacion\Edubooks\edubooks-api\usuarios\views.py changed, reloading.
+INFO 2025-09-28 02:06:33,453 supabase_client 5516 24352 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 02:06:33,508 autoreload 5516 24352 Watching for file changes with StatReloader
+INFO 2025-09-28 02:06:33,889 supabase_client 21176 19728 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 02:06:33,960 autoreload 21176 19728 Watching for file changes with StatReloader
+INFO 2025-09-28 02:06:40,801 autoreload 21176 19728 C:\Users\ASUS\OneDrive\Escritorio\Logica de Programacion\Edubooks\edubooks-api\usuarios\views.py changed, reloading.
+INFO 2025-09-28 02:06:41,296 autoreload 5516 24352 C:\Users\ASUS\OneDrive\Escritorio\Logica de Programacion\Edubooks\edubooks-api\usuarios\views.py changed, reloading.
+INFO 2025-09-28 02:06:44,578 supabase_client 21840 5616 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 02:06:44,663 autoreload 21840 5616 Watching for file changes with StatReloader
+INFO 2025-09-28 02:06:45,017 supabase_client 20564 22604 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 02:06:45,151 autoreload 20564 22604 Watching for file changes with StatReloader
+INFO 2025-09-28 02:06:49,443 autoreload 21840 5616 C:\Users\ASUS\OneDrive\Escritorio\Logica de Programacion\Edubooks\edubooks-api\usuarios\views.py changed, reloading.
+INFO 2025-09-28 02:06:49,641 autoreload 20564 22604 C:\Users\ASUS\OneDrive\Escritorio\Logica de Programacion\Edubooks\edubooks-api\usuarios\views.py changed, reloading.
+INFO 2025-09-28 02:06:53,052 supabase_client 14088 24404 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 02:06:53,095 autoreload 14088 24404 Watching for file changes with StatReloader
+INFO 2025-09-28 02:06:53,157 supabase_client 2316 17680 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 02:06:53,211 autoreload 2316 17680 Watching for file changes with StatReloader
+INFO 2025-09-28 02:07:08,303 autoreload 14088 24404 C:\Users\ASUS\OneDrive\Escritorio\Logica de Programacion\Edubooks\edubooks-api\usuarios\urls.py changed, reloading.
+INFO 2025-09-28 02:07:08,321 autoreload 2316 17680 C:\Users\ASUS\OneDrive\Escritorio\Logica de Programacion\Edubooks\edubooks-api\usuarios\urls.py changed, reloading.
+INFO 2025-09-28 02:07:11,423 supabase_client 10100 18736 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 02:07:11,423 supabase_client 17748 19080 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 02:07:11,474 autoreload 10100 18736 Watching for file changes with StatReloader
+INFO 2025-09-28 02:07:11,474 autoreload 17748 19080 Watching for file changes with StatReloader
+INFO 2025-09-28 02:07:26,858 supabase_client 14016 18988 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 02:07:39,123 supabase_client 6752 15908 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 02:09:05,688 supabase_client 17832 21244 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 02:09:21,754 supabase_client 21196 15180 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 02:09:47,581 supabase_client 14096 22280 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 02:10:23,184 autoreload 10100 18736 C:\Users\ASUS\OneDrive\Escritorio\Logica de Programacion\Edubooks\edubooks-api\edubooks\settings.py changed, reloading.
+INFO 2025-09-28 02:10:23,226 autoreload 17748 19080 C:\Users\ASUS\OneDrive\Escritorio\Logica de Programacion\Edubooks\edubooks-api\edubooks\settings.py changed, reloading.
+INFO 2025-09-28 02:10:28,026 supabase_client 11340 7368 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 02:10:28,076 supabase_client 2088 12500 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 02:10:28,094 autoreload 11340 7368 Watching for file changes with StatReloader
+INFO 2025-09-28 02:10:28,145 autoreload 2088 12500 Watching for file changes with StatReloader
+INFO 2025-09-28 02:11:11,240 supabase_client 7464 20080 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 02:11:25,864 supabase_client 20332 11832 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 02:11:40,201 supabase_client 14548 19728 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 02:11:53,150 supabase_client 11356 8456 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 02:11:55,537 models 11356 8456 Sanción aplicada a test@edubooks.com: 7 días. Motivo: Prueba de sanción
+INFO 2025-09-28 02:11:56,142 models 11356 8456 Multa agregada a test@edubooks.com: $5000. Concepto: Multa de prueba
+INFO 2025-09-28 02:12:28,472 supabase_client 4964 8040 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 02:17:12,647 supabase_client 21320 23172 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 02:18:30,209 supabase_client 3116 11324 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 02:18:34,213 autoreload 2088 12500 C:\Users\ASUS\OneDrive\Escritorio\Logica de Programacion\Edubooks\edubooks-api\usuarios\migrations\0001_initial.py changed, reloading.
+INFO 2025-09-28 02:18:34,374 autoreload 11340 7368 C:\Users\ASUS\OneDrive\Escritorio\Logica de Programacion\Edubooks\edubooks-api\usuarios\migrations\0001_initial.py changed, reloading.
+INFO 2025-09-28 02:18:38,949 supabase_client 14832 20308 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 02:18:39,061 autoreload 14832 20308 Watching for file changes with StatReloader
+INFO 2025-09-28 02:18:39,071 supabase_client 11508 5112 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 02:18:39,148 autoreload 11508 5112 Watching for file changes with StatReloader
+INFO 2025-09-28 02:18:49,332 supabase_client 23516 760 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 02:25:38,900 autoreload 11508 5112 C:\Users\ASUS\OneDrive\Escritorio\Logica de Programacion\Edubooks\edubooks-api\usuarios\views.py changed, reloading.
+INFO 2025-09-28 02:25:38,910 autoreload 14832 20308 C:\Users\ASUS\OneDrive\Escritorio\Logica de Programacion\Edubooks\edubooks-api\usuarios\views.py changed, reloading.
+INFO 2025-09-28 02:25:43,457 supabase_client 5816 16332 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 02:25:43,507 supabase_client 4588 16420 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 02:25:43,551 autoreload 5816 16332 Watching for file changes with StatReloader
+INFO 2025-09-28 02:25:43,577 autoreload 4588 16420 Watching for file changes with StatReloader
+INFO 2025-09-28 02:27:37,118 autoreload 5816 16332 C:\Users\ASUS\OneDrive\Escritorio\Logica de Programacion\Edubooks\edubooks-api\edubooks\settings.py changed, reloading.
+INFO 2025-09-28 02:27:37,142 autoreload 4588 16420 C:\Users\ASUS\OneDrive\Escritorio\Logica de Programacion\Edubooks\edubooks-api\edubooks\settings.py changed, reloading.
+INFO 2025-09-28 02:27:40,882 supabase_client 23372 18324 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 02:27:40,887 supabase_client 16736 20312 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 02:27:40,947 autoreload 23372 18324 Watching for file changes with StatReloader
+INFO 2025-09-28 02:27:40,947 autoreload 16736 20312 Watching for file changes with StatReloader
+INFO 2025-09-28 02:56:11,004 autoreload 23372 18324 C:\Users\ASUS\OneDrive\Escritorio\Logica de Programacion\Edubooks\edubooks-api\usuarios\views.py changed, reloading.
+INFO 2025-09-28 02:56:11,015 autoreload 16736 20312 C:\Users\ASUS\OneDrive\Escritorio\Logica de Programacion\Edubooks\edubooks-api\usuarios\views.py changed, reloading.
+INFO 2025-09-28 02:56:15,495 supabase_client 23568 22892 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 02:56:15,495 supabase_client 20972 18284 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 02:56:15,580 autoreload 23568 22892 Watching for file changes with StatReloader
+INFO 2025-09-28 02:56:15,582 autoreload 20972 18284 Watching for file changes with StatReloader
+INFO 2025-09-28 02:56:22,237 autoreload 23568 22892 C:\Users\ASUS\OneDrive\Escritorio\Logica de Programacion\Edubooks\edubooks-api\usuarios\views.py changed, reloading.
+INFO 2025-09-28 02:56:23,435 autoreload 20972 18284 C:\Users\ASUS\OneDrive\Escritorio\Logica de Programacion\Edubooks\edubooks-api\usuarios\views.py changed, reloading.
+INFO 2025-09-28 02:56:26,136 supabase_client 6600 12004 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 02:56:26,198 autoreload 6600 12004 Watching for file changes with StatReloader
+INFO 2025-09-28 02:56:27,308 supabase_client 24248 16020 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 02:56:27,394 autoreload 24248 16020 Watching for file changes with StatReloader
+INFO 2025-09-28 02:57:29,089 autoreload 24248 16020 C:\Users\ASUS\OneDrive\Escritorio\Logica de Programacion\Edubooks\edubooks-api\usuarios\views.py changed, reloading.
+INFO 2025-09-28 02:57:29,106 autoreload 6600 12004 C:\Users\ASUS\OneDrive\Escritorio\Logica de Programacion\Edubooks\edubooks-api\usuarios\views.py changed, reloading.
+INFO 2025-09-28 02:57:33,003 supabase_client 3100 17540 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 02:57:33,005 supabase_client 10052 22844 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 02:57:33,066 autoreload 3100 17540 Watching for file changes with StatReloader
+INFO 2025-09-28 02:57:33,067 autoreload 10052 22844 Watching for file changes with StatReloader
+INFO 2025-09-28 02:58:36,123 autoreload 3100 17540 C:\Users\ASUS\OneDrive\Escritorio\Logica de Programacion\Edubooks\edubooks-api\usuarios\views.py changed, reloading.
+INFO 2025-09-28 02:58:36,259 autoreload 10052 22844 C:\Users\ASUS\OneDrive\Escritorio\Logica de Programacion\Edubooks\edubooks-api\usuarios\views.py changed, reloading.
+INFO 2025-09-28 02:58:39,920 supabase_client 4536 19020 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 02:58:39,929 supabase_client 16440 7584 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 02:58:39,984 autoreload 4536 19020 Watching for file changes with StatReloader
+INFO 2025-09-28 02:58:39,984 autoreload 16440 7584 Watching for file changes with StatReloader
+INFO 2025-09-28 02:59:43,221 autoreload 16440 7584 C:\Users\ASUS\OneDrive\Escritorio\Logica de Programacion\Edubooks\edubooks-api\usuarios\views.py changed, reloading.
+INFO 2025-09-28 02:59:44,370 autoreload 4536 19020 C:\Users\ASUS\OneDrive\Escritorio\Logica de Programacion\Edubooks\edubooks-api\usuarios\views.py changed, reloading.
+INFO 2025-09-28 02:59:46,869 supabase_client 20356 4120 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 02:59:46,931 autoreload 20356 4120 Watching for file changes with StatReloader
+INFO 2025-09-28 02:59:47,914 supabase_client 11360 4596 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 02:59:47,991 autoreload 11360 4596 Watching for file changes with StatReloader
+INFO 2025-09-28 03:00:53,335 autoreload 11360 4596 C:\Users\ASUS\OneDrive\Escritorio\Logica de Programacion\Edubooks\edubooks-api\usuarios\views.py changed, reloading.
+INFO 2025-09-28 03:00:53,352 autoreload 20356 4120 C:\Users\ASUS\OneDrive\Escritorio\Logica de Programacion\Edubooks\edubooks-api\usuarios\views.py changed, reloading.
+INFO 2025-09-28 03:00:56,866 supabase_client 16524 17724 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 03:00:56,870 supabase_client 22972 10612 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 03:00:56,924 autoreload 16524 17724 Watching for file changes with StatReloader
+INFO 2025-09-28 03:00:56,929 autoreload 22972 10612 Watching for file changes with StatReloader
+INFO 2025-09-28 14:44:50,879 autoreload 22972 10612 C:\Users\ASUS\OneDrive\Escritorio\Logica de Programacion\Edubooks\edubooks-api\edubooks\settings.py changed, reloading.
+INFO 2025-09-28 14:45:04,948 supabase_client 24860 18904 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 14:45:05,186 autoreload 24860 18904 Watching for file changes with StatReloader
+INFO 2025-09-28 14:51:51,900 supabase_client 22716 17504 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 14:51:54,666 supabase_client 20836 22848 Cliente de Supabase inicializado correctamente
+INFO 2025-09-28 14:51:54,708 autoreload 20836 22848 Watching for file changes with StatReloader

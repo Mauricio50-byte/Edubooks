@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { tap, catchError } from 'rxjs/operators';
+import { BehaviorSubject, Observable, from } from 'rxjs';
+import { tap, catchError, switchMap } from 'rxjs/operators';
 import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { ApiService } from './api.service';
+import { SupabaseService } from './supabase.service';
 import { Usuario, UsuarioLogin, UsuarioRegistro, AuthResponse } from '../models/usuario.model';
 
 @Injectable({
@@ -16,29 +18,82 @@ export class AuthService {
 
   constructor(
     private apiService: ApiService,
-    private router: Router
+    private router: Router,
+    private supabaseService: SupabaseService
   ) {
-    this.loadStoredUser();
+    this.currentUserSubject = new BehaviorSubject<Usuario | null>(this.loadStoredUser());
+    this.currentUser$ = this.currentUserSubject.asObservable();
+    // Delay Supabase initialization to avoid NavigatorLockAcquireTimeoutError
+    setTimeout(() => {
+      this.initializeSupabaseAuth();
+    }, 100);
+  }
+
+  // Inicializar autenticación de Supabase
+  private initializeSupabaseAuth() {
+    this.supabaseService.currentUser$.subscribe(supabaseUser => {
+      if (supabaseUser && !this.isAuthenticatedSubject.value) {
+        // Usuario autenticado en Supabase pero no en Django
+        this.syncWithDjango(supabaseUser);
+      }
+    });
+  }
+
+  // Sincronizar usuario de Supabase con Django
+  private async syncWithDjango(supabaseUser: any) {
+    try {
+      const token = await this.supabaseService.getAccessToken();
+      if (token) {
+        // Enviar token de Supabase al backend Django para sincronización
+        this.apiService.post<AuthResponse>('/auth/supabase-sync/', {
+          supabase_token: token,
+          user_data: {
+            email: supabaseUser.email,
+            username: supabaseUser.email.split('@')[0],
+            nombre: supabaseUser.user_metadata?.full_name?.split(' ')[0] || '',
+            apellido: supabaseUser.user_metadata?.full_name?.split(' ').slice(1).join(' ') || ''
+          }
+        }).subscribe({
+          next: (response) => this.handleAuthSuccess(response),
+          error: (error) => console.error('Error sincronizando con Django:', error)
+        });
+      }
+    } catch (error) {
+      console.error('Error obteniendo token de Supabase:', error);
+    }
   }
 
   // Cargar usuario almacenado al inicializar la app
-  private loadStoredUser() {
+  private loadStoredUser(): Usuario | null {
     try {
       const accessToken = localStorage.getItem('access_token');
       const userData = localStorage.getItem('user_data');
 
       if (accessToken && userData) {
         const user = JSON.parse(userData);
-        this.currentUserSubject.next(user);
         this.isAuthenticatedSubject.next(true);
+        return user;
       }
+      return null;
     } catch (error) {
       console.error('Error cargando usuario almacenado:', error);
       this.clearStorage();
+      return null;
     }
   }
 
-  // Registro de usuario
+  // Inicio de sesión con Google
+  async loginWithGoogle(): Promise<void> {
+    try {
+      await this.supabaseService.signInWithGoogle();
+      // La sincronización se manejará automáticamente en initializeSupabaseAuth
+    } catch (error) {
+      console.error('Error en login con Google:', error);
+      throw error;
+    }
+  }
+
+  // Registro de usuario (mantener funcionalidad existente)
   registro(userData: UsuarioRegistro): Observable<AuthResponse> {
     return this.apiService.post<AuthResponse>('/auth/registro/', userData)
       .pipe(
@@ -78,6 +133,11 @@ export class AuthService {
           }
         });
       }
+      
+      // Cerrar sesión en Supabase
+      this.supabaseService.signOut().catch(error => {
+        console.error('Error cerrando sesión en Supabase:', error);
+      });
       
       // Siempre limpiar el almacenamiento local y redirigir
       this.clearStorage();

@@ -75,6 +75,22 @@
       </ion-button>
     </form>
 
+    <!-- Separador -->
+    <div class="divider">
+      <span>o</span>
+    </div>
+
+    <!-- Botón de Google -->
+    <ion-button 
+      expand="block" 
+      fill="outline" 
+      class="google-button"
+      (click)="loginWithGoogle()"
+      [disabled]="isLoading">
+      <ion-icon name="logo-google" slot="start"></ion-icon>
+      Continuar con Google
+    </ion-button>
+
     <!-- Enlaces adicionales -->
     <div class="additional-links">
       <ion-button fill="clear" (click)="goToRegister()" class="register-link">

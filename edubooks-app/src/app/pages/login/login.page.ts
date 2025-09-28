@@ -85,6 +85,38 @@ export class LoginPage implements OnInit {
     }
   }
 
+  // Nuevo método para login con Google
+  async loginWithGoogle() {
+    const loading = await this.loadingController.create({
+      message: 'Iniciando sesión con Google...',
+    });
+    await loading.present();
+
+    try {
+      await this.authService.loginWithGoogle();
+      await loading.dismiss();
+      
+      const toast = await this.toastController.create({
+        message: '¡Bienvenido a EduBooks!',
+        duration: 2000,
+        color: 'success',
+        position: 'top'
+      });
+      await toast.present();
+
+      this.router.navigate(['/home']);
+    } catch (error) {
+      await loading.dismiss();
+      
+      const alert = await this.alertController.create({
+        header: 'Error de Autenticación',
+        message: 'No se pudo iniciar sesión con Google. Inténtalo de nuevo.',
+        buttons: ['OK']
+      });
+      await alert.present();
+    }
+  }
+
   togglePasswordVisibility() {
     this.showPassword = !this.showPassword;
   }

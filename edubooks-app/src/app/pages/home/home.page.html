@@ -84,7 +84,7 @@
           </ion-item>
 
           <!-- Opciones para Estudiantes y Docentes -->
-          <ion-item button (click)="navigateTo('/bibliografia')" *ngIf="isEstudianteOrDocente()">
+          <ion-item button (click)="navigateTo('/bibliografia')" *appHasRole="['Estudiante', 'Docente']">
             <ion-icon name="book-outline" slot="start" color="secondary"></ion-icon>
             <ion-label>
               <h3>Mi Bibliografía</h3>
@@ -93,7 +93,7 @@
             <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
           </ion-item>
 
-          <ion-item button (click)="navigateTo('/historial-prestamos')" *ngIf="isEstudianteOrDocente()">
+          <ion-item button (click)="navigateTo('/historial-prestamos')" *appHasRole="['Estudiante', 'Docente']">
             <ion-icon name="time-outline" slot="start" color="secondary"></ion-icon>
             <ion-label>
               <h3>Historial de Préstamos</h3>
@@ -102,7 +102,7 @@
             <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
           </ion-item>
 
-          <ion-item button (click)="navigateTo('/sanciones')" *ngIf="isEstudianteOrDocente()">
+          <ion-item button (click)="navigateTo('/sanciones')" *appHasRole="['Estudiante', 'Docente']">
             <ion-icon name="warning-outline" slot="start" color="warning"></ion-icon>
             <ion-label>
               <h3>Mis Sanciones</h3>
@@ -112,7 +112,7 @@
           </ion-item>
 
           <!-- Opciones solo para Administradores -->
-          <ion-item button (click)="navigateTo('/admin-libros')" *ngIf="isAdministrador()">
+          <ion-item button (click)="navigateTo('/admin-libros')" *appHasRole="'Administrador'">
             <ion-icon name="settings-outline" slot="start" color="tertiary"></ion-icon>
             <ion-label>
               <h3>Administrar Libros</h3>
@@ -121,7 +121,7 @@
             <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
           </ion-item>
 
-          <ion-item button (click)="navigateTo('/admin-usuarios')" *ngIf="isAdministrador()">
+          <ion-item button (click)="navigateTo('/admin-usuarios')" *appHasRole="'Administrador'">
             <ion-icon name="people-outline" slot="start" color="tertiary"></ion-icon>
             <ion-label>
               <h3>Administrar Usuarios</h3>
@@ -130,7 +130,7 @@
             <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
           </ion-item>
 
-          <ion-item button (click)="navigateTo('/admin-prestamos')" *ngIf="isAdministrador()">
+          <ion-item button (click)="navigateTo('/admin-prestamos')" *appHasRole="['Administrador', 'Docente']">
             <ion-icon name="swap-horizontal-outline" slot="start" color="tertiary"></ion-icon>
             <ion-label>
               <h3>Administrar Préstamos</h3>
@@ -139,7 +139,7 @@
             <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
           </ion-item>
 
-          <ion-item button (click)="navigateTo('/admin-solicitudes')" *ngIf="isAdministrador()">
+          <ion-item button (click)="navigateTo('/admin-solicitudes')" *appHasRole="['Administrador', 'Docente']">
             <ion-icon name="document-text-outline" slot="start" color="tertiary"></ion-icon>
             <ion-label>
               <h3>Solicitudes Pendientes</h3>

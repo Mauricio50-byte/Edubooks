@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 import { AuthGuard } from '../../../edubooks-app/src/app/core/guards/auth-guard';
 import { NoAuthGuard } from '../../../edubooks-app/src/app/core/guards/no-auth-guard';
+import { RoleGuard } from '../../../edubooks-app/src/app/core/guards/role.guard';
 
 const routes: Routes = [
   {
@@ -20,6 +21,10 @@ const routes: Routes = [
     canActivate: [NoAuthGuard] // Solo accesible si NO está autenticado
   },
   {
+    path: 'auth/callback',
+    loadChildren: () => import('./shared/componentes/auth/callback/callback.module').then( m => m.CallbackPageModule)
+  },
+  {
     path: 'home',
     loadChildren: () => import('./pages/home/home.module').then( m => m.HomePageModule),
     canActivate: [AuthGuard] // Solo accesible si está autenticado
@@ -31,62 +36,67 @@ const routes: Routes = [
   },
   {
     path: 'catalogo',
-    loadChildren: () => import('./pages/catalogo/catalogo.module').then( m => m.CatalogoPageModule),
+    loadChildren: () => import('./pages/docente_y_estudiante/catalogo/catalogo.module').then( m => m.CatalogoPageModule),
     canActivate: [AuthGuard] // Solo accesible si está autenticado
   },
   {
     path: 'detalle-libro',
-    loadChildren: () => import('./pages/detalle-libro/detalle-libro.module').then( m => m.DetalleLibroPageModule),
+    loadChildren: () => import('./pages/docente_y_estudiante/detalle-libro/detalle-libro.module').then( m => m.DetalleLibroPageModule),
     canActivate: [AuthGuard] // Solo accesible si está autenticado
   },
   {
     path: 'bibliografia',
-    loadChildren: () => import('./pages/bibliografia/bibliografia.module').then( m => m.BibliografiaPageModule),
+    loadChildren: () => import('./pages/docente_y_estudiante/bibliografia/bibliografia.module').then( m => m.BibliografiaPageModule),
     canActivate: [AuthGuard] // Solo accesible si está autenticado
   },
   {
     path: 'admin-libros',
-    loadChildren: () => import('./pages/admin-libros/admin-libros.module').then( m => m.AdminLibrosPageModule),
-    canActivate: [AuthGuard] // Solo accesible si está autenticado
+    loadChildren: () => import('./pages/administrador/admin-libros/admin-libros.module').then( m => m.AdminLibrosPageModule),
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['Administrador', 'Docente'] }
   },
   {
     path: 'bibliografia-estudiante',
-    loadChildren: () => import('./pages/bibliografia-estudiante/bibliografia-estudiante.module').then( m => m.BibliografiaEstudiantePageModule),
+    loadChildren: () => import('./pages/docente_y_estudiante/bibliografia-estudiante/bibliografia-estudiante.module').then( m => m.BibliografiaEstudiantePageModule),
     canActivate: [AuthGuard] // Solo accesible si está autenticado
   },
   {
     path: 'historial-prestamos',
-    loadChildren: () => import('./pages/historial-prestamos/historial-prestamos.module').then( m => m.HistorialPrestamosPageModule),
+    loadChildren: () => import('./pages/docente_y_estudiante/historial-prestamos/historial-prestamos.module').then( m => m.HistorialPrestamosPageModule),
     canActivate: [AuthGuard] // Solo accesible si está autenticado
   },
   {
     path: 'notificaciones',
-    loadChildren: () => import('./pages/notificaciones/notificaciones.module').then( m => m.NotificacionesPageModule),
+    loadChildren: () => import('./pages/docente_y_estudiante/notificaciones/notificaciones.module').then( m => m.NotificacionesPageModule),
     canActivate: [AuthGuard] // Solo accesible si está autenticado
   },
   {
     path: 'admin-usuarios',
-    loadChildren: () => import('./pages/admin-usuarios/admin-usuarios.module').then( m => m.AdminUsuariosPageModule),
-    canActivate: [AuthGuard] // Solo accesible si está autenticado
+    loadChildren: () => import('./pages/administrador/admin-usuarios/admin-usuarios.module').then( m => m.AdminUsuariosPageModule),
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['Administrador'] }
   },
   {
     path: 'admin-prestamos',
-    loadChildren: () => import('./pages/admin-prestamos/admin-prestamos.module').then( m => m.AdminPrestamosPageModule),
-    canActivate: [AuthGuard] // Solo accesible si está autenticado
+    loadChildren: () => import('./pages/administrador/admin-prestamos/admin-prestamos.module').then( m => m.AdminPrestamosPageModule),
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['Administrador', 'Docente'] }
   },
   {
     path: 'sanciones',
-    loadChildren: () => import('./pages/sanciones/sanciones.module').then( m => m.SancionesPageModule),
-    canActivate: [AuthGuard] // Solo accesible si está autenticado
+    loadChildren: () => import('./pages/docente_y_estudiante/sanciones/sanciones.module').then( m => m.SancionesPageModule),
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['Administrador'] }
   },
   {
     path: 'admin-solicitudes',
-    loadChildren: () => import('./pages/admin-solicitudes/admin-solicitudes.module').then( m => m.AdminSolicitudesPageModule),
-    canActivate: [AuthGuard] // Solo accesible si está autenticado
+    loadChildren: () => import('./pages/administrador/admin-solicitudes/admin-solicitudes.module').then( m => m.AdminSolicitudesPageModule),
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['Administrador', 'Docente'] }
   },
   {
     path: 'mis-solicitudes',
-    loadChildren: () => import('./pages/mis-solicitudes/mis-solicitudes.module').then( m => m.MisSolicitudesPageModule),
+    loadChildren: () => import('./pages/docente_y_estudiante/mis-solicitudes/mis-solicitudes.module').then( m => m.MisSolicitudesPageModule),
     canActivate: [AuthGuard] // Solo accesible si está autenticado
   },
   {

@@ -42,6 +42,51 @@
   margin-bottom: 20px;
 }
 
+.divider {
+  text-align: center;
+  margin: 20px 0;
+  position: relative;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.3);
+  }
+  
+  span {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 0 15px;
+    font-size: 14px;
+    position: relative;
+    z-index: 1;
+  }
+}
+
+.google-button {
+  --background: white;
+  --color: #333;
+  --border-color: rgba(255, 255, 255, 0.3);
+  --border-width: 2px;
+  --border-style: solid;
+  margin: 0 0 20px 0;
+  height: 50px;
+  font-weight: 600;
+  
+  ion-icon {
+    color: #4285f4;
+    margin-right: 8px;
+  }
+  
+  &:hover {
+    --background: #f8f9fa;
+  }
+}
+
 .form-item {
   --background: transparent;
   --border-radius: 12px;
