@@ -29,15 +29,31 @@ export class RegisterPage implements OnInit {
   }
 
   ngOnInit() {
-    // Verificar si ya está autenticado
-    if (this.authService.isAuthenticated) {
-      this.router.navigate(['/home']);
-    }
+    // El registro libre ya no está disponible, pero no mostrar el modal
+    // La información se muestra directamente en la página
+  }
 
-    // Escuchar cambios en el rol para mostrar/ocultar campos específicos
-    this.registerForm.get('rol')?.valueChanges.subscribe(rol => {
-      this.updateValidationsByRole(rol);
+  private async showRegistrationDisabledAlert() {
+    const alert = await this.alertController.create({
+      header: 'Registro No Disponible',
+      message: 'El registro libre ha sido deshabilitado. Solo puedes registrarte mediante invitación de un administrador.',
+      buttons: [
+        {
+          text: 'Ir a Login',
+          handler: () => {
+            this.router.navigate(['/login']);
+          }
+        },
+        {
+          text: '¿Tienes una invitación?',
+          handler: () => {
+            this.router.navigate(['/register-invitation']);
+          }
+        }
+      ],
+      backdropDismiss: false
     });
+    await alert.present();
   }
 
   private createForm(): FormGroup {
@@ -47,16 +63,34 @@ export class RegisterPage implements OnInit {
       username: ['', [Validators.required, Validators.minLength(3)]],
       nombre: ['', [Validators.required, Validators.minLength(2)]],
       apellido: ['', [Validators.required, Validators.minLength(2)]],
-      rol: ['Estudiante', [Validators.required]],
+      rol: ['estudiante', [Validators.required]],
       password: ['', [Validators.required, Validators.minLength(8)]],
       password_confirm: ['', [Validators.required]],
       
-      // Campos específicos por rol
+      // Campos adicionales opcionales (sin dirección)
+      numero_identificacion: [''],
+      telefono: [''],
+      genero: [''],
+      
+      // Preferencias
+      notificaciones_email: [true],
+      notificaciones_push: [true],
+      idioma_preferido: ['es'],
+      
+      // Campos específicos por rol - Estudiante (sin fechas)
       carrera: [''],
       matricula: [''],
+      semestre_actual: [''],
+      
+      // Campos específicos por rol - Docente (sin fecha_contratacion)
       departamento: [''],
       numero_empleado: [''],
-      area: ['']
+      especialidad: [''],
+      grado_academico: [''],
+      
+      // Campos específicos por rol - Administrador (sin fecha_nombramiento)
+      area: [''],
+      nivel_acceso: ['']
     }, { 
       validators: this.passwordMatchValidator 
     });
@@ -64,126 +98,100 @@ export class RegisterPage implements OnInit {
 
   private passwordMatchValidator(form: FormGroup) {
     const password = form.get('password');
-    const passwordConfirm = form.get('password_confirm');
+    const confirmPassword = form.get('password_confirm');
     
-    if (password && passwordConfirm && password.value !== passwordConfirm.value) {
-      passwordConfirm.setErrors({ passwordMismatch: true });
+    if (password && confirmPassword && password.value !== confirmPassword.value) {
+      confirmPassword.setErrors({ passwordMismatch: true });
       return { passwordMismatch: true };
-    }
-    
-    if (passwordConfirm?.hasError('passwordMismatch')) {
-      delete passwordConfirm.errors!['passwordMismatch'];
-      if (Object.keys(passwordConfirm.errors!).length === 0) {
-        passwordConfirm.setErrors(null);
-      }
     }
     
     return null;
   }
 
-  private updateValidationsByRole(rol: string) {
-    // Limpiar validadores anteriores
-    this.registerForm.get('carrera')?.clearValidators();
-    this.registerForm.get('matricula')?.clearValidators();
-    this.registerForm.get('departamento')?.clearValidators();
-    this.registerForm.get('numero_empleado')?.clearValidators();
-    this.registerForm.get('area')?.clearValidators();
+  checkPasswordsMatch(): boolean {
+    const password = this.registerForm.get('password')?.value;
+    const confirmPassword = this.registerForm.get('password_confirm')?.value;
+    return password === confirmPassword;
+  }
 
-    // Establecer validadores según el rol
+  updateValidationsByRole(rol: string) {
+    // Limpiar validaciones previas
+    this.clearRoleValidations();
+    
+    // Aplicar validaciones según el rol
     switch (rol) {
-      case 'Estudiante':
+      case 'estudiante':
         this.registerForm.get('carrera')?.setValidators([Validators.required]);
         this.registerForm.get('matricula')?.setValidators([Validators.required]);
         break;
-      case 'Docente':
+      case 'docente':
         this.registerForm.get('departamento')?.setValidators([Validators.required]);
-        this.registerForm.get('numero_empleado')?.setValidators([Validators.required]);
+        this.registerForm.get('especialidad')?.setValidators([Validators.required]);
         break;
-      case 'Administrador':
+      case 'administrador':
         this.registerForm.get('area')?.setValidators([Validators.required]);
         break;
     }
+    
+    // Actualizar validaciones
+    this.registerForm.updateValueAndValidity();
+  }
 
-    // Actualizar validaciones (excluyendo el control 'rol' para evitar bucle infinito)
-    Object.keys(this.registerForm.controls).forEach(key => {
-      if (key !== 'rol') {
-        this.registerForm.get(key)?.updateValueAndValidity();
-      }
+  private clearRoleValidations() {
+    const roleFields = [
+      'carrera', 'matricula', 'semestre_actual',
+      'departamento', 'numero_empleado', 'especialidad', 'grado_academico',
+      'area', 'nivel_acceso'
+    ];
+    
+    roleFields.forEach(field => {
+      this.registerForm.get(field)?.clearValidators();
+      this.registerForm.get(field)?.updateValueAndValidity();
     });
   }
 
-  // Método para verificar si las contraseñas coinciden
-  checkPasswordsMatch(): boolean {
-    const password = this.registerForm.get('password')?.value;
-    const passwordConfirm = this.registerForm.get('password_confirm')?.value;
-    return password === passwordConfirm;
-  }
+  buildUserData(): UsuarioRegistro {
+    const formValue = this.registerForm.value;
+    const rol = formValue.rol;
+    
+    const userData: UsuarioRegistro = {
+      email: formValue.email,
+      username: formValue.username,
+      nombre: formValue.nombre,
+      apellido: formValue.apellido,
+      rol: rol,
+      password: formValue.password,
+      password_confirm: formValue.password_confirm,
+      telefono: formValue.telefono || undefined,
+      numero_identificacion: formValue.numero_identificacion || undefined,
+      genero: formValue.genero || undefined,
+      notificaciones_email: formValue.notificaciones_email,
+      notificaciones_push: formValue.notificaciones_push,
+      idioma_preferido: formValue.idioma_preferido
+    };
 
-  async onSubmit() {
-    // Validar manualmente las contraseñas
-    if (!this.checkPasswordsMatch()) {
-      const alert = await this.alertController.create({
-        header: 'Error de Validación',
-        message: 'Las contraseñas no coinciden.',
-        buttons: ['OK']
-      });
-      await alert.present();
-      return;
+    // Agregar datos específicos por rol (sin campos de fecha eliminados)
+    if (rol === 'estudiante') {
+      userData.datos_estudiante = {
+        carrera: formValue.carrera,
+        matricula: formValue.matricula,
+        semestre_actual: formValue.semestre_actual || undefined
+      };
+    } else if (rol === 'docente') {
+      userData.datos_docente = {
+        departamento: formValue.departamento,
+        numero_empleado: formValue.numero_empleado || undefined,
+        especialidad: formValue.especialidad || undefined,
+        grado_academico: formValue.grado_academico || undefined
+      };
+    } else if (rol === 'administrador') {
+      userData.datos_administrador = {
+        area: formValue.area,
+        nivel_acceso: formValue.nivel_acceso || undefined
+      };
     }
 
-    if (this.registerForm.valid) {
-      const loading = await this.loadingController.create({
-        message: 'Registrando usuario...',
-      });
-      await loading.present();
-
-      const userData: UsuarioRegistro = this.registerForm.value;
-
-      this.authService.registro(userData).subscribe({
-        next: async (response) => {
-          await loading.dismiss();
-          
-          const toast = await this.toastController.create({
-            message: '¡Registro exitoso! Por favor inicia sesión',
-            duration: 3000,
-            color: 'success',
-            position: 'top'
-          });
-          await toast.present();
-
-          this.router.navigate(['/login']);
-        },
-        error: async (error) => {
-          await loading.dismiss();
-          
-          let errorMessage = 'Error en el registro. Por favor, intenta nuevamente.';
-          
-          if (error.message.includes('email')) {
-            errorMessage = 'El email ya está registrado.';
-          } else if (error.message.includes('username')) {
-            errorMessage = 'El nombre de usuario ya existe.';
-          } else if (error.message.includes('matricula')) {
-            errorMessage = 'La matrícula ya está registrada.';
-          } else if (error.message.includes('numero_empleado')) {
-            errorMessage = 'El número de empleado ya está registrado.';
-          }
-
-          const alert = await this.alertController.create({
-            header: 'Error de Registro',
-            message: errorMessage,
-            buttons: ['OK']
-          });
-          await alert.present();
-        }
-      });
-    } else {
-      const alert = await this.alertController.create({
-        header: 'Formulario Inválido',
-        message: 'Por favor, completa todos los campos correctamente.',
-        buttons: ['OK']
-      });
-      await alert.present();
-    }
+    return userData;
   }
 
   togglePasswordVisibility() {
@@ -194,11 +202,33 @@ export class RegisterPage implements OnInit {
     this.showPasswordConfirm = !this.showPasswordConfirm;
   }
 
+  async onSubmit() {
+    // Este método ya no debería ejecutarse debido a la redirección
+    const alert = await this.alertController.create({
+      header: 'Registro No Disponible',
+      message: 'El registro libre ha sido deshabilitado. Solo puedes registrarte mediante invitación.',
+      buttons: ['OK']
+    });
+    await alert.present();
+  }
+
+  shouldShowEstudianteFields(): boolean {
+    return this.registerForm.get('rol')?.value === 'estudiante';
+  }
+
+  shouldShowDocenteFields(): boolean {
+    return this.registerForm.get('rol')?.value === 'docente';
+  }
+
+  shouldShowAdminFields(): boolean {
+    return this.registerForm.get('rol')?.value === 'administrador';
+  }
+
   goToLogin() {
     this.router.navigate(['/login']);
   }
 
-  // Getters para validaciones
+  // Getters para facilitar el acceso a los controles del formulario en el template
   get email() { return this.registerForm.get('email'); }
   get username() { return this.registerForm.get('username'); }
   get nombre() { return this.registerForm.get('nombre'); }
@@ -206,22 +236,10 @@ export class RegisterPage implements OnInit {
   get rol() { return this.registerForm.get('rol'); }
   get password() { return this.registerForm.get('password'); }
   get password_confirm() { return this.registerForm.get('password_confirm'); }
+  get numero_identificacion() { return this.registerForm.get('numero_identificacion'); }
+  get telefono() { return this.registerForm.get('telefono'); }
+  get genero() { return this.registerForm.get('genero'); }
   get carrera() { return this.registerForm.get('carrera'); }
   get matricula() { return this.registerForm.get('matricula'); }
   get departamento() { return this.registerForm.get('departamento'); }
-  get numero_empleado() { return this.registerForm.get('numero_empleado'); }
-  get area() { return this.registerForm.get('area'); }
-
-  // Métodos auxiliares para la vista
-  shouldShowEstudianteFields(): boolean {
-    return this.rol?.value === 'Estudiante';
-  }
-
-  shouldShowDocenteFields(): boolean {
-    return this.rol?.value === 'Docente';
-  }
-
-  shouldShowAdminFields(): boolean {
-    return this.rol?.value === 'Administrador';
-  }
 }

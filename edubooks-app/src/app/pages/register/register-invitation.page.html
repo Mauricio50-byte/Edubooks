@@ -1,0 +1,314 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button (click)="goToLogin()"></ion-back-button>
+    </ion-buttons>
+    <ion-title class="ion-text-center">
+      <ion-icon name="mail-outline" style="margin-right: 8px;"></ion-icon>
+      Registro por Invitación
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="register-content">
+  <!-- Loading mientras valida token -->
+  <div *ngIf="validatingToken" class="loading-container">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Validando invitación...</p>
+  </div>
+
+  <!-- Contenido principal -->
+  <div *ngIf="!validatingToken && invitacionInfo" class="register-container">
+    <!-- Información de la invitación -->
+    <div class="invitation-info">
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>
+            <ion-icon name="mail-open-outline"></ion-icon>
+            Invitación Recibida
+          </ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <p><strong>Invitado por:</strong> {{ invitacionInfo.invitado_por.nombre }} {{ invitacionInfo.invitado_por.apellido }}</p>
+          <p><strong>Email:</strong> {{ invitacionInfo.email_invitado }}</p>
+          <p><strong>Rol asignado:</strong> 
+            <ion-chip [color]="invitacionInfo.rol === 'Administrador' ? 'danger' : invitacionInfo.rol === 'Docente' ? 'warning' : 'primary'">
+              {{ invitacionInfo.rol }}
+            </ion-chip>
+          </p>
+          <p><strong>Válida hasta:</strong> {{ invitacionInfo.fecha_expiracion | date:'dd/MM/yyyy HH:mm' }}</p>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Formulario de registro -->
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="register-form">
+      
+      <!-- Información Personal -->
+      <div class="form-section">
+        <h3>Información Personal</h3>
+        
+        <!-- Username -->
+        <ion-item class="form-item" [class.ion-invalid]="username?.invalid && username?.touched">
+          <ion-label position="stacked">Nombre de Usuario *</ion-label>
+          <ion-input 
+            formControlName="username" 
+            type="text" 
+            placeholder="usuario123">
+          </ion-input>
+          <ion-icon name="person-outline" slot="start"></ion-icon>
+          <ion-note slot="error" *ngIf="username?.errors?.['required'] && username?.touched">
+            El nombre de usuario es requerido
+          </ion-note>
+          <ion-note slot="error" *ngIf="username?.errors?.['minlength'] && username?.touched">
+            Mínimo 3 caracteres
+          </ion-note>
+        </ion-item>
+
+        <!-- Nombre -->
+        <ion-item class="form-item" [class.ion-invalid]="nombre?.invalid && nombre?.touched">
+          <ion-label position="stacked">Nombre *</ion-label>
+          <ion-input 
+            formControlName="nombre" 
+            type="text" 
+            placeholder="Tu nombre">
+          </ion-input>
+          <ion-icon name="person-circle-outline" slot="start"></ion-icon>
+          <ion-note slot="error" *ngIf="nombre?.errors?.['required'] && nombre?.touched">
+            El nombre es requerido
+          </ion-note>
+        </ion-item>
+
+        <!-- Apellido -->
+        <ion-item class="form-item" [class.ion-invalid]="apellido?.invalid && apellido?.touched">
+          <ion-label position="stacked">Apellido *</ion-label>
+          <ion-input 
+            formControlName="apellido" 
+            type="text" 
+            placeholder="Tu apellido">
+          </ion-input>
+          <ion-icon name="person-circle-outline" slot="start"></ion-icon>
+          <ion-note slot="error" *ngIf="apellido?.errors?.['required'] && apellido?.touched">
+            El apellido es requerido
+          </ion-note>
+        </ion-item>
+      </div>
+
+      <!-- Contraseñas -->
+      <div class="form-section">
+        <h3>Seguridad</h3>
+        
+        <!-- Password -->
+        <ion-item class="form-item" [class.ion-invalid]="password?.invalid && password?.touched">
+          <ion-label position="stacked">Contraseña *</ion-label>
+          <ion-input 
+            formControlName="password" 
+            [type]="showPassword ? 'text' : 'password'" 
+            placeholder="Mínimo 8 caracteres">
+          </ion-input>
+          <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
+          <ion-button 
+            fill="clear" 
+            slot="end" 
+            (click)="togglePasswordVisibility()">
+            <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+          </ion-button>
+          <ion-note slot="error" *ngIf="password?.errors?.['required'] && password?.touched">
+            La contraseña es requerida
+          </ion-note>
+          <ion-note slot="error" *ngIf="password?.errors?.['minlength'] && password?.touched">
+            Mínimo 8 caracteres
+          </ion-note>
+        </ion-item>
+
+        <!-- Confirmar Password -->
+        <ion-item class="form-item" [class.ion-invalid]="password_confirm?.invalid && password_confirm?.touched">
+          <ion-label position="stacked">Confirmar Contraseña *</ion-label>
+          <ion-input 
+            formControlName="password_confirm" 
+            [type]="showPasswordConfirm ? 'text' : 'password'" 
+            placeholder="Repite tu contraseña">
+          </ion-input>
+          <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
+          <ion-button 
+            fill="clear" 
+            slot="end" 
+            (click)="togglePasswordConfirmVisibility()">
+            <ion-icon [name]="showPasswordConfirm ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+          </ion-button>
+          <ion-note slot="error" *ngIf="password_confirm?.errors?.['required'] && password_confirm?.touched">
+            Confirma tu contraseña
+          </ion-note>
+          <ion-note slot="error" *ngIf="password_confirm?.errors?.['passwordMismatch'] && password_confirm?.touched">
+            Las contraseñas no coinciden
+          </ion-note>
+        </ion-item>
+      </div>
+
+      <!-- Información Adicional Opcional -->
+      <div class="form-section">
+        <h3>Información Adicional (Opcional)</h3>
+        
+        <!-- Teléfono -->
+        <ion-item class="form-item">
+          <ion-label position="stacked">Teléfono</ion-label>
+          <ion-input 
+            formControlName="telefono" 
+            type="tel" 
+            placeholder="Ej: +1234567890">
+          </ion-input>
+          <ion-icon name="call-outline" slot="start"></ion-icon>
+        </ion-item>
+
+        <!-- Número de Identificación -->
+        <ion-item class="form-item">
+          <ion-label position="stacked">Número de Identificación</ion-label>
+          <ion-input 
+            formControlName="numero_identificacion" 
+            type="text" 
+            placeholder="Ej: 12345678">
+          </ion-input>
+          <ion-icon name="id-card-outline" slot="start"></ion-icon>
+        </ion-item>
+
+        <!-- Género -->
+        <ion-item class="form-item">
+          <ion-label position="stacked">Género</ion-label>
+          <ion-select formControlName="genero" placeholder="Selecciona tu género">
+            <ion-select-option value="M">Masculino</ion-select-option>
+            <ion-select-option value="F">Femenino</ion-select-option>
+            <ion-select-option value="Otro">Otro</ion-select-option>
+          </ion-select>
+          <ion-icon name="person-outline" slot="start"></ion-icon>
+        </ion-item>
+
+
+      </div>
+
+      <!-- Campos específicos por rol (dinámicos) -->
+      <div class="form-section" *ngIf="getRoleFields().length > 0">
+        <h3>Información de {{ invitacionInfo.rol }}</h3>
+        
+        <div *ngFor="let fieldName of getRoleFields()">
+          <!-- Campo de texto normal -->
+          <ion-item 
+            *ngIf="getFieldType(fieldName) === 'text'" 
+            class="form-item" 
+            [class.ion-invalid]="registerForm.get(fieldName)?.invalid && registerForm.get(fieldName)?.touched">
+            <ion-label position="stacked">
+              {{ getFieldLabel(fieldName) }}
+              <span *ngIf="isFieldRequired(fieldName)"> *</span>
+            </ion-label>
+            <ion-input 
+              [formControlName]="fieldName" 
+              type="text" 
+              [placeholder]="getFieldPlaceholder(fieldName)">
+            </ion-input>
+            <ion-icon name="document-text-outline" slot="start"></ion-icon>
+            <ion-note slot="error" *ngIf="registerForm.get(fieldName)?.errors?.['required'] && registerForm.get(fieldName)?.touched">
+              {{ getFieldLabel(fieldName) }} es requerido
+            </ion-note>
+          </ion-item>
+
+          <!-- Campo numérico -->
+          <ion-item 
+            *ngIf="getFieldType(fieldName) === 'number'" 
+            class="form-item" 
+            [class.ion-invalid]="registerForm.get(fieldName)?.invalid && registerForm.get(fieldName)?.touched">
+            <ion-label position="stacked">
+              {{ getFieldLabel(fieldName) }}
+              <span *ngIf="isFieldRequired(fieldName)"> *</span>
+            </ion-label>
+            <ion-input 
+              [formControlName]="fieldName" 
+              type="number" 
+              [placeholder]="getFieldPlaceholder(fieldName)">
+            </ion-input>
+            <ion-icon name="calculator-outline" slot="start"></ion-icon>
+            <ion-note slot="error" *ngIf="registerForm.get(fieldName)?.errors?.['required'] && registerForm.get(fieldName)?.touched">
+              {{ getFieldLabel(fieldName) }} es requerido
+            </ion-note>
+            <ion-note slot="error" *ngIf="registerForm.get(fieldName)?.errors?.['min'] && registerForm.get(fieldName)?.touched">
+              Valor mínimo: {{ registerForm.get(fieldName)?.errors?.['min']?.min }}
+            </ion-note>
+            <ion-note slot="error" *ngIf="registerForm.get(fieldName)?.errors?.['max'] && registerForm.get(fieldName)?.touched">
+              Valor máximo: {{ registerForm.get(fieldName)?.errors?.['max']?.max }}
+            </ion-note>
+          </ion-item>
+
+          <!-- Campo de fecha -->
+          <ion-item 
+            *ngIf="getFieldType(fieldName) === 'date'" 
+            class="form-item">
+            <ion-label position="stacked">
+              {{ getFieldLabel(fieldName) }}
+              <span *ngIf="isFieldRequired(fieldName)"> *</span>
+            </ion-label>
+            <ion-datetime 
+              [formControlName]="fieldName"
+              presentation="date"
+              [showDefaultButtons]="true"
+              [showClearButton]="true">
+            </ion-datetime>
+            <ion-icon name="calendar-outline" slot="start"></ion-icon>
+          </ion-item>
+
+          <!-- Campo select -->
+          <ion-item 
+            *ngIf="getFieldType(fieldName) === 'select'" 
+            class="form-item" 
+            [class.ion-invalid]="registerForm.get(fieldName)?.invalid && registerForm.get(fieldName)?.touched">
+            <ion-label position="stacked">
+              {{ getFieldLabel(fieldName) }}
+              <span *ngIf="isFieldRequired(fieldName)"> *</span>
+            </ion-label>
+            <ion-select 
+              [formControlName]="fieldName" 
+              [placeholder]="'Selecciona ' + getFieldLabel(fieldName).toLowerCase()">
+              <ion-select-option 
+                *ngFor="let option of getSelectOptions(fieldName)" 
+                [value]="option">
+                {{ option }}
+              </ion-select-option>
+            </ion-select>
+            <ion-icon name="list-outline" slot="start"></ion-icon>
+            <ion-note slot="error" *ngIf="registerForm.get(fieldName)?.errors?.['required'] && registerForm.get(fieldName)?.touched">
+              {{ getFieldLabel(fieldName) }} es requerido
+            </ion-note>
+          </ion-item>
+        </div>
+      </div>
+
+      <!-- Botón de registro -->
+      <div class="form-actions">
+        <ion-button 
+          expand="block" 
+          type="submit" 
+          [disabled]="!registerForm.valid || isLoading"
+          color="primary">
+          <ion-icon name="person-add-outline" slot="start"></ion-icon>
+          {{ isLoading ? 'Registrando...' : 'Completar Registro' }}
+        </ion-button>
+      </div>
+    </form>
+
+    <!-- Link para ir al login -->
+    <div class="login-link">
+      <p>¿Ya tienes cuenta? 
+        <ion-button fill="clear" (click)="goToLogin()">
+          Iniciar Sesión
+        </ion-button>
+      </p>
+    </div>
+  </div>
+
+  <!-- Error si no hay invitación válida -->
+  <div *ngIf="!validatingToken && !invitacionInfo" class="error-container">
+    <ion-icon name="warning-outline" color="danger"></ion-icon>
+    <h2>Invitación No Válida</h2>
+    <p>La invitación ha expirado o no es válida.</p>
+    <ion-button fill="outline" (click)="goToLogin()">
+      Ir al Login
+    </ion-button>
+  </div>
+</ion-content>

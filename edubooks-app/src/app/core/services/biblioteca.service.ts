@@ -309,7 +309,7 @@ export class BibliotecaService {
           console.error('Error obteniendo préstamos:', error);
           // Fallback a datos simulados en caso de error
           const usuario = this.authService.currentUserValue;
-          if (usuario?.rol === 'Administrador') {
+          if (usuario?.rol === 'administrador') {
             return of(this.prestamos);
           } else {
             return of(this.prestamos.filter(p => p.usuario.id === usuario?.id));

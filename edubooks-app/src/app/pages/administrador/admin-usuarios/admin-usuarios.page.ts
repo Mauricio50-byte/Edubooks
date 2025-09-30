@@ -3,6 +3,7 @@ import { LoadingController, ToastController, AlertController } from '@ionic/angu
 import { AuthService } from '../../../core/services/auth.service';
 import { UsuarioService, UsuarioAdmin } from '../../../core/services/usuario.service';
 import { Router } from '@angular/router';
+import { FilterOption } from '../../../shared/componentes/filter-dropdown/filter-dropdown.component';
 
 @Component({
   selector: 'app-admin-usuarios',
@@ -17,6 +18,21 @@ export class AdminUsuariosPage implements OnInit {
   usuarioActual: any = null;
   searchTerm: string = '';
   filtroRol: string = '';
+  filtroEstado: string = '';
+
+  // Opciones para los filtros desplegables
+  rolOptions: FilterOption[] = [
+    { value: '', label: 'Todos los roles', icon: 'people-outline' },
+    { value: 'Administrador', label: 'Administradores', icon: 'shield-outline', color: 'danger' },
+    { value: 'Docente', label: 'Docentes', icon: 'school-outline', color: 'warning' },
+    { value: 'Estudiante', label: 'Estudiantes', icon: 'person-outline', color: 'primary' }
+  ];
+
+  estadoOptions: FilterOption[] = [
+    { value: '', label: 'Todos los estados', icon: 'list-outline' },
+    { value: 'activo', label: 'Usuarios Activos', icon: 'checkmark-circle-outline', color: 'success' },
+    { value: 'inactivo', label: 'Usuarios Inactivos', icon: 'close-circle-outline', color: 'danger' }
+  ];
 
   constructor(
     private authService: AuthService,
@@ -71,7 +87,11 @@ export class AdminUsuariosPage implements OnInit {
       
       const cumpleRol = !this.filtroRol || usuario.rol === this.filtroRol;
       
-      return cumpleBusqueda && cumpleRol;
+      const cumpleEstado = !this.filtroEstado || 
+        (this.filtroEstado === 'activo' && usuario.is_active) ||
+        (this.filtroEstado === 'inactivo' && !usuario.is_active);
+      
+      return cumpleBusqueda && cumpleRol && cumpleEstado;
     });
   }
 
@@ -170,7 +190,7 @@ export class AdminUsuariosPage implements OnInit {
    * Verificar si el usuario es administrador
    */
   get esAdministrador(): boolean {
-    return this.usuarioActual?.rol === 'Administrador';
+    return this.usuarioActual?.rol === 'administrador';
   }
 
   /**
@@ -204,5 +224,31 @@ export class AdminUsuariosPage implements OnInit {
    */
   getUsuariosInactivos(): number {
     return this.usuarios.filter(u => u && u.is_active === false).length;
+  }
+
+  /**
+   * Manejar cambio en filtro de rol
+   */
+  onRolFilterChange(value: string | string[]) {
+    this.filtroRol = Array.isArray(value) ? value[0] || '' : value;
+  }
+
+  /**
+   * Manejar cambio en filtro de estado
+   */
+  onEstadoFilterChange(value: string | string[]) {
+    this.filtroEstado = Array.isArray(value) ? value[0] || '' : value;
+  }
+
+  /**
+   * Obtener icono del rol
+   */
+  getRolIcon(rol: string): string {
+    switch (rol) {
+      case 'Administrador': return 'shield-outline';
+      case 'Docente': return 'school-outline';
+      case 'Estudiante': return 'person-outline';
+      default: return 'person-outline';
+    }
   }
 }

@@ -5,25 +5,14 @@ export interface Usuario {
     username: string;
     nombre: string;
     apellido: string;
-    rol: 'Estudiante' | 'Docente' | 'Administrador';
+    rol: 'estudiante' | 'docente' | 'administrador';
     fecha_registro?: string;
     activo?: boolean;
-    
-    // Campos específicos para Estudiantes
-    carrera?: string;
-    matricula?: string;
-    
-    // Campos específicos para Docentes
-    departamento?: string;
-    numero_empleado?: string;
-    
-    // Campos específicos para Administradores
-    area?: string;
     
     // Nuevos campos del modelo híbrido
     telefono?: string;
     direccion?: string;
-    fecha_nacimiento?: string;
+    numero_identificacion?: string;
     genero?: 'M' | 'F' | 'Otro';
     
     // Campos de gestión académica
@@ -40,6 +29,27 @@ export interface Usuario {
     
     // Campos de Supabase
     supabase_id?: string;
+    
+    // Datos específicos por rol (estructura anidada)
+    datos_estudiante?: {
+        carrera?: string;
+        matricula?: string;
+        semestre_actual?: number;
+        fecha_ingreso?: string;
+        fecha_graduacion_esperada?: string;
+    };
+    datos_docente?: {
+        departamento?: string;
+        numero_empleado?: string;
+        especialidad?: string;
+        grado_academico?: string;
+        fecha_contratacion?: string;
+    };
+    datos_administrador?: {
+        area?: string;
+        nivel_acceso?: string;
+        fecha_nombramiento?: string;
+    };
 }
 
 export interface UsuarioRegistro {
@@ -47,22 +57,41 @@ export interface UsuarioRegistro {
     username: string;
     nombre: string;
     apellido: string;
-    rol: 'Estudiante' | 'Docente' | 'Administrador';
+    rol: 'estudiante' | 'docente' | 'administrador';
     password: string;
     password_confirm: string;
-    
-    // Campos opcionales según el rol
-    carrera?: string;
-    matricula?: string;
-    departamento?: string;
-    numero_empleado?: string;
-    area?: string;
     
     // Campos adicionales opcionales
     telefono?: string;
     direccion?: string;
-    fecha_nacimiento?: string;
+    numero_identificacion?: string;
     genero?: 'M' | 'F' | 'Otro';
+    
+    // Preferencias
+    notificaciones_email?: boolean;
+    notificaciones_push?: boolean;
+    idioma_preferido?: string;
+    
+    // Datos específicos por rol (estructura anidada)
+    datos_estudiante?: {
+        carrera: string;
+        matricula: string;
+        semestre_actual?: number;
+        fecha_ingreso?: string;
+        fecha_graduacion_esperada?: string;
+    };
+    datos_docente?: {
+        departamento: string;
+        numero_empleado: string;
+        especialidad?: string;
+        grado_academico?: string;
+        fecha_contratacion?: string;
+    };
+    datos_administrador?: {
+        area: string;
+        nivel_acceso?: string;
+        fecha_nombramiento?: string;
+    };
 }
 
 export interface UsuarioLogin {

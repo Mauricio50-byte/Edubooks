@@ -313,7 +313,7 @@ export class AdminPrestamosPage implements OnInit {
    * Verificar si el usuario es administrador
    */
   get esAdministrador(): boolean {
-    return this.usuarioActual?.rol === 'Administrador';
+    return this.usuarioActual?.rol === 'administrador';
   }
 
   /**

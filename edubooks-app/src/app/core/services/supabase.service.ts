@@ -1,11 +1,13 @@
 import { Injectable } from '@angular/core';
-import { createClient, SupabaseClient, User, AuthError } from '@supabase/supabase-js';
-import { BehaviorSubject, Observable, from } from 'rxjs';
+import { createClient, SupabaseClient, Session, User, AuthError } from '@supabase/supabase-js';
 import { environment } from '../../../environments/environment';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { LockManagerService } from './lock-manager.service';
 
 export interface SupabaseAuthResult {
-  data: any;
-  error: AuthError | null;
+  success: boolean;
+  data?: any;
+  error?: string | AuthError | null;
 }
 
 @Injectable({
@@ -13,72 +15,123 @@ export interface SupabaseAuthResult {
 })
 export class SupabaseService {
   private supabase!: SupabaseClient;
-  private currentUserSubject = new BehaviorSubject<User | null>(null);
-  public currentUser$ = this.currentUserSubject.asObservable();
-  private isInitialized = false;
+  private initialized = false;
+  private initializationPromise: Promise<void> | null = null;
+  
+  private sessionSubject = new BehaviorSubject<Session | null>(null);
+  public session$ = this.sessionSubject.asObservable();
+  
+  private userSubject = new BehaviorSubject<User | null>(null);
+  public user$ = this.userSubject.asObservable();
 
-  constructor() {
+  constructor(private lockManager: LockManagerService) {
     this.initializeSupabase();
   }
 
-  private async initializeSupabase() {
+  private async initializeSupabase(): Promise<void> {
+    if (this.initialized) return;
+    
+    if (this.initializationPromise) {
+      return this.initializationPromise;
+    }
+
+    this.initializationPromise = this.performInitialization();
+    return this.initializationPromise;
+  }
+
+  private async performInitialization(): Promise<void> {
     try {
-      this.supabase = createClient(environment.supabase.url, environment.supabase.anonKey, {
-        auth: {
-          persistSession: true,
-          autoRefreshToken: true,
-          detectSessionInUrl: true,
-          flowType: 'pkce'
-        }
-      });
+      // Limpiar locks antes de inicializar
+      this.lockManager.clearSupabaseLocks();
       
-      // Escuchar cambios de autenticación
+      this.supabase = createClient(
+        environment.supabase.url,
+        environment.supabase.anonKey,
+        {
+          auth: {
+            persistSession: true,
+            autoRefreshToken: true,
+            detectSessionInUrl: true,
+            flowType: 'pkce',
+            storage: window.localStorage,
+            storageKey: 'sb-auth-token',
+            debug: false
+          }
+        }
+      );
+
+      // Configurar listener de cambios de autenticación
       this.supabase.auth.onAuthStateChange(async (event, session) => {
-        console.log('Auth state changed:', event, session);
-        this.currentUserSubject.next(session?.user ?? null);
-        
-        // Manejar el callback de OAuth
-        if (event === 'SIGNED_IN' && session) {
-          console.log('Usuario autenticado exitosamente');
+        try {
+          console.log('Auth state change:', event, session?.user?.email);
+          
+          this.sessionSubject.next(session);
+          this.userSubject.next(session?.user || null);
+          
+          switch (event) {
+            case 'SIGNED_IN':
+              console.log('Usuario autenticado:', session?.user?.email);
+              break;
+            case 'SIGNED_OUT':
+              console.log('Usuario desconectado');
+              this.lockManager.clearSupabaseLocks();
+              break;
+            case 'TOKEN_REFRESHED':
+              console.log('Token renovado para:', session?.user?.email);
+              break;
+            case 'PASSWORD_RECOVERY':
+              console.log('Recuperación de contraseña iniciada');
+              break;
+            default:
+              console.log('Evento de autenticación:', event);
+          }
+        } catch (error) {
+          console.error('Error en onAuthStateChange:', error);
+          this.lockManager.clearSupabaseLocks();
         }
       });
 
-      // Cargar sesión actual con manejo de errores
-      await this.loadSession();
-      this.isInitialized = true;
+      this.initialized = true;
+      console.log('Supabase inicializado correctamente');
     } catch (error) {
       console.error('Error inicializando Supabase:', error);
-      this.isInitialized = true; // Marcar como inicializado aunque haya error
+      this.lockManager.clearSupabaseLocks();
+      throw error;
     }
   }
 
-  private async loadSession() {
+  async loadSession(): Promise<void> {
     try {
+      await this.initializeSupabase();
+      
+      // Limpiar locks antes de cargar sesión
+      this.lockManager.clearSupabaseLocks();
+      
       const { data: { session }, error } = await this.supabase.auth.getSession();
+      
       if (error) {
-        console.warn('Error cargando sesión:', error);
+        console.error('Error cargando sesión:', error);
+        this.lockManager.clearSupabaseLocks();
         return;
       }
-      this.currentUserSubject.next(session?.user ?? null);
+      
+      this.sessionSubject.next(session);
+      this.userSubject.next(session?.user || null);
+      
+      if (session) {
+        console.log('Sesión cargada para:', session.user.email);
+      } else {
+        console.log('No hay sesión activa');
+      }
     } catch (error) {
-      console.warn('Error al cargar sesión:', error);
+      console.error('Error en loadSession:', error);
+      this.lockManager.clearSupabaseLocks();
     }
   }
 
   // Esperar a que Supabase esté inicializado
   private async waitForInitialization(): Promise<void> {
-    if (this.isInitialized) return;
-    
-    return new Promise((resolve) => {
-      const checkInitialized = () => {
-        if (this.isInitialized) {
-          resolve();
-        } else {
-          setTimeout(checkInitialized, 100);
-        }
-      };
-      checkInitialized();
-    });
+    return this.initializeSupabase();
   }
 
   // Autenticación con Google
@@ -100,10 +153,14 @@ export class SupabaseService {
         }
       });
 
-      return { data, error };
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      return { success: true, data };
     } catch (error) {
       console.error('Error en signInWithGoogle:', error);
-      return { data: null, error: error as AuthError };
+      return { success: false, error: 'Error inesperado en autenticación con Google' };
     }
   }
 
@@ -120,10 +177,14 @@ export class SupabaseService {
         }
       });
 
-      return { data, error };
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      return { success: true, data };
     } catch (error) {
       console.error('Error en signUp:', error);
-      return { data: null, error: error as AuthError };
+      return { success: false, error: 'Error inesperado en registro' };
     }
   }
 
@@ -137,26 +198,44 @@ export class SupabaseService {
         password
       });
 
-      return { data, error };
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      return { success: true, data };
     } catch (error) {
       console.error('Error en signIn:', error);
-      return { data: null, error: error as AuthError };
+      return { success: false, error: 'Error inesperado en inicio de sesión' };
     }
   }
 
   // Cerrar sesión
-  async signOut(): Promise<void> {
-    await this.waitForInitialization();
-    
+  async signOut(): Promise<SupabaseAuthResult> {
     try {
+      await this.initializeSupabase();
+      
+      // Limpiar locks antes y después del sign out
+      this.lockManager.clearSupabaseLocks();
+      
       const { error } = await this.supabase.auth.signOut();
+      
+      // Limpiar locks después del sign out
+      this.lockManager.clearSupabaseLocks();
+      
       if (error) {
-        console.warn('Error cerrando sesión:', error);
+        console.error('Error cerrando sesión:', error);
+        return { success: false, error: error.message };
       }
-      this.currentUserSubject.next(null);
+      
+      this.sessionSubject.next(null);
+      this.userSubject.next(null);
+      
+      console.log('Sesión cerrada exitosamente');
+      return { success: true };
     } catch (error) {
       console.error('Error en signOut:', error);
-      this.currentUserSubject.next(null);
+      this.lockManager.clearSupabaseLocks();
+      return { success: false, error: 'Error inesperado al cerrar sesión' };
     }
   }
 
@@ -179,12 +258,12 @@ export class SupabaseService {
 
   // Obtener usuario actual
   get currentUser(): User | null {
-    return this.currentUserSubject.value;
+    return this.userSubject.value;
   }
 
   // Verificar si está autenticado
   get isAuthenticated(): boolean {
-    return this.currentUserSubject.value !== null;
+    return this.userSubject.value !== null;
   }
 
   // Obtener token de acceso
@@ -204,10 +283,15 @@ export class SupabaseService {
     
     try {
       const { data, error } = await this.supabase.auth.refreshSession();
-      return { data, error };
+      
+      if (error) {
+        return { success: false, error: error.message };
+      }
+      
+      return { success: true, data };
     } catch (error) {
       console.error('Error refrescando token:', error);
-      return { data: null, error: error as AuthError };
+      return { success: false, error: 'Error inesperado al refrescar token' };
     }
   }
 
@@ -231,7 +315,7 @@ export class SupabaseService {
       
       if (data.session) {
         console.log('Sesión establecida exitosamente en callback');
-        this.currentUserSubject.next(data.session.user);
+        this.userSubject.next(data.session.user);
         return;
       }
 
@@ -255,7 +339,7 @@ export class SupabaseService {
         
         if (sessionData.session) {
           console.log('Sesión establecida con tokens del callback');
-          this.currentUserSubject.next(sessionData.session.user);
+          this.userSubject.next(sessionData.session.user);
         }
       } else {
         console.warn('No se encontraron tokens en el callback');

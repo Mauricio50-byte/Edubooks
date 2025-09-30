@@ -61,27 +61,27 @@ export class HomePage implements OnInit {
    * Verificar si el usuario es Administrador
    */
   isAdministrador(): boolean {
-    return this.currentUser?.rol === 'Administrador';
+    return this.currentUser?.rol === 'administrador';
   }
 
   /**
    * Verificar si el usuario es Estudiante o Docente
    */
   isEstudianteOrDocente(): boolean {
-    return this.currentUser?.rol === 'Estudiante' || this.currentUser?.rol === 'Docente';
+    return this.currentUser?.rol === 'estudiante' || this.currentUser?.rol === 'docente';
   }
 
   /**
    * Verificar si el usuario es Estudiante
    */
   isEstudiante(): boolean {
-    return this.currentUser?.rol === 'Estudiante';
+    return this.currentUser?.rol === 'estudiante';
   }
 
   /**
    * Verificar si el usuario es Docente
    */
   isDocente(): boolean {
-    return this.currentUser?.rol === 'Docente';
+    return this.currentUser?.rol === 'docente';
   }
 }

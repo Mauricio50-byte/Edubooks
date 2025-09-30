@@ -1,0 +1,186 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-title>Configuración Inicial</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="setup-content">
+  <div class="setup-container">
+    <!-- Header con logo/icono -->
+    <div class="setup-header">
+      <ion-icon name="library-outline" class="setup-icon"></ion-icon>
+      <h1>Bienvenido a EduBooks</h1>
+      <p>Configura tu sistema de biblioteca digital</p>
+    </div>
+
+    <!-- Formulario de configuración -->
+    <form [formGroup]="setupForm" (ngSubmit)="inicializarSistema()" class="setup-form">
+      
+      <!-- Información de la institución -->
+      <div class="form-section">
+        <h3>Información de la Institución</h3>
+        
+        <ion-item [class.ion-invalid]="hasError('institucion')" class="form-item">
+          <ion-label position="stacked">Nombre de la Institución *</ion-label>
+          <ion-input 
+            formControlName="institucion"
+            placeholder="Ej: Universidad Nacional"
+            type="text">
+          </ion-input>
+          <ion-note slot="error" *ngIf="hasError('institucion')">
+            {{ getErrorMessage('institucion') }}
+          </ion-note>
+        </ion-item>
+      </div>
+
+      <!-- Información del administrador -->
+      <div class="form-section">
+        <h3>Datos del Administrador</h3>
+        
+        <ion-item [class.ion-invalid]="hasError('nombre')" class="form-item">
+          <ion-label position="stacked">Nombre *</ion-label>
+          <ion-input 
+            formControlName="nombre"
+            placeholder="Tu nombre"
+            type="text">
+          </ion-input>
+          <ion-note slot="error" *ngIf="hasError('nombre')">
+            {{ getErrorMessage('nombre') }}
+          </ion-note>
+        </ion-item>
+
+        <ion-item [class.ion-invalid]="hasError('apellido')" class="form-item">
+          <ion-label position="stacked">Apellido *</ion-label>
+          <ion-input 
+            formControlName="apellido"
+            placeholder="Tu apellido"
+            type="text">
+          </ion-input>
+          <ion-note slot="error" *ngIf="hasError('apellido')">
+            {{ getErrorMessage('apellido') }}
+          </ion-note>
+        </ion-item>
+
+        <ion-item [class.ion-invalid]="hasError('email')" class="form-item">
+          <ion-label position="stacked">Email *</ion-label>
+          <ion-input 
+            formControlName="email"
+            placeholder="admin@institucion.edu"
+            type="email">
+          </ion-input>
+          <ion-note slot="error" *ngIf="hasError('email')">
+            {{ getErrorMessage('email') }}
+          </ion-note>
+        </ion-item>
+
+        <ion-item [class.ion-invalid]="hasError('username')" class="form-item">
+          <ion-label position="stacked">Nombre de Usuario *</ion-label>
+          <ion-input 
+            formControlName="username"
+            placeholder="admin"
+            type="text">
+          </ion-input>
+          <ion-note slot="error" *ngIf="hasError('username')">
+            {{ getErrorMessage('username') }}
+          </ion-note>
+        </ion-item>
+      </div>
+
+      <!-- Credenciales de acceso -->
+      <div class="form-section">
+        <h3>Credenciales de Acceso</h3>
+        
+        <ion-item [class.ion-invalid]="hasError('password')" class="form-item">
+          <ion-label position="stacked">Contraseña *</ion-label>
+          <ion-input 
+            formControlName="password"
+            placeholder="Ej: MiClave123!"
+            type="password">
+          </ion-input>
+          <ion-note slot="error" *ngIf="hasError('password')">
+            {{ getErrorMessage('password') }}
+          </ion-note>
+        </ion-item>
+
+        <ion-item [class.ion-invalid]="hasError('password_confirm')" class="form-item">
+          <ion-label position="stacked">Confirmar Contraseña *</ion-label>
+          <ion-input 
+            formControlName="password_confirm"
+            placeholder="Repite la contraseña"
+            type="password">
+          </ion-input>
+          <ion-note slot="error" *ngIf="hasError('password_confirm')">
+            {{ getErrorMessage('password_confirm') }}
+          </ion-note>
+        </ion-item>
+
+        <!-- Especificaciones de la contraseña -->
+        <div class="password-requirements">
+          <h4>Características requeridas para la contraseña:</h4>
+          <ul>
+            <li>
+              <ion-icon name="checkmark-circle" color="success" *ngIf="passwordHasMinLength(); else minLengthIcon"></ion-icon>
+              <ng-template #minLengthIcon>
+                <ion-icon name="ellipse-outline" color="medium"></ion-icon>
+              </ng-template>
+              Mínimo 8 caracteres
+            </li>
+            <li>
+              <ion-icon name="checkmark-circle" color="success" *ngIf="passwordHasUppercase(); else uppercaseIcon"></ion-icon>
+              <ng-template #uppercaseIcon>
+                <ion-icon name="ellipse-outline" color="medium"></ion-icon>
+              </ng-template>
+              Al menos una letra MAYÚSCULA (A, B, C...)
+            </li>
+            <li>
+              <ion-icon name="checkmark-circle" color="success" *ngIf="passwordHasLowercase(); else lowercaseIcon"></ion-icon>
+              <ng-template #lowercaseIcon>
+                <ion-icon name="ellipse-outline" color="medium"></ion-icon>
+              </ng-template>
+              Al menos una letra minúscula (a, b, c...)
+            </li>
+            <li>
+              <ion-icon name="checkmark-circle" color="success" *ngIf="passwordHasNumber(); else numberIcon"></ion-icon>
+              <ng-template #numberIcon>
+                <ion-icon name="ellipse-outline" color="medium"></ion-icon>
+              </ng-template>
+              Al menos un número (0, 1, 2...)
+            </li>
+            <li>
+              <ion-icon name="checkmark-circle" color="success" *ngIf="passwordHasSpecialChar(); else specialIcon"></ion-icon>
+              <ng-template #specialIcon>
+                <ion-icon name="ellipse-outline" color="medium"></ion-icon>
+              </ng-template>
+              Al menos un símbolo especial (! @ # $ % & *)
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Información importante -->
+      <ion-card class="info-card">
+        <ion-card-content>
+          <div class="info-content">
+            <ion-icon name="information-circle-outline" color="primary"></ion-icon>
+            <div>
+              <h4>Información Importante</h4>
+              <p>Este usuario tendrá permisos de administrador completos del sistema. Guarda las credenciales de forma segura.</p>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Botón de inicialización -->
+      <ion-button 
+        expand="block" 
+        type="submit" 
+        [disabled]="!setupForm.valid || isLoading"
+        class="setup-button">
+        <ion-spinner name="crescent" *ngIf="isLoading"></ion-spinner>
+        <span *ngIf="!isLoading">Inicializar Sistema</span>
+        <span *ngIf="isLoading">Configurando...</span>
+      </ion-button>
+
+    </form>
+  </div>
+</ion-content>

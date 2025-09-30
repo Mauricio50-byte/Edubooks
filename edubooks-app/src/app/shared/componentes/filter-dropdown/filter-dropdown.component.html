@@ -1,0 +1,101 @@
+<div class="filter-dropdown-container">
+  <ion-button 
+    fill="outline" 
+    [color]="color"
+    (click)="toggleDropdown()"
+    class="filter-button"
+    [class.active]="isOpen"
+    [class.has-selection]="getSelectedCount() > 0">
+    
+    <ion-icon [name]="icon" slot="start"></ion-icon>
+    <ion-label>{{ getSelectedLabel() }}</ion-label>
+    
+    <!-- Badge para mostrar cantidad seleccionada -->
+    <ion-badge 
+      *ngIf="getSelectedCount() > 0" 
+      [color]="color" 
+      slot="end"
+      class="selection-badge">
+      {{ getSelectedCount() }}
+    </ion-badge>
+    
+    <ion-icon 
+      [name]="isOpen ? 'chevron-up' : 'chevron-down'" 
+      slot="end"
+      class="dropdown-arrow">
+    </ion-icon>
+  </ion-button>
+
+  <!-- Dropdown Menu -->
+  <div class="dropdown-menu" [class.open]="isOpen" *ngIf="isOpen">
+    <ion-card class="dropdown-card">
+      <ion-card-header *ngIf="title">
+        <ion-card-title class="dropdown-title">
+          <ion-icon [name]="icon"></ion-icon>
+          {{ title }}
+        </ion-card-title>
+      </ion-card-header>
+      
+      <ion-card-content class="dropdown-content">
+        <!-- Botón para limpiar selección -->
+        <ion-item 
+          *ngIf="clearable && getSelectedCount() > 0"
+          button 
+          (click)="clearSelection()"
+          class="clear-option">
+          <ion-icon name="close-circle" slot="start" color="medium"></ion-icon>
+          <ion-label color="medium">Limpiar selección</ion-label>
+        </ion-item>
+        
+        <ion-item 
+          *ngIf="clearable && getSelectedCount() > 0"
+          lines="full">
+        </ion-item>
+
+        <!-- Opciones del filtro -->
+        <ion-item 
+          *ngFor="let option of options" 
+          button 
+          (click)="selectOption(option.value)"
+          class="filter-option"
+          [class.selected]="isSelected(option.value)">
+          
+          <ion-icon 
+            *ngIf="option.icon" 
+            [name]="option.icon" 
+            slot="start"
+            [color]="option.color || (isSelected(option.value) ? color : 'medium')">
+          </ion-icon>
+          
+          <ion-label 
+            [color]="isSelected(option.value) ? color : undefined">
+            {{ option.label }}
+          </ion-label>
+          
+          <!-- Checkmark para selección múltiple -->
+          <ion-checkbox 
+            *ngIf="multiple"
+            [checked]="isSelected(option.value)"
+            slot="end"
+            [color]="color">
+          </ion-checkbox>
+          
+          <!-- Checkmark para selección única -->
+          <ion-icon 
+            *ngIf="!multiple && isSelected(option.value)"
+            name="checkmark" 
+            slot="end"
+            [color]="color">
+          </ion-icon>
+        </ion-item>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Overlay para cerrar el dropdown -->
+  <div 
+    *ngIf="isOpen" 
+    class="dropdown-overlay" 
+    (click)="isOpen = false">
+  </div>
+</div>

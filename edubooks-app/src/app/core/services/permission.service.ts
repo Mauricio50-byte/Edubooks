@@ -20,7 +20,7 @@ export class PermissionService {
   
   // Definición de permisos por rol
   private rolePermissions: RolePermissions = {
-    'Administrador': {
+    'administrador': {
       'libro': ['create', 'read', 'update', 'delete'],
       'prestamo': ['create', 'read', 'update', 'delete'],
       'usuario': ['create', 'read', 'update', 'delete'],
@@ -29,7 +29,7 @@ export class PermissionService {
       'notificacion': ['create', 'read', 'update', 'delete'],
       'reporte': ['create', 'read', 'update', 'delete']
     },
-    'Docente': {
+    'docente': {
       'libro': ['create', 'read', 'update'],
       'prestamo': ['read', 'update'],
       'usuario': ['read'],
@@ -38,7 +38,7 @@ export class PermissionService {
       'notificacion': ['read'],
       'reporte': ['read']
     },
-    'Estudiante': {
+    'estudiante': {
       'libro': ['read'],
       'prestamo': ['create', 'read'],
       'usuario': ['read'], // Solo su propio perfil
@@ -101,21 +101,21 @@ export class PermissionService {
    * Verifica si el usuario actual es administrador
    */
   isAdmin(): boolean {
-    return this.hasRole('Administrador');
+    return this.hasRole('administrador');
   }
 
   /**
    * Verifica si el usuario actual es docente
    */
   isTeacher(): boolean {
-    return this.hasRole('Docente');
+    return this.hasRole('docente');
   }
 
   /**
    * Verifica si el usuario actual es estudiante
    */
   isStudent(): boolean {
-    return this.hasRole('Estudiante');
+    return this.hasRole('estudiante');
   }
 
   /**

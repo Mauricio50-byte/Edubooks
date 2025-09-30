@@ -13,7 +13,7 @@ from .serializers import (
     ReservaSerializer, ReservaListSerializer,
     BibliografiaSerializer, SancionSerializer, NotificacionSerializer
 )
-from usuarios.permissions import IsAdministrador, IsDocente, IsEstudiante
+from usuarios.auth.permissions import IsAdministrador, IsDocente, IsEstudiante
 
 class StandardResultsSetPagination(PageNumberPagination):
     page_size = 50

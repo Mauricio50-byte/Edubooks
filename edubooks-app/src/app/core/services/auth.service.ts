@@ -29,9 +29,16 @@ export class AuthService {
     }, 100);
   }
 
+  // Método público para inicializar autenticación
+  public initializeAuth() {
+    // Este método puede ser llamado desde app.component.ts
+    // La inicialización ya se hace automáticamente en el constructor
+    console.log('AuthService inicializado');
+  }
+
   // Inicializar autenticación de Supabase
   private initializeSupabaseAuth() {
-    this.supabaseService.currentUser$.subscribe(supabaseUser => {
+    this.supabaseService.user$.subscribe((supabaseUser: any) => {
       if (supabaseUser && !this.isAuthenticatedSubject.value) {
         // Usuario autenticado en Supabase pero no en Django
         this.syncWithDjango(supabaseUser);
@@ -95,7 +102,7 @@ export class AuthService {
 
   // Registro de usuario (mantener funcionalidad existente)
   registro(userData: UsuarioRegistro): Observable<AuthResponse> {
-    return this.apiService.post<AuthResponse>('/auth/registro/', userData)
+    return this.apiService.post<AuthResponse>('/usuarios/registro/', userData)
       .pipe(
         // No llamamos handleAuthSuccess para que no se autentique automáticamente
         catchError(error => {
@@ -228,5 +235,53 @@ export class AuthService {
   // Verificar si es administrador
   isAdministrador(): boolean {
     return this.hasRole('Administrador');
+  }
+
+  // Métodos para el sistema de invitaciones
+  validarTokenInvitacion(token: string): Observable<any> {
+    return this.apiService.post('/auth/invitaciones/validar-token/', { token });
+  }
+
+  registroConInvitacion(userData: any): Observable<any> {
+    return this.apiService.post('/auth/invitaciones/registro/', userData)
+      .pipe(
+        tap((response: any) => {
+          if (response.user && response.tokens) {
+            this.handleAuthSuccess(response);
+          }
+        })
+      );
+  }
+
+  // Métodos para administradores - gestión de invitaciones
+  crearInvitacion(invitacionData: any): Observable<any> {
+    return this.apiService.post('/auth/invitaciones/crear/', invitacionData);
+  }
+
+  listarInvitaciones(filtros?: any): Observable<any> {
+    const params = filtros ? new URLSearchParams(filtros).toString() : '';
+    return this.apiService.get(`/auth/invitaciones/listar/${params ? '?' + params : ''}`);
+  }
+
+  obtenerDetalleInvitacion(token: string): Observable<any> {
+    return this.apiService.get(`/auth/invitaciones/detalle/${token}/`);
+  }
+
+  cancelarInvitacion(token: string): Observable<any> {
+    return this.apiService.post(`/auth/invitaciones/cancelar/${token}/`, {});
+  }
+
+  extenderInvitacion(token: string, diasAdicionales: number): Observable<any> {
+    return this.apiService.post(`/auth/invitaciones/extender/${token}/`, { 
+      dias_adicionales: diasAdicionales 
+    });
+  }
+
+  reenviarInvitacion(token: string): Observable<any> {
+    return this.apiService.post(`/auth/invitaciones/reenviar/${token}/`, {});
+  }
+
+  obtenerEstadisticasInvitaciones(): Observable<any> {
+    return this.apiService.get('/auth/invitaciones/estadisticas/');
   }
 }

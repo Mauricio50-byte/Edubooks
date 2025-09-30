@@ -7,12 +7,12 @@ from decouple import config
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-liobrthg8hyod+f6vas_c&-!06#o(oq^mjdjr)w=5plwp$%ts8'
+SECRET_KEY = config('SECRET_KEY', default='django-insecure-liobrthg8hyod+f6vas_c&-!06#o(oq^mjdjr)w=5plwp$%ts8')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=lambda v: [s.strip() for s in v.split(',')])
 
 # Application definition
 INSTALLED_APPS = [
@@ -47,7 +47,7 @@ AUTH_USER_MODEL = 'usuarios.Usuario'
 
 # Configuración híbrida Django-Supabase
 AUTHENTICATION_BACKENDS = [
-    'usuarios.backends.SupabaseAuthBackend',  # Backend personalizado para Supabase
+    'usuarios.auth.backends.SupabaseAuthBackend',  # Backend personalizado para Supabase
     'django.contrib.auth.backends.ModelBackend',  # Backend tradicional de Django
 ]
 
@@ -55,7 +55,7 @@ AUTHENTICATION_BACKENDS = [
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-        'usuarios.authentication.SupabaseAuthentication',  # Autenticación híbrida
+        'usuarios.auth.authentication.SupabaseAuthentication',  # Autenticación híbrida
     ),
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
@@ -76,17 +76,18 @@ SIMPLE_JWT = {
 }
 
 # Configuración de CORS
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:8100",  # Para desarrollo con Ionic
-    "http://127.0.0.1:8100",
-    "http://localhost:4200",  # Para desarrollo con Angular
-    "http://127.0.0.1:4200",
-]
+# CORS Configuration
+CORS_ALLOWED_ORIGINS = config(
+    'CORS_ALLOWED_ORIGINS', 
+    default='http://localhost:8100,http://127.0.0.1:8100,http://localhost:8101,http://127.0.0.1:8101,http://localhost:4200,http://127.0.0.1:4200,http://localhost:8000,http://127.0.0.1:8000',
+    cast=lambda v: [s.strip() for s in v.split(',')]
+)
 
 CORS_ALLOW_CREDENTIALS = True
 
-# Configuración adicional de CORS para desarrollo
-CORS_ALLOW_ALL_ORIGINS = True  # Solo para desarrollo
+# Solo para desarrollo - debe ser False en producción
+CORS_ALLOW_ALL_ORIGINS = config('CORS_ALLOW_ALL_ORIGINS', default=True, cast=bool)
+
 CORS_ALLOW_HEADERS = [
     'accept',
     'accept-encoding',
@@ -97,6 +98,15 @@ CORS_ALLOW_HEADERS = [
     'user-agent',
     'x-csrftoken',
     'x-requested-with',
+    'x-client-info',
+    'cache-control',
+    'pragma',
+]
+
+CORS_EXPOSE_HEADERS = [
+    'content-type',
+    'x-total-count',
+    'x-page-count',
 ]
 
 CORS_ALLOW_METHODS = [
@@ -243,3 +253,24 @@ LOGGING = {
 log_dir = BASE_DIR / 'logs'
 if not os.path.exists(log_dir):
     os.makedirs(log_dir)
+
+# Configuración de Email
+EMAIL_MODE = os.getenv('EMAIL_MODE', 'console')
+
+if EMAIL_MODE == 'smtp':
+    # Configuración SMTP para emails reales
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = os.getenv('EMAIL_HOST')
+    EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
+    EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() == 'true'
+    EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL', 'False').lower() == 'true'
+    EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+    EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+else:
+    # Configuración para desarrollo (mostrar en consola)
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@edubooks.com')
+
+# URL del frontend para enlaces en emails
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:8100')

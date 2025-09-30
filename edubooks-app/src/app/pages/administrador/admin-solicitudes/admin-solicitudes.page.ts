@@ -171,7 +171,7 @@ export class AdminSolicitudesPage implements OnInit {
 
   get esAdministrador(): boolean {
     const usuario = this.authService.currentUserValue;
-    return !!(usuario && usuario.rol === 'Administrador');
+    return !!(usuario && usuario.rol === 'administrador');
   }
 
 }

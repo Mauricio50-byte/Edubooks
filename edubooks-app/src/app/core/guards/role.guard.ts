@@ -50,13 +50,13 @@ export class RoleGuard implements CanActivate {
 
   private redirectBasedOnRole(userRole: string) {
     switch (userRole) {
-      case 'Administrador':
-        this.router.navigate(['/admin-dashboard']);
+      case 'administrador':
+        this.router.navigate(['/home']);
         break;
-      case 'Docente':
-        this.router.navigate(['/docente-dashboard']);
+      case 'docente':
+        this.router.navigate(['/home']);
         break;
-      case 'Estudiante':
+      case 'estudiante':
         this.router.navigate(['/home']);
         break;
       default:

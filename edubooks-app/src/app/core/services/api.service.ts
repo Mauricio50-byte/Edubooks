@@ -14,9 +14,17 @@ export class ApiService {
   constructor(private http: HttpClient) {}
 
   private getHeaders(): HttpHeaders {
-    return new HttpHeaders({
+    const headers: any = {
       'Content-Type': 'application/json'
-    });
+    };
+    
+    // Agregar token de autorización si existe
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    return new HttpHeaders(headers);
   }
 
   private handleError(error: HttpErrorResponse) {

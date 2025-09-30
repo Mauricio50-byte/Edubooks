@@ -36,9 +36,130 @@ class Libro(models.Model, SupabaseModelMixin):
     class Meta:
         db_table = 'libros'
         ordering = ['titulo']
+        indexes = [
+            # Índices para búsquedas frecuentes
+            models.Index(fields=['titulo'], name='idx_libro_titulo'),
+            models.Index(fields=['autor'], name='idx_libro_autor'),
+            models.Index(fields=['isbn'], name='idx_libro_isbn'),
+            models.Index(fields=['categoria'], name='idx_libro_categoria'),
+            models.Index(fields=['editorial'], name='idx_libro_editorial'),
+            
+            # Índices para filtros comunes
+            models.Index(fields=['estado'], name='idx_libro_estado'),
+            models.Index(fields=['ubicacion'], name='idx_libro_ubicacion'),
+            models.Index(fields=['año_publicacion'], name='idx_libro_año_publicacion'),
+            
+            # Índices para disponibilidad y gestión de inventario
+            models.Index(fields=['cantidad_disponible'], name='idx_libro_cantidad_disponible'),
+            models.Index(fields=['cantidad_total'], name='idx_libro_cantidad_total'),
+            
+            # Índices para fechas (útiles para reportes y filtros temporales)
+            models.Index(fields=['fecha_registro'], name='idx_libro_fecha_registro'),
+            
+            # Índices compuestos para consultas complejas
+            models.Index(fields=['categoria', 'estado'], name='idx_libro_categoria_estado'),
+            models.Index(fields=['estado', 'cantidad_disponible'], name='idx_libro_estado_disponible'),
+            models.Index(fields=['autor', 'categoria'], name='idx_libro_autor_categoria'),
+            
+            # Índice para búsquedas de texto (título y autor juntos)
+            models.Index(fields=['titulo', 'autor'], name='idx_libro_titulo_autor'),
+        ]
     
     def __str__(self):
         return f"{self.titulo} - {self.autor}"
+    
+    def clean(self):
+        """Validaciones personalizadas del modelo Libro."""
+        import re
+        from django.core.exceptions import ValidationError
+        from django.core.validators import URLValidator
+        
+        errors = {}
+        
+        # Validación de título
+        if self.titulo:
+            if len(self.titulo.strip()) < 2:
+                errors['titulo'] = 'El título debe tener al menos 2 caracteres.'
+            if len(self.titulo) > 200:
+                errors['titulo'] = 'El título no puede exceder 200 caracteres.'
+        
+        # Validación de autor
+        if self.autor:
+            if len(self.autor.strip()) < 2:
+                errors['autor'] = 'El autor debe tener al menos 2 caracteres.'
+            if len(self.autor) > 200:
+                errors['autor'] = 'El autor no puede exceder 200 caracteres.'
+            # Validar que contenga solo letras, espacios, puntos, comas y guiones
+            if not re.match(r'^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s\.,\-]+$', self.autor):
+                errors['autor'] = 'El autor solo puede contener letras, espacios, puntos, comas y guiones.'
+        
+        # Validación de ISBN
+        if self.isbn:
+            # Remover guiones y espacios para validación
+            isbn_limpio = re.sub(r'[\s\-]+', '', self.isbn)
+            # Validar formato ISBN-10 o ISBN-13
+            if not re.match(r'^(?:97[89])?\d{9}[\dX]$', isbn_limpio):
+                errors['isbn'] = 'El ISBN debe tener formato válido (10 o 13 dígitos).'
+        
+        # Validación de editorial
+        if self.editorial and len(self.editorial.strip()) < 2:
+            errors['editorial'] = 'La editorial debe tener al menos 2 caracteres.'
+        
+        # Validación de año de publicación
+        if self.año_publicacion:
+            from datetime import datetime
+            año_actual = datetime.now().year
+            if self.año_publicacion < 1000:
+                errors['año_publicacion'] = 'El año de publicación debe ser mayor a 1000.'
+            if self.año_publicacion > año_actual + 1:
+                errors['año_publicacion'] = f'El año de publicación no puede ser mayor a {año_actual + 1}.'
+        
+        # Validación de categoría
+        if self.categoria:
+            if len(self.categoria.strip()) < 2:
+                errors['categoria'] = 'La categoría debe tener al menos 2 caracteres.'
+            if not re.match(r'^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s\-]+$', self.categoria):
+                errors['categoria'] = 'La categoría solo puede contener letras, espacios y guiones.'
+        
+        # Validación de ubicación
+        if self.ubicacion:
+            if len(self.ubicacion.strip()) < 2:
+                errors['ubicacion'] = 'La ubicación debe tener al menos 2 caracteres.'
+            # Validar formato de ubicación (ej: A1-001, B2-015)
+            if not re.match(r'^[A-Z]\d+\-\d{3}$', self.ubicacion.strip()):
+                errors['ubicacion'] = 'La ubicación debe tener formato válido (ej: A1-001).'
+        
+        # Validación de cantidades
+        if self.cantidad_total < 1:
+            errors['cantidad_total'] = 'La cantidad total debe ser al menos 1.'
+        
+        if self.cantidad_disponible < 0:
+            errors['cantidad_disponible'] = 'La cantidad disponible no puede ser negativa.'
+        
+        if self.cantidad_disponible > self.cantidad_total:
+            errors['cantidad_disponible'] = 'La cantidad disponible no puede ser mayor a la cantidad total.'
+        
+        # Validación de coherencia entre estado y cantidad disponible
+        if self.estado == 'Disponible' and self.cantidad_disponible == 0:
+            errors['estado'] = 'Un libro con cantidad disponible 0 no puede tener estado "Disponible".'
+        
+        if self.estado == 'Prestado' and self.cantidad_disponible == self.cantidad_total:
+            errors['estado'] = 'Un libro con toda la cantidad disponible no puede tener estado "Prestado".'
+        
+        # Validación de imagen de portada
+        if self.imagen_portada:
+            try:
+                validator = URLValidator()
+                validator(self.imagen_portada)
+            except ValidationError:
+                errors['imagen_portada'] = 'La URL de la imagen de portada no es válida.'
+        
+        # Validación de descripción
+        if self.descripcion and len(self.descripcion) > 2000:
+            errors['descripcion'] = 'La descripción no puede exceder 2000 caracteres.'
+        
+        if errors:
+            raise ValidationError(errors)
     
     def save(self, *args, **kwargs):
         # Actualizar estado basado en disponibilidad
@@ -78,6 +199,96 @@ class Prestamo(models.Model, SupabaseModelMixin):
     
     def __str__(self):
         return f"{self.libro.titulo} - {self.usuario.nombre} {self.usuario.apellido}"
+    
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        from datetime import date, timedelta
+        
+        errors = {}
+        
+        # Validación de fechas
+        if self.fecha_devolucion_esperada and self.fecha_devolucion_real:
+            if self.fecha_devolucion_real.date() < self.fecha_prestamo.date():
+                errors['fecha_devolucion_real'] = 'La fecha de devolución real no puede ser anterior a la fecha de préstamo.'
+        
+        if self.fecha_devolucion_esperada:
+            if self.fecha_devolucion_esperada < self.fecha_prestamo.date():
+                errors['fecha_devolucion_esperada'] = 'La fecha de devolución esperada no puede ser anterior a la fecha de préstamo.'
+            
+            # Validar que no sea más de 30 días en el futuro
+            max_fecha = self.fecha_prestamo.date() + timedelta(days=30)
+            if self.fecha_devolucion_esperada > max_fecha:
+                errors['fecha_devolucion_esperada'] = 'El período de préstamo no puede exceder 30 días.'
+        
+        # Validación de estado y fechas relacionadas
+        if self.estado == 'Activo':
+            if not self.fecha_devolucion_esperada:
+                errors['fecha_devolucion_esperada'] = 'Un préstamo activo debe tener fecha de devolución esperada.'
+            if not self.aprobado_por:
+                errors['aprobado_por'] = 'Un préstamo activo debe tener un usuario que lo aprobó.'
+        
+        if self.estado == 'Devuelto':
+            if not self.fecha_devolucion_real:
+                errors['fecha_devolucion_real'] = 'Un préstamo devuelto debe tener fecha de devolución real.'
+        
+        if self.estado == 'Rechazado':
+            if not self.motivo_rechazo or len(self.motivo_rechazo.strip()) < 10:
+                errors['motivo_rechazo'] = 'Un préstamo rechazado debe tener un motivo de al menos 10 caracteres.'
+        
+        # Validación de renovaciones
+        if self.renovaciones < 0:
+            errors['renovaciones'] = 'El número de renovaciones no puede ser negativo.'
+        
+        if self.renovaciones > 3:
+            errors['renovaciones'] = 'No se pueden realizar más de 3 renovaciones por préstamo.'
+        
+        # Validación de observaciones
+        if self.observaciones and len(self.observaciones) > 1000:
+            errors['observaciones'] = 'Las observaciones no pueden exceder 1000 caracteres.'
+        
+        # Validación de disponibilidad del libro
+        if self.estado == 'Pendiente' and self.libro:
+            if self.libro.cantidad_disponible <= 0:
+                errors['libro'] = 'No hay ejemplares disponibles de este libro.'
+            
+            if self.libro.estado == 'Mantenimiento':
+                errors['libro'] = 'Este libro está en mantenimiento y no se puede prestar.'
+        
+        # Validación de usuario sancionado
+        if self.usuario and hasattr(self.usuario, 'sancionado_hasta'):
+            if self.usuario.sancionado_hasta and self.usuario.sancionado_hasta > date.today():
+                if self.estado == 'Pendiente':
+                    errors['usuario'] = f'El usuario está sancionado hasta {self.usuario.sancionado_hasta}.'
+        
+        # Validación de límite de préstamos activos
+        if self.usuario and self.estado in ['Pendiente', 'Activo']:
+            prestamos_activos = Prestamo.objects.filter(
+                usuario=self.usuario,
+                estado__in=['Pendiente', 'Activo']
+            ).exclude(pk=self.pk).count()
+            
+            max_prestamos = getattr(self.usuario, 'max_prestamos_permitidos', 3)
+            if prestamos_activos >= max_prestamos:
+                errors['usuario'] = f'El usuario ya tiene {prestamos_activos} préstamos activos. Máximo permitido: {max_prestamos}.'
+        
+        # Validación de préstamo duplicado
+        if self.estado == 'Pendiente' and self.libro and self.usuario:
+            prestamo_existente = Prestamo.objects.filter(
+                libro=self.libro,
+                usuario=self.usuario,
+                estado__in=['Pendiente', 'Activo']
+            ).exclude(pk=self.pk).exists()
+            
+            if prestamo_existente:
+                errors['libro'] = 'Ya tienes un préstamo pendiente o activo de este libro.'
+        
+        # Validación de aprobador
+        if self.aprobado_por:
+            if not hasattr(self.aprobado_por, 'rol') or self.aprobado_por.rol not in ['Administrador', 'Bibliotecario']:
+                errors['aprobado_por'] = 'Solo administradores y bibliotecarios pueden aprobar préstamos.'
+        
+        if errors:
+            raise ValidationError(errors)
     
     def save(self, *args, **kwargs):
         # Establecer fecha de devolución esperada solo cuando se aprueba
@@ -257,7 +468,7 @@ class Notificacion(models.Model):
         ('general', 'General'),
     ]
     
-    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notificaciones')
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notificaciones_libros')
     titulo = models.CharField(max_length=200)
     mensaje = models.TextField()
     tipo = models.CharField(max_length=20, choices=TIPOS_CHOICES, default='general')

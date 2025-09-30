@@ -1,0 +1,244 @@
+.setup-content {
+  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.setup-container {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 20px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.setup-header {
+  text-align: center;
+  margin-bottom: 30px;
+  color: white;
+  
+  .setup-icon {
+    font-size: 4rem;
+    margin-bottom: 16px;
+    color: white;
+  }
+  
+  h1 {
+    font-size: 2rem;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+  }
+  
+  p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin: 0;
+  }
+}
+
+.setup-form {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-section {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  
+  h3 {
+    color: var(--ion-color-primary);
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 0 0 16px 0;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--ion-color-primary-tint);
+  }
+}
+
+.form-item {
+  --background: transparent;
+  --border-color: var(--ion-color-light-shade);
+  --border-radius: 8px;
+  margin-bottom: 16px;
+  
+  &.ion-invalid {
+    --border-color: var(--ion-color-danger);
+  }
+  
+  ion-label {
+    font-weight: 500;
+    color: var(--ion-color-dark);
+  }
+  
+  ion-input {
+    --padding-start: 12px;
+    --padding-end: 12px;
+  }
+  
+  ion-note {
+    font-size: 0.85rem;
+    margin-top: 4px;
+  }
+}
+
+.info-card {
+  margin: 20px 0;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  
+  .info-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    
+    ion-icon {
+      font-size: 1.5rem;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+    
+    h4 {
+      color: var(--ion-color-primary);
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 0 0 4px 0;
+    }
+    
+    p {
+      color: var(--ion-color-medium-shade);
+      font-size: 0.9rem;
+      line-height: 1.4;
+      margin: 0;
+    }
+  }
+}
+
+.password-requirements {
+  margin-top: 16px;
+  padding: 16px;
+  background: var(--ion-color-light);
+  border-radius: 8px;
+  border-left: 4px solid var(--ion-color-primary);
+  
+  h4 {
+    color: var(--ion-color-primary);
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin: 0 0 12px 0;
+  }
+  
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    
+    li {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 0;
+      font-size: 0.9rem;
+      color: var(--ion-color-dark);
+      
+      ion-icon {
+        font-size: 1rem;
+        flex-shrink: 0;
+      }
+    }
+  }
+}
+
+.setup-button {
+  margin-top: auto;
+  margin-bottom: 20px;
+  --border-radius: 12px;
+  height: 50px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  
+  &[disabled] {
+    opacity: 0.6;
+  }
+  
+  ion-spinner {
+    margin-right: 8px;
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .setup-container {
+    padding: 16px;
+  }
+  
+  .setup-header {
+    margin-bottom: 24px;
+    
+    .setup-icon {
+      font-size: 3rem;
+    }
+    
+    h1 {
+      font-size: 1.8rem;
+    }
+    
+    p {
+      font-size: 1rem;
+    }
+  }
+  
+  .form-section {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+}
+
+// Dark mode support
+@media (prefers-color-scheme: dark) {
+  .setup-content {
+    --background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+  }
+  
+  .form-section {
+    background: var(--ion-color-dark-tint);
+    
+    h3 {
+      color: var(--ion-color-primary-tint);
+      border-bottom-color: var(--ion-color-primary-shade);
+    }
+  }
+  
+  .form-item {
+    ion-label {
+      color: var(--ion-color-light);
+    }
+  }
+  
+  .password-requirements {
+    background: var(--ion-color-dark-shade);
+    
+    h4 {
+      color: var(--ion-color-primary-tint);
+    }
+    
+    ul li {
+      color: var(--ion-color-light);
+    }
+  }
+  
+  .info-card {
+    
+    .info-content {
+      h4 {
+        color: var(--ion-color-primary-tint);
+      }
+      
+      p {
+        color: var(--ion-text-color);
+      }
+    }
+  }
+}
