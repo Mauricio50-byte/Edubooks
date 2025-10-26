@@ -53,3 +53,44 @@ import 'zone.js';  // Included with Angular CLI.
 /***************************************************************************************************
  * APPLICATION IMPORTS
  */
+// Polyfill/patch para Web Locks: versión segura sin escribir en navigator.locks ni mostrar logs
+(function() {
+  try {
+    const w: any = window as any;
+    const nav: any = (w && w.navigator) ? w.navigator : undefined;
+    if (!nav || nav.__edubooksLockPatched) {
+      return;
+    }
+    const locks: any = nav.locks;
+    // Si no existe Web Locks o no hay request, no hacer nada
+    if (!locks || typeof locks.request !== 'function') {
+      return;
+    }
+
+    const originalRequest = locks.request.bind(locks);
+    const lockQueues = new Map<string, Promise<any>>();
+
+    // Envoltura que serializa peticiones por nombre sin romper el comportamiento nativo
+    locks.request = function(name: string, optionsOrCb: any, maybeCb?: any) {
+      try {
+        const cb = typeof optionsOrCb === 'function' ? optionsOrCb : maybeCb;
+        if (typeof cb !== 'function') {
+          // Si no hay callback válido, usar la implementación nativa
+          return originalRequest(name, optionsOrCb, maybeCb);
+        }
+        // Serializa por nombre para evitar fallos inmediatos al competir por el mismo lock
+        const prev = lockQueues.get(name) || Promise.resolve();
+        const next = prev.then(() => originalRequest(name, optionsOrCb, cb));
+        lockQueues.set(name, next.catch(() => Promise.resolve()));
+        return next;
+      } catch {
+        // Ante cualquier problema, delegar en la implementación nativa
+        return originalRequest(name, optionsOrCb, maybeCb);
+      }
+    };
+
+    nav.__edubooksLockPatched = true;
+  } catch {
+    // Silencioso: no registrar advertencias en consola
+  }
+})();

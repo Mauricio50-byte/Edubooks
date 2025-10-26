@@ -25,7 +25,7 @@ export class SupabaseService {
   public user$ = this.userSubject.asObservable();
 
   constructor(private lockManager: LockManagerService) {
-    this.initializeSupabase();
+    // Inicialización diferida: se realizará bajo demanda
   }
 
   private async initializeSupabase(): Promise<void> {
@@ -41,8 +41,8 @@ export class SupabaseService {
 
   private async performInitialization(): Promise<void> {
     try {
-      // Limpiar locks antes de inicializar
-      this.lockManager.clearSupabaseLocks();
+      // Evitar limpiar locks justo antes de inicializar para no competir con Navigator Locks
+      // this.lockManager.clearSupabaseLocks();
       
       this.supabase = createClient(
         environment.supabase.url,
@@ -74,7 +74,8 @@ export class SupabaseService {
               break;
             case 'SIGNED_OUT':
               console.log('Usuario desconectado');
-              this.lockManager.clearSupabaseLocks();
+              // No limpiar locks aquí para evitar conflictos con el LockManager
+              // this.lockManager.clearSupabaseLocks();
               break;
             case 'TOKEN_REFRESHED':
               console.log('Token renovado para:', session?.user?.email);
@@ -87,7 +88,8 @@ export class SupabaseService {
           }
         } catch (error) {
           console.error('Error en onAuthStateChange:', error);
-          this.lockManager.clearSupabaseLocks();
+          // Evitar limpiar locks en el catch para no competir con Navigator Locks
+          // this.lockManager.clearSupabaseLocks();
         }
       });
 
@@ -95,7 +97,8 @@ export class SupabaseService {
       console.log('Supabase inicializado correctamente');
     } catch (error) {
       console.error('Error inicializando Supabase:', error);
-      this.lockManager.clearSupabaseLocks();
+      // Evitar limpiar locks en errores de inicialización
+      // this.lockManager.clearSupabaseLocks();
       throw error;
     }
   }
@@ -104,14 +107,14 @@ export class SupabaseService {
     try {
       await this.initializeSupabase();
       
-      // Limpiar locks antes de cargar sesión
-      this.lockManager.clearSupabaseLocks();
+      // No limpiar locks antes de cargar sesión para evitar competir por el lock
+      // this.lockManager.clearSupabaseLocks();
       
       const { data: { session }, error } = await this.supabase.auth.getSession();
       
       if (error) {
         console.error('Error cargando sesión:', error);
-        this.lockManager.clearSupabaseLocks();
+        // this.lockManager.clearSupabaseLocks();
         return;
       }
       
@@ -125,7 +128,7 @@ export class SupabaseService {
       }
     } catch (error) {
       console.error('Error en loadSession:', error);
-      this.lockManager.clearSupabaseLocks();
+      // this.lockManager.clearSupabaseLocks();
     }
   }
 
@@ -214,8 +217,8 @@ export class SupabaseService {
     try {
       await this.initializeSupabase();
       
-      // Limpiar locks antes y después del sign out
-      this.lockManager.clearSupabaseLocks();
+      // Evitar limpiar locks antes del sign out
+      // this.lockManager.clearSupabaseLocks();
       
       const { error } = await this.supabase.auth.signOut();
       
@@ -234,7 +237,7 @@ export class SupabaseService {
       return { success: true };
     } catch (error) {
       console.error('Error en signOut:', error);
-      this.lockManager.clearSupabaseLocks();
+      // this.lockManager.clearSupabaseLocks();
       return { success: false, error: 'Error inesperado al cerrar sesión' };
     }
   }
