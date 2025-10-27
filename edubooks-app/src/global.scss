@@ -44,3 +44,35 @@ ion-input, ion-select {
 ion-input::part(native), ion-select::part(native) {
   color: #333333 !important;
 }
+
+/* Mejoras de accesibilidad y gestión de foco */
+/* Asegurar que elementos ocultos no reciban foco */
+[aria-hidden="true"] {
+  pointer-events: none !important;
+}
+
+[aria-hidden="true"] * {
+  pointer-events: none !important;
+}
+
+/* Mejorar indicadores de foco visibles */
+button:focus,
+ion-button:focus,
+ion-input:focus,
+ion-select:focus,
+ion-textarea:focus,
+[tabindex]:focus {
+  outline: 2px solid var(--ion-color-primary, #3880ff) !important;
+  outline-offset: 2px !important;
+}
+
+/* Asegurar que páginas ocultas no interfieran con la navegación */
+ion-page[aria-hidden="true"] {
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Transiciones suaves para cambios de foco */
+* {
+  transition: outline 0.2s ease-in-out;
+}

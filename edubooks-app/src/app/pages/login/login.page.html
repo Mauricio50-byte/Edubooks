@@ -22,6 +22,9 @@
       <ion-item class="form-item" [class.ion-invalid]="email?.invalid && email?.touched">
         <ion-label position="stacked">Email</ion-label>
         <ion-input 
+          id="login-email"
+          name="email"
+          autocomplete="email"
           formControlName="email" 
           type="email" 
           placeholder="tu@email.com"
@@ -40,6 +43,9 @@
       <ion-item class="form-item" [class.ion-invalid]="password?.invalid && password?.touched">
         <ion-label position="stacked">Contraseña</ion-label>
         <ion-input 
+          id="login-password"
+          name="current-password"
+          autocomplete="current-password"
           formControlName="password" 
           [type]="showPassword ? 'text' : 'password'" 
           placeholder="Tu contraseña"

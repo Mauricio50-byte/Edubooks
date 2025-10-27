@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from django.db import transaction
+from django.db import IntegrityError
 from ..models import Usuario
 from ..serializers import UsuarioPerfilSerializer, UsuarioRegistroSerializer
 import jwt
@@ -17,27 +18,46 @@ logger = logging.getLogger(__name__)
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def registro(request):
-    """Registro de nuevos usuarios"""
-    serializer = UsuarioRegistroSerializer(data=request.data)
-    if serializer.is_valid():
-        try:
-            with transaction.atomic():
-                usuario = serializer.save()
-                return Response({
-                    'message': 'Usuario registrado exitosamente. Por favor, inicia sesión.',
-                    'user': UsuarioPerfilSerializer(usuario).data
-                }, status=status.HTTP_201_CREATED)
-        except Exception as e:
-            logger.error(f"Error en registro: {str(e)}")
+    """Registro de nuevos usuarios (solo estudiantes)"""
+    try:
+        rol = request.data.get('rol', 'estudiante')
+        if rol != 'estudiante':
             return Response({
-                'message': 'Error interno del servidor',
-                'errors': str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
-    return Response({
-        'message': 'Datos inválidos',
-        'errors': serializer.errors
-    }, status=status.HTTP_400_BAD_REQUEST)
+                'message': 'Registro manual no permitido para este rol.',
+                'detail': 'Solo estudiantes pueden registrarse manualmente. Los docentes deben registrarse mediante invitación.',
+                'next': {
+                    'invitacion_registro_url': '/api/auth/invitaciones/registro/'
+                }
+            }, status=status.HTTP_403_FORBIDDEN)
+        
+        data = request.data.copy()
+        data['rol'] = 'estudiante'
+        serializer = UsuarioRegistroSerializer(data=data)
+        if serializer.is_valid():
+            try:
+                with transaction.atomic():
+                    usuario = serializer.save()
+                    return Response({
+                        'message': 'Usuario registrado exitosamente. Por favor, inicia sesión.',
+                        'user': UsuarioPerfilSerializer(usuario).data
+                    }, status=status.HTTP_201_CREATED)
+            except IntegrityError as ie:
+                logger.error(f"Error de integridad en registro: {str(ie)}")
+                return Response({
+                    'message': 'Datos duplicados o inválidos',
+                    'detail': str(ie)
+                }, status=status.HTTP_400_BAD_REQUEST)
+        
+        return Response({
+            'message': 'Datos inválidos',
+            'errors': serializer.errors
+        }, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        logger.error(f"Error en registro: {str(e)}")
+        return Response({
+            'message': 'Error interno del servidor',
+            'errors': str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['POST'])
 @permission_classes([AllowAny])

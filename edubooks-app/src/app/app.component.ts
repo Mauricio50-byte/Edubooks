@@ -3,6 +3,7 @@ import { Platform } from '@ionic/angular';
 import { AuthService } from './core/services/auth.service';
 import { LockManagerService } from './core/services/lock-manager.service';
 import { SupabaseService } from './core/services/supabase.service';
+import { FocusManagementService } from './core/services/focus-management.service';
 
 @Component({
   selector: 'app-root',
@@ -15,7 +16,8 @@ export class AppComponent implements OnInit {
     private platform: Platform,
     private authService: AuthService,
     private lockManager: LockManagerService,
-    private supabaseService: SupabaseService
+    private supabaseService: SupabaseService,
+    private focusManagementService: FocusManagementService
   ) {}
 
   ngOnInit() {

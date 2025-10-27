@@ -52,6 +52,9 @@
         <ion-item class="form-item" [class.ion-invalid]="username?.invalid && username?.touched">
           <ion-label position="stacked">Nombre de Usuario *</ion-label>
           <ion-input 
+            id="register-invite-username"
+            name="username"
+            autocomplete="username"
             formControlName="username" 
             type="text" 
             placeholder="usuario123">
@@ -69,6 +72,9 @@
         <ion-item class="form-item" [class.ion-invalid]="nombre?.invalid && nombre?.touched">
           <ion-label position="stacked">Nombre *</ion-label>
           <ion-input 
+            id="register-invite-first-name"
+            name="nombre"
+            autocomplete="given-name"
             formControlName="nombre" 
             type="text" 
             placeholder="Tu nombre">
@@ -83,6 +89,9 @@
         <ion-item class="form-item" [class.ion-invalid]="apellido?.invalid && apellido?.touched">
           <ion-label position="stacked">Apellido *</ion-label>
           <ion-input 
+            id="register-invite-last-name"
+            name="apellido"
+            autocomplete="family-name"
             formControlName="apellido" 
             type="text" 
             placeholder="Tu apellido">
@@ -102,6 +111,9 @@
         <ion-item class="form-item" [class.ion-invalid]="password?.invalid && password?.touched">
           <ion-label position="stacked">Contraseña *</ion-label>
           <ion-input 
+            id="register-invite-password"
+            name="new-password"
+            autocomplete="new-password"
             formControlName="password" 
             [type]="showPassword ? 'text' : 'password'" 
             placeholder="Mínimo 8 caracteres">
@@ -125,6 +137,9 @@
         <ion-item class="form-item" [class.ion-invalid]="password_confirm?.invalid && password_confirm?.touched">
           <ion-label position="stacked">Confirmar Contraseña *</ion-label>
           <ion-input 
+            id="register-invite-password-confirm"
+            name="new-password-confirm"
+            autocomplete="new-password"
             formControlName="password_confirm" 
             [type]="showPasswordConfirm ? 'text' : 'password'" 
             placeholder="Repite tu contraseña">
@@ -153,6 +168,9 @@
         <ion-item class="form-item">
           <ion-label position="stacked">Teléfono</ion-label>
           <ion-input 
+            id="register-invite-telefono"
+            name="telefono"
+            autocomplete="tel"
             formControlName="telefono" 
             type="tel" 
             placeholder="Ej: +1234567890">
@@ -164,6 +182,9 @@
         <ion-item class="form-item">
           <ion-label position="stacked">Número de Identificación</ion-label>
           <ion-input 
+            id="register-invite-identificacion"
+            name="numero_identificacion"
+            autocomplete="off"
             formControlName="numero_identificacion" 
             type="text" 
             placeholder="Ej: 12345678">
@@ -174,7 +195,7 @@
         <!-- Género -->
         <ion-item class="form-item">
           <ion-label position="stacked">Género</ion-label>
-          <ion-select formControlName="genero" placeholder="Selecciona tu género">
+          <ion-select id="register-invite-genero" name="genero" formControlName="genero" placeholder="Selecciona tu género">
             <ion-select-option value="M">Masculino</ion-select-option>
             <ion-select-option value="F">Femenino</ion-select-option>
             <ion-select-option value="Otro">Otro</ion-select-option>
@@ -200,14 +221,13 @@
               <span *ngIf="isFieldRequired(fieldName)"> *</span>
             </ion-label>
             <ion-input 
+              [attr.id]="'register-invite-' + fieldName"
+              [attr.name]="fieldName"
+              autocomplete="off"
               [formControlName]="fieldName" 
               type="text" 
               [placeholder]="getFieldPlaceholder(fieldName)">
             </ion-input>
-            <ion-icon name="document-text-outline" slot="start"></ion-icon>
-            <ion-note slot="error" *ngIf="registerForm.get(fieldName)?.errors?.['required'] && registerForm.get(fieldName)?.touched">
-              {{ getFieldLabel(fieldName) }} es requerido
-            </ion-note>
           </ion-item>
 
           <!-- Campo numérico -->
@@ -220,6 +240,9 @@
               <span *ngIf="isFieldRequired(fieldName)"> *</span>
             </ion-label>
             <ion-input 
+              [attr.id]="'register-invite-' + fieldName"
+              [attr.name]="fieldName"
+              autocomplete="off"
               [formControlName]="fieldName" 
               type="number" 
               [placeholder]="getFieldPlaceholder(fieldName)">
@@ -245,6 +268,7 @@
               <span *ngIf="isFieldRequired(fieldName)"> *</span>
             </ion-label>
             <ion-datetime 
+              [attr.id]="'register-invite-' + fieldName"
               [formControlName]="fieldName"
               presentation="date"
               [showDefaultButtons]="true"
@@ -263,6 +287,8 @@
               <span *ngIf="isFieldRequired(fieldName)"> *</span>
             </ion-label>
             <ion-select 
+              [attr.id]="'register-invite-' + fieldName"
+              [attr.name]="fieldName"
               [formControlName]="fieldName" 
               [placeholder]="'Selecciona ' + getFieldLabel(fieldName).toLowerCase()">
               <ion-select-option 

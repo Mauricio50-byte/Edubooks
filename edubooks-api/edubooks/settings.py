@@ -2,6 +2,9 @@ from pathlib import Path
 from datetime import timedelta
 import os
 from decouple import config
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning, module="pkg_resources")
+warnings.filterwarnings("ignore", category=UserWarning, module="rest_framework_simplejwt")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent

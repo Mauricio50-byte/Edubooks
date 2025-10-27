@@ -3,6 +3,7 @@ from rest_framework import serializers
 from django.contrib.auth import authenticate
 from django.utils import timezone
 from ..models import Usuario, Estudiante, Docente, Administrador
+from decimal import Decimal
 
 class UsuarioRegistroSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=8)
@@ -112,7 +113,19 @@ class UsuarioRegistroSerializer(serializers.ModelSerializer):
         # Crear perfil específico según el rol
         rol = usuario.rol
         
-        if rol == 'estudiante' and datos_estudiante:
+        if rol == 'estudiante':
+            # Asegurar estructura y defaults requeridos por el modelo
+            if datos_estudiante is None:
+                datos_estudiante = {}
+            if not datos_estudiante.get('semestre_actual'):
+                datos_estudiante['semestre_actual'] = 1
+            if not datos_estudiante.get('fecha_ingreso'):
+                from django.utils import timezone
+                datos_estudiante['fecha_ingreso'] = timezone.now().date()
+            # Convertir fecha_graduacion_esperada si viene como string
+            if 'fecha_graduacion_esperada' in datos_estudiante and isinstance(datos_estudiante['fecha_graduacion_esperada'], str):
+                from datetime import datetime
+                datos_estudiante['fecha_graduacion_esperada'] = datetime.strptime(datos_estudiante['fecha_graduacion_esperada'], '%Y-%m-%d').date()
             Estudiante.objects.create(usuario=usuario, **datos_estudiante)
         elif rol == 'docente' and datos_docente:
             Docente.objects.create(usuario=usuario, **datos_docente)
@@ -329,7 +342,7 @@ class SancionSerializer(serializers.Serializer):
 class MultaSerializer(serializers.Serializer):
     """Serializer para aplicar multas"""
     usuario_id = serializers.IntegerField()
-    cantidad = serializers.DecimalField(max_digits=10, decimal_places=2, min_value=0.01)
+    cantidad = serializers.DecimalField(max_digits=10, decimal_places=2, min_value=Decimal('0.01'))
     concepto = serializers.CharField(max_length=500, required=False, allow_blank=True)
     
     def validate_usuario_id(self, value):
@@ -342,7 +355,7 @@ class MultaSerializer(serializers.Serializer):
 class PagoMultaSerializer(serializers.Serializer):
     """Serializer para registrar pagos de multas"""
     usuario_id = serializers.IntegerField()
-    cantidad = serializers.DecimalField(max_digits=10, decimal_places=2, min_value=0.01)
+    cantidad = serializers.DecimalField(max_digits=10, decimal_places=2, min_value=Decimal('0.01'))
     
     def validate_usuario_id(self, value):
         try:

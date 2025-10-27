@@ -29,8 +29,9 @@ export class RegisterPage implements OnInit {
   }
 
   ngOnInit() {
-    // El registro libre ya no está disponible, pero no mostrar el modal
-    // La información se muestra directamente en la página
+    // Forzar rol estudiante y configurar validaciones de estudiante
+    this.registerForm.get('rol')?.setValue('estudiante');
+    this.updateValidationsByRole('estudiante');
   }
 
   private async showRegistrationDisabledAlert() {
@@ -100,12 +101,24 @@ export class RegisterPage implements OnInit {
     const password = form.get('password');
     const confirmPassword = form.get('password_confirm');
     
-    if (password && confirmPassword && password.value !== confirmPassword.value) {
-      confirmPassword.setErrors({ passwordMismatch: true });
-      return { passwordMismatch: true };
+    if (!password || !confirmPassword) {
+      return null;
     }
-    
-    return null;
+
+    const mismatch = password.value !== confirmPassword.value;
+
+    if (mismatch) {
+      const currentErrors = confirmPassword.errors || {};
+      confirmPassword.setErrors({ ...currentErrors, passwordMismatch: true });
+    } else {
+      // Clear only the passwordMismatch error, preserve others
+      const { passwordMismatch, ...others } = confirmPassword.errors || {} as any;
+      const newErrors = Object.keys(others).length ? others : null;
+      confirmPassword.setErrors(newErrors);
+    }
+
+    confirmPassword.updateValueAndValidity({ onlySelf: true, emitEvent: false });
+    return mismatch ? { passwordMismatch: true } : null;
   }
 
   checkPasswordsMatch(): boolean {
@@ -203,13 +216,52 @@ export class RegisterPage implements OnInit {
   }
 
   async onSubmit() {
-    // Este método ya no debería ejecutarse debido a la redirección
-    const alert = await this.alertController.create({
-      header: 'Registro No Disponible',
-      message: 'El registro libre ha sido deshabilitado. Solo puedes registrarte mediante invitación.',
-      buttons: ['OK']
+    if (this.registerForm.invalid || !this.checkPasswordsMatch()) {
+      const alert = await this.alertController.create({
+        header: 'Formulario inválido',
+        message: 'Revisa los campos requeridos y que las contraseñas coincidan.',
+        buttons: ['OK']
+      });
+      await alert.present();
+      return;
+    }
+
+    this.isLoading = true;
+    const loading = await this.loadingController.create({ message: 'Registrando...' });
+    await loading.present();
+
+    const userData: UsuarioRegistro = this.buildUserData();
+    // Asegurar rol estudiante
+    userData.rol = 'estudiante';
+
+    this.authService.registro(userData).subscribe({
+      next: async (response) => {
+        await loading.dismiss();
+        this.isLoading = false;
+        const toast = await this.toastController.create({
+          message: 'Registro exitoso. Ahora inicia sesión.',
+          duration: 2500,
+          color: 'success'
+        });
+        await toast.present();
+        this.router.navigate(['/login']);
+      },
+      error: async (error) => {
+        await loading.dismiss();
+        this.isLoading = false;
+        const backend = error?.error;
+        let msg = error?.message || backend?.detail || 'No se pudo completar el registro.';
+        if (backend?.errors) {
+          msg = this.extractFirstErrorMessage(backend.errors) || msg;
+        }
+        const alert = await this.alertController.create({
+          header: 'Error de registro',
+          message: msg,
+          buttons: ['OK']
+        });
+        await alert.present();
+      }
     });
-    await alert.present();
   }
 
   shouldShowEstudianteFields(): boolean {
@@ -242,4 +294,24 @@ export class RegisterPage implements OnInit {
   get carrera() { return this.registerForm.get('carrera'); }
   get matricula() { return this.registerForm.get('matricula'); }
   get departamento() { return this.registerForm.get('departamento'); }
+
+  private extractFirstErrorMessage(errors: any): string | null {
+    if (!errors) return null;
+    const tryGetMsg = (val: any): string | null => {
+      if (!val) return null;
+      if (typeof val === 'string') return val;
+      if (Array.isArray(val) && val.length) {
+        const first = val[0];
+        return typeof first === 'string' ? first : tryGetMsg(first);
+      }
+      if (typeof val === 'object') {
+        const keys = Object.keys(val);
+        if (keys.length) {
+          return tryGetMsg(val[keys[0]]);
+        }
+      }
+      return null;
+    };
+    return tryGetMsg(errors);
+  }
 }

@@ -13,7 +13,12 @@ import { AuthInterceptor } from './core/interceptors/auth.interceptor';
   declarations: [AppComponent],
   imports: [
     BrowserModule, 
-    IonicModule.forRoot(), 
+    IonicModule.forRoot({
+      // Configuraciones de accesibilidad mejoradas
+      mode: 'md', // Usar Material Design para mejor accesibilidad
+      animated: true,
+      rippleEffect: true
+    }), 
     AppRoutingModule,
     HttpClientModule // Para hacer peticiones HTTP
   ],

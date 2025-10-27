@@ -5,7 +5,7 @@
     </ion-buttons>
     <ion-title class="ion-text-center">
       <ion-icon name="person-add-outline" style="margin-right: 8px;"></ion-icon>
-      Registro
+      Registro de Estudiante
     </ion-title>
   </ion-toolbar>
 </ion-header>
@@ -14,50 +14,106 @@
   <div class="register-container">
     <!-- Título -->
     <div class="header-section">
-      <h1>Registro No Disponible</h1>
-      <p>El registro libre ha sido deshabilitado. Solo puedes registrarte mediante invitación de un administrador.</p>
+      <h1>Crea tu cuenta de estudiante</h1>
+      <p>Los docentes se registran mediante invitación por correo.</p>
     </div>
 
-    <!-- Mensaje informativo -->
+    <!-- Formulario de registro de estudiante -->
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="register-form">
+      <!-- Email -->
+      <ion-item class="form-item" [class.ion-invalid]="email?.invalid && email?.touched">
+        <ion-label position="stacked">Email *</ion-label>
+        <ion-input id="register-email" name="email" autocomplete="email" type="email" formControlName="email" placeholder="tu@email.com"></ion-input>
+        <ion-note slot="error" *ngIf="email?.errors?.['required'] && email?.touched">El email es requerido</ion-note>
+        <ion-note slot="error" *ngIf="email?.errors?.['email'] && email?.touched">Ingresa un email válido</ion-note>
+      </ion-item>
+
+      <!-- Username -->
+      <ion-item class="form-item" [class.ion-invalid]="username?.invalid && username?.touched">
+        <ion-label position="stacked">Usuario *</ion-label>
+        <ion-input id="register-username" name="username" autocomplete="username" type="text" formControlName="username" placeholder="tu_usuario"></ion-input>
+        <ion-note slot="error" *ngIf="username?.errors?.['required'] && username?.touched">El usuario es requerido</ion-note>
+        <ion-note slot="error" *ngIf="username?.errors?.['minlength'] && username?.touched">Mínimo 3 caracteres</ion-note>
+      </ion-item>
+
+      <!-- Nombre y Apellido -->
+      <ion-item class="form-item" [class.ion-invalid]="nombre?.invalid && nombre?.touched">
+        <ion-label position="stacked">Nombre *</ion-label>
+        <ion-input id="register-first-name" name="nombre" autocomplete="given-name" type="text" formControlName="nombre" placeholder="Tu nombre"></ion-input>
+        <ion-note slot="error" *ngIf="nombre?.errors?.['required'] && nombre?.touched">El nombre es requerido</ion-note>
+      </ion-item>
+
+      <ion-item class="form-item" [class.ion-invalid]="apellido?.invalid && apellido?.touched">
+        <ion-label position="stacked">Apellido *</ion-label>
+        <ion-input id="register-last-name" name="apellido" autocomplete="family-name" type="text" formControlName="apellido" placeholder="Tu apellido"></ion-input>
+        <ion-note slot="error" *ngIf="apellido?.errors?.['required'] && apellido?.touched">El apellido es requerido</ion-note>
+      </ion-item>
+
+      <!-- Password -->
+      <ion-item class="form-item" [class.ion-invalid]="password?.invalid && password?.touched">
+        <ion-label position="stacked">Contraseña *</ion-label>
+        <ion-input id="register-password" name="new-password" autocomplete="new-password" [type]="showPassword ? 'text' : 'password'" formControlName="password" placeholder="••••••••"></ion-input>
+        <ion-button slot="end" fill="clear" size="small" (click)="togglePasswordVisibility()">
+          <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+        </ion-button>
+        <ion-note slot="error" *ngIf="password?.errors?.['required'] && password?.touched">La contraseña es requerida</ion-note>
+        <ion-note slot="error" *ngIf="password?.errors?.['minlength'] && password?.touched">Mínimo 8 caracteres</ion-note>
+      </ion-item>
+
+      <!-- Confirm Password -->
+      <ion-item class="form-item" [class.ion-invalid]="password_confirm?.invalid && password_confirm?.touched || !checkPasswordsMatch() && password_confirm?.touched">
+        <ion-label position="stacked">Confirmar Contraseña *</ion-label>
+        <ion-input id="register-password-confirm" name="new-password-confirm" autocomplete="new-password" [type]="showPasswordConfirm ? 'text' : 'password'" formControlName="password_confirm" placeholder="••••••••"></ion-input>
+        <ion-button slot="end" fill="clear" size="small" (click)="togglePasswordConfirmVisibility()">
+          <ion-icon [name]="showPasswordConfirm ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+        </ion-button>
+        <ion-note slot="error" *ngIf="password_confirm?.errors?.['required'] && password_confirm?.touched">Confirma tu contraseña</ion-note>
+        <ion-note slot="error" *ngIf="!checkPasswordsMatch() && password_confirm?.touched">Las contraseñas no coinciden</ion-note>
+      </ion-item>
+
+      <!-- Campos de Estudiante -->
+      <div class="form-section">
+        <h3>Datos de Estudiante</h3>
+        <ion-item class="form-item" [class.ion-invalid]="carrera?.invalid && carrera?.touched">
+          <ion-label position="stacked">Carrera *</ion-label>
+          <ion-input id="register-carrera" name="carrera" autocomplete="organization-title" type="text" formControlName="carrera" placeholder="Ej: Bachillerato en Ciencias"></ion-input>
+          <ion-note slot="error" *ngIf="carrera?.errors?.['required'] && carrera?.touched">La carrera es requerida</ion-note>
+        </ion-item>
+        <ion-item class="form-item" [class.ion-invalid]="matricula?.invalid && matricula?.touched">
+          <ion-label position="stacked">Matrícula *</ion-label>
+          <ion-input id="register-matricula" name="matricula" autocomplete="off" type="text" formControlName="matricula" placeholder="Ej: EST2024001"></ion-input>
+          <ion-note slot="error" *ngIf="matricula?.errors?.['required'] && matricula?.touched">La matrícula es requerida</ion-note>
+        </ion-item>
+        <ion-item class="form-item">
+          <ion-label position="stacked">Semestre Actual</ion-label>
+          <ion-input id="register-semestre" name="semestre_actual" autocomplete="off" type="text" formControlName="semestre_actual" placeholder="Ej: 1"></ion-input>
+        </ion-item>
+      </div>
+
+      <!-- Botón de registro -->
+      <ion-button expand="block" color="primary" type="submit" [disabled]="isLoading || registerForm.invalid || !checkPasswordsMatch()">
+        <ion-spinner name="dots" *ngIf="isLoading" slot="start"></ion-spinner>
+        Registrarme
+      </ion-button>
+    </form>
+
+    <!-- Invitación para docentes -->
     <div class="info-section">
       <ion-card>
         <ion-card-header>
           <ion-card-title>
             <ion-icon name="information-circle-outline" color="primary"></ion-icon>
-            ¿Cómo registrarse?
+            ¿Eres docente?
           </ion-card-title>
         </ion-card-header>
         <ion-card-content>
-          <p>Para crear una cuenta en EduBooks, necesitas una invitación de un administrador del sistema.</p>
-          <ul>
-            <li>Si eres estudiante, contacta a la biblioteca de tu institución</li>
-            <li>Si eres docente, solicita acceso al departamento académico</li>
-            <li>Si ya tienes una invitación, usa el enlace que recibiste por email</li>
-          </ul>
+          <p>Los docentes reciben una invitación por correo para registrarse.</p>
+          <ion-button expand="block" fill="outline" color="secondary" routerLink="/register-invitation">
+            <ion-icon name="mail-outline" slot="start"></ion-icon>
+            Tengo una invitación
+          </ion-button>
         </ion-card-content>
       </ion-card>
-    </div>
-
-    <!-- Botones de acción -->
-    <div class="action-buttons">
-      <ion-button 
-        expand="block" 
-        color="primary"
-        (click)="goToLogin()"
-        class="action-button">
-        <ion-icon name="log-in-outline" slot="start"></ion-icon>
-        Iniciar Sesión
-      </ion-button>
-
-      <ion-button 
-        expand="block" 
-        fill="outline"
-        color="secondary"
-        routerLink="/register-invitation"
-        class="action-button">
-        <ion-icon name="mail-outline" slot="start"></ion-icon>
-        Tengo una Invitación
-      </ion-button>
     </div>
 
     <!-- Enlaces adicionales -->
