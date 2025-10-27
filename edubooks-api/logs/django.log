@@ -159290,3 +159290,49 @@ INFO 2025-10-26 19:44:03,174 basehttp 11732 16500 "GET /api/libros/ HTTP/1.1" 20
 INFO 2025-10-26 19:44:06,970 basehttp 11732 16500 "OPTIONS /api/sanciones/ HTTP/1.1" 200 0
 INFO 2025-10-26 19:44:07,626 basehttp 11732 16500 "GET /api/sanciones/ HTTP/1.1" 200 52
 INFO 2025-10-26 19:44:11,647 basehttp 11732 16500 "GET /api/libros/ HTTP/1.1" 200 439
+INFO 2025-10-26 20:24:54,463 supabase_client 6316 19000 Cliente de Supabase inicializado correctamente
+INFO 2025-10-26 20:24:55,868 supabase_client 1248 4604 Cliente de Supabase inicializado correctamente
+INFO 2025-10-26 20:24:55,942 autoreload 1248 4604 Watching for file changes with StatReloader
+INFO 2025-10-26 20:26:17,427 basehttp 1248 3800 "OPTIONS /api/setup/verificar/ HTTP/1.1" 200 0
+INFO 2025-10-26 20:26:18,507 basehttp 1248 3800 "GET /api/setup/verificar/ HTTP/1.1" 200 125
+INFO 2025-10-26 20:26:37,508 basehttp 1248 11020 "GET /api/categorias/ HTTP/1.1" 200 33
+INFO 2025-10-26 20:26:37,865 basehttp 1248 15064 "GET /api/libros/ HTTP/1.1" 200 439
+INFO 2025-10-26 20:26:38,159 basehttp 1248 11020 "GET /api/categorias/ HTTP/1.1" 200 33
+INFO 2025-10-26 20:26:38,670 basehttp 1248 15064 "GET /api/libros/ HTTP/1.1" 200 439
+INFO 2025-10-26 20:26:42,996 basehttp 1248 15064 "GET /api/libros/ HTTP/1.1" 200 439
+INFO 2025-10-26 20:26:46,676 basehttp 1248 15064 "GET /api/prestamos/ HTTP/1.1" 200 52
+INFO 2025-10-26 20:26:47,370 basehttp 1248 15064 "GET /api/prestamos/ HTTP/1.1" 200 52
+INFO 2025-10-26 20:26:49,570 basehttp 1248 15064 "GET /api/sanciones/ HTTP/1.1" 200 52
+INFO 2025-10-26 20:26:52,415 basehttp 1248 15064 "OPTIONS /api/notificaciones/ HTTP/1.1" 200 0
+INFO 2025-10-26 20:26:53,216 basehttp 1248 15064 "GET /api/notificaciones/ HTTP/1.1" 200 35
+INFO 2025-10-26 20:26:53,965 basehttp 1248 15064 "GET /api/notificaciones/ HTTP/1.1" 200 35
+INFO 2025-10-26 20:29:12,449 basehttp 1248 8580 "GET /api/setup/verificar/ HTTP/1.1" 200 125
+INFO 2025-10-26 20:30:56,342 basehttp 1248 2668 "OPTIONS /api/setup/verificar/ HTTP/1.1" 200 0
+INFO 2025-10-26 20:30:57,157 basehttp 1248 2668 "GET /api/setup/verificar/ HTTP/1.1" 200 125
+INFO 2025-10-26 20:38:26,394 basehttp 1248 452 "GET /api/setup/verificar/ HTTP/1.1" 200 125
+INFO 2025-10-26 20:38:40,795 basehttp 1248 452 "POST /api/auth/login/ HTTP/1.1" 200 1236
+INFO 2025-10-26 20:39:36,660 basehttp 1248 452 "POST /api/auth/login/ HTTP/1.1" 200 1236
+INFO 2025-10-26 20:39:39,822 basehttp 1248 452 "GET /api/libros/ HTTP/1.1" 200 439
+INFO 2025-10-26 20:39:39,896 basehttp 1248 8288 "GET /api/categorias/ HTTP/1.1" 200 33
+INFO 2025-10-26 20:39:40,504 basehttp 1248 452 "GET /api/libros/ HTTP/1.1" 200 439
+INFO 2025-10-26 20:39:40,611 basehttp 1248 8288 "GET /api/categorias/ HTTP/1.1" 200 33
+INFO 2025-10-26 20:39:42,359 basehttp 1248 8288 "GET /api/libros/ HTTP/1.1" 200 439
+INFO 2025-10-26 20:39:44,476 basehttp 1248 8288 "GET /api/prestamos/ HTTP/1.1" 200 52
+INFO 2025-10-26 20:39:45,198 basehttp 1248 8288 "GET /api/prestamos/ HTTP/1.1" 200 52
+INFO 2025-10-26 20:39:46,526 basehttp 1248 8288 "GET /api/sanciones/ HTTP/1.1" 200 52
+INFO 2025-10-26 20:39:48,949 basehttp 1248 8288 "GET /api/notificaciones/ HTTP/1.1" 200 35
+INFO 2025-10-26 20:39:49,794 basehttp 1248 8288 "GET /api/notificaciones/ HTTP/1.1" 200 35
+INFO 2025-10-26 20:42:22,243 basehttp 1248 8288 "GET /api/setup/verificar/ HTTP/1.1" 200 125
+WARNING 2025-10-26 20:43:28,014 log 1248 8288 Unauthorized: /api/auth/login/
+WARNING 2025-10-26 20:43:28,015 basehttp 1248 8288 "POST /api/auth/login/ HTTP/1.1" 401 37
+WARNING 2025-10-26 20:53:52,335 log 1248 18076 Unauthorized: /api/auth/login/
+WARNING 2025-10-26 20:53:52,336 basehttp 1248 18076 "POST /api/auth/login/ HTTP/1.1" 401 37
+WARNING 2025-10-26 20:54:06,742 log 1248 18076 Unauthorized: /api/auth/login/
+WARNING 2025-10-26 20:54:06,743 basehttp 1248 18076 "POST /api/auth/login/ HTTP/1.1" 401 37
+WARNING 2025-10-26 20:55:41,859 log 1248 18076 Unauthorized: /api/auth/login/
+WARNING 2025-10-26 20:55:41,860 basehttp 1248 18076 "POST /api/auth/login/ HTTP/1.1" 401 37
+WARNING 2025-10-26 20:56:47,701 log 1248 18076 Unauthorized: /api/auth/login/
+WARNING 2025-10-26 20:56:47,702 basehttp 1248 18076 "POST /api/auth/login/ HTTP/1.1" 401 37
+INFO 2025-10-26 21:20:11,568 basehttp 1248 9084 "GET /api/setup/verificar/ HTTP/1.1" 200 125
+WARNING 2025-10-26 21:20:36,018 log 1248 9084 Unauthorized: /api/auth/login/
+WARNING 2025-10-26 21:20:36,019 basehttp 1248 9084 "POST /api/auth/login/ HTTP/1.1" 401 37
