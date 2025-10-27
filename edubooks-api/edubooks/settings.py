@@ -205,6 +205,25 @@ MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10MB
 # Configuración de logging
 LOG_HANDLERS = ['console'] if DEBUG else ['console', 'file']
 
+# Construye los handlers de logging según el entorno
+LOGGING_HANDLERS = {
+    'console': {
+        'level': 'DEBUG',
+        'class': 'logging.StreamHandler',
+        'formatter': 'simple',
+    }
+}
+if not DEBUG:
+    LOGGING_HANDLERS['file'] = {
+        'level': 'INFO',
+        'class': 'logging.handlers.RotatingFileHandler',
+        'filename': BASE_DIR / 'logs' / 'django.log',
+        'formatter': 'verbose',
+        'maxBytes': 5 * 1024 * 1024,  # 5MB
+        'backupCount': 3,
+        'encoding': 'utf-8',
+    }
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -218,22 +237,7 @@ LOGGING = {
             'style': '{',
         },
     },
-    'handlers': {
-        'file': {
-            'level': 'INFO',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': BASE_DIR / 'logs' / 'django.log',
-            'formatter': 'verbose',
-            'maxBytes': 5 * 1024 * 1024,  # 5MB
-            'backupCount': 3,
-            'encoding': 'utf-8',
-        },
-        'console': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
-            'formatter': 'simple',
-        },
-    },
+    'handlers': LOGGING_HANDLERS,
     'root': {
         'handlers': LOG_HANDLERS,
         'level': 'INFO',
