@@ -203,6 +203,8 @@ SUPABASE_STORAGE_BUCKET = 'edubooks-files'
 MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10MB
 
 # Configuración de logging
+LOG_HANDLERS = ['console'] if DEBUG else ['console', 'file']
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -219,9 +221,12 @@ LOGGING = {
     'handlers': {
         'file': {
             'level': 'INFO',
-            'class': 'logging.FileHandler',
+            'class': 'logging.handlers.RotatingFileHandler',
             'filename': BASE_DIR / 'logs' / 'django.log',
             'formatter': 'verbose',
+            'maxBytes': 5 * 1024 * 1024,  # 5MB
+            'backupCount': 3,
+            'encoding': 'utf-8',
         },
         'console': {
             'level': 'DEBUG',
@@ -230,22 +235,22 @@ LOGGING = {
         },
     },
     'root': {
-        'handlers': ['console', 'file'],
+        'handlers': LOG_HANDLERS,
         'level': 'INFO',
     },
     'loggers': {
         'django': {
-            'handlers': ['console', 'file'],
+            'handlers': LOG_HANDLERS,
             'level': 'INFO',
             'propagate': False,
         },
         'usuarios': {
-            'handlers': ['console', 'file'],
+            'handlers': LOG_HANDLERS,
             'level': 'DEBUG',
             'propagate': False,
         },
         'libros': {
-            'handlers': ['console', 'file'],
+            'handlers': LOG_HANDLERS,
             'level': 'DEBUG',
             'propagate': False,
         },
@@ -254,7 +259,7 @@ LOGGING = {
 
 # Crear directorio de logs si no existe
 log_dir = BASE_DIR / 'logs'
-if not os.path.exists(log_dir):
+if not DEBUG and not os.path.exists(log_dir):
     os.makedirs(log_dir)
 
 # Configuración de Email
