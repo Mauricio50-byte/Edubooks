@@ -4,9 +4,18 @@
       <ion-back-button defaultHref="/catalogo"></ion-back-button>
     </ion-buttons>
     <ion-title>Detalle del Libro</ion-title>
+    <!-- Acciones rápidas -->
+    <ion-buttons slot="end">
+      <ion-button fill="clear" (click)="compartirLibro()" aria-label="Compartir libro">
+        <ion-icon name="share-outline"></ion-icon>
+      </ion-button>
+      <ion-button fill="clear" (click)="toggleFavorito()" [color]="esFavorito ? 'warning' : 'medium'" aria-label="Favorito">
+        <ion-icon [name]="esFavorito ? 'heart' : 'heart-outline'"></ion-icon>
+      </ion-button>
+    </ion-buttons>
     <ion-buttons slot="end" *ngIf="isAdministrador()">
-      <ion-button (click)="volverAlCatalogo()">
-        <ion-icon name="create-outline"></ion-icon>
+      <ion-button fill="clear" (click)="volverAlCatalogo()" aria-label="Volver al catálogo">
+        <ion-icon name="arrow-back-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
@@ -15,8 +24,19 @@
 <ion-content [fullscreen]="true">
   <!-- Loading state -->
   <div class="loading-container" *ngIf="isLoading">
-    <ion-spinner name="dots"></ion-spinner>
-    <p>Cargando información del libro...</p>
+    <div class="skeleton-hero">
+      <ion-skeleton-text animated style="width: 200px; height: 280px"></ion-skeleton-text>
+      <div class="skeleton-info">
+        <ion-skeleton-text animated style="width: 60%; height: 24px"></ion-skeleton-text>
+        <ion-skeleton-text animated style="width: 40%; height: 16px"></ion-skeleton-text>
+        <ion-skeleton-text animated style="width: 80%; height: 14px"></ion-skeleton-text>
+      </div>
+    </div>
+    <div class="skeleton-detail">
+      <ion-skeleton-text animated style="width: 90%; height: 16px"></ion-skeleton-text>
+      <ion-skeleton-text animated style="width: 85%; height: 16px"></ion-skeleton-text>
+      <ion-skeleton-text animated style="width: 80%; height: 16px"></ion-skeleton-text>
+    </div>
   </div>
 
   <!-- Error state -->
@@ -34,10 +54,11 @@
     <!-- Hero section -->
     <div class="libro-hero">
       <div class="imagen-container">
-        <img 
+        <ion-img 
           [src]="libro.imagen_portada || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjY2NjY2NjIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzY2NjY2NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkxpYnJvPC90ZXh0Pjwvc3ZnPg=='" 
           [alt]="libro.titulo"
           class="libro-imagen">
+        </ion-img>
         
         <!-- Estado badge -->
         <ion-badge 
@@ -50,7 +71,22 @@
       <div class="info-principal">
         <h1 class="titulo">{{ libro.titulo }}</h1>
         <p class="autor">por {{ libro.autor }}</p>
-        
+        <!-- Chips de metadatos -->
+        <div class="chips">
+          <ion-chip color="tertiary">
+            <ion-icon name="bookmark-outline"></ion-icon>
+            <ion-label>{{ libro.categoria }}</ion-label>
+          </ion-chip>
+          <ion-chip *ngIf="libro.editorial" color="secondary">
+            <ion-icon name="business-outline"></ion-icon>
+            <ion-label>{{ libro.editorial }}</ion-label>
+          </ion-chip>
+          <ion-chip *ngIf="libro['anio_publicacion']" color="medium">
+            <ion-icon name="calendar-clear-outline"></ion-icon>
+            <ion-label>{{ libro['anio_publicacion'] }}</ion-label>
+          </ion-chip>
+        </div>
+
         <div class="disponibilidad">
           <div class="disponibilidad-item">
             <ion-icon name="copy-outline"></ion-icon>
@@ -65,8 +101,18 @@
       </div>
     </div>
 
+    <!-- Segmento para alternar contenido -->
+    <ion-segment class="segmented" (ionChange)="onSegmentChange($event)" [value]="segmentValue">
+      <ion-segment-button value="detalles">
+        <ion-label>Detalles</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="descripcion">
+        <ion-label>Descripción</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+
     <!-- Información detallada -->
-    <div class="info-detallada">
+    <div class="info-detallada" *ngIf="segmentValue === 'detalles'">
       <ion-card>
         <ion-card-header>
           <ion-card-title>
@@ -119,9 +165,11 @@
           </ion-list>
         </ion-card-content>
       </ion-card>
+    </div>
 
-      <!-- Descripción -->
-      <ion-card *ngIf="libro.descripcion">
+    <!-- Descripción -->
+    <div class="info-detallada" *ngIf="segmentValue === 'descripcion' && libro?.descripcion">
+      <ion-card>
         <ion-card-header>
           <ion-card-title>
             <ion-icon name="document-text-outline"></ion-icon>
@@ -148,7 +196,7 @@
       </ion-button>
       
       <ion-button 
-        *ngIf="puedeReservar" 
+        *ngIf="puedeReservar()" 
         expand="block" 
         size="large"
         fill="outline"
@@ -159,7 +207,7 @@
         Hacer Reserva
       </ion-button>
       
-      <div class="info-no-disponible" *ngIf="!puedePrestar() && !puedeReservar">
+      <div class="info-no-disponible" *ngIf="!puedePrestar() && !puedeReservar()">
         <ion-icon name="information-circle-outline" color="medium"></ion-icon>
         <p>Este libro no está disponible para préstamo o reserva en este momento.</p>
       </div>

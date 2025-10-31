@@ -163,6 +163,10 @@ export class AuthService {
   obtenerEstadisticasInvitaciones(): Observable<any> {
     return this.apiService.get('/auth/invitaciones/estadisticas/');
   }
+
+  eliminarInvitacion(token: string): Observable<any> {
+    return this.apiService.delete(`/auth/invitaciones/eliminar/${token}/`);
+  }
   // Getters de compatibilidad con páginas existentes
   get currentUserValue(): Usuario | null {
     return this.currentUserSubject.value;

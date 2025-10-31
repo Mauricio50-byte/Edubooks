@@ -17,6 +17,8 @@ export class DetalleLibroPage implements OnInit {
   isLoading = true;
   error: string = '';
   libroId: number = 0;
+  segmentValue: string = 'detalles';
+  esFavorito = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -50,6 +52,7 @@ export class DetalleLibroPage implements OnInit {
         next: (libro) => {
           if (libro) {
             this.libro = libro;
+            this.actualizarFavoritoDesdeStorage();
             this.cargarLibrosRelacionados();
           } else {
             this.error = 'Libro no encontrado';
@@ -204,5 +207,67 @@ export class DetalleLibroPage implements OnInit {
       buttons: ['OK']
     });
     await alert.present();
+  }
+
+  // Favoritos & compartir
+  actualizarFavoritoDesdeStorage() {
+    if (!this.libro) {
+      this.esFavorito = false;
+      return;
+    }
+    const raw = localStorage.getItem('favoritos');
+    const ids: number[] = raw ? JSON.parse(raw) : [];
+    this.esFavorito = ids.includes(this.libro.id);
+  }
+
+  async toggleFavorito() {
+    if (!this.libro) return;
+    const raw = localStorage.getItem('favoritos');
+    const ids: number[] = raw ? JSON.parse(raw) : [];
+    const index = ids.indexOf(this.libro.id);
+    if (index >= 0) {
+      ids.splice(index, 1);
+      this.esFavorito = false;
+      await this.mostrarToast('Eliminado de favoritos', 'medium');
+    } else {
+      ids.push(this.libro.id);
+      this.esFavorito = true;
+      await this.mostrarToast('Añadido a favoritos', 'success');
+    }
+    localStorage.setItem('favoritos', JSON.stringify(ids));
+  }
+
+  async compartirLibro() {
+    if (!this.libro) return;
+    const shareData = {
+      title: this.libro.titulo,
+      text: `Mira este libro: ${this.libro.titulo} de ${this.libro.autor}`,
+      url: window.location.href
+    };
+    try {
+      if ((navigator as any).share) {
+        await (navigator as any).share(shareData);
+      } else {
+        await navigator.clipboard.writeText(shareData.url);
+        await this.mostrarToast('Enlace copiado al portapapeles', 'primary');
+      }
+    } catch (err) {
+      await this.mostrarToast('No se pudo compartir', 'danger');
+    }
+  }
+
+  private async mostrarToast(message: string, color: string = 'primary') {
+    const toast = await this.toastController.create({
+      message,
+      duration: 2500,
+      color,
+      position: 'top'
+    });
+    await toast.present();
+  }
+
+  onSegmentChange(event: any) {
+    const value = (event?.detail?.value as string | undefined) ?? 'detalles';
+    this.segmentValue = value === 'descripcion' ? 'descripcion' : 'detalles';
   }
 }

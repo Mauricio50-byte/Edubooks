@@ -233,6 +233,33 @@ def cancelar_invitacion(request, token):
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def eliminar_invitacion(request, token):
+    """
+    Endpoint para eliminar una invitación de la base de datos.
+    Solo administradores pueden eliminar invitaciones.
+    """
+    if request.user.rol != 'administrador':
+        return Response({
+            'error': 'Solo los administradores pueden eliminar invitaciones.'
+        }, status=status.HTTP_403_FORBIDDEN)
+
+    invitacion = get_object_or_404(InvitacionRegistro, token=token)
+
+    try:
+        invitacion.delete()
+        logger.info(f"Invitación {token} eliminada por {request.user.email}")
+        return Response({
+            'mensaje': 'Invitación eliminada correctamente',
+            'token': str(token)
+        }, status=status.HTTP_200_OK)
+    except Exception as e:
+        logger.error(f"Error eliminando invitación {token}: {str(e)}")
+        return Response({
+            'error': 'Error interno del servidor'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def extender_invitacion(request, token):

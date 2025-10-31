@@ -1,0 +1,154 @@
+// Hero y disposición general
+.libro-detail {
+  padding: 16px;
+}
+
+.libro-hero {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 16px;
+  align-items: start;
+  margin-bottom: 12px;
+}
+
+.imagen-container {
+  position: relative;
+}
+
+.libro-imagen {
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  width: 200px;
+  height: 280px;
+  object-fit: cover;
+}
+
+.estado-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2;
+}
+
+.info-principal .titulo {
+  margin: 0 0 6px 0;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.info-principal .autor {
+  margin: 0 0 10px 0;
+  color: var(--ion-color-medium);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.disponibilidad {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.disponibilidad-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ion-color-medium);
+}
+
+// Segmento y tarjetas
+.segmented {
+  margin: 8px 0 12px;
+}
+
+.info-detallada ion-card {
+  margin-bottom: 12px;
+}
+
+.descripcion {
+  line-height: 1.6;
+}
+
+// Acciones principales/admin
+.acciones-principales, .acciones-admin {
+  margin-top: 12px;
+}
+
+.action-button {
+  --border-radius: 8px;
+}
+
+.info-no-disponible {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ion-color-medium);
+  margin-top: 6px;
+}
+
+// Libros relacionados
+.libros-relacionados {
+  margin-top: 20px;
+}
+
+.libros-relacionados h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.libros-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.libro-relacionado img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+}
+
+.libro-relacionado .libro-info {
+  padding: 8px;
+}
+
+// Loading skeletons
+.loading-container {
+  padding: 16px;
+}
+
+.skeleton-hero {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.skeleton-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.skeleton-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+// Responsivo
+@media (max-width: 480px) {
+  .libro-hero {
+    grid-template-columns: 1fr;
+  }
+  .libro-imagen {
+    width: 100%;
+    height: 300px;
+  }
+}

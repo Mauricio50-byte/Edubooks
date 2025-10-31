@@ -24,10 +24,12 @@ class InvitacionCrearSerializer(serializers.ModelSerializer):
         return value
     
     def validate_rol_asignado(self, value):
-        """Validar que el rol sea válido."""
-        roles_validos = [choice[0] for choice in Usuario.ROLES_CHOICES]
-        if value not in roles_validos:
-            raise serializers.ValidationError("Rol no válido.")
+        """Validar que el rol sea válido y permitido para invitaciones."""
+        roles_permitidos = ['docente', 'administrador']
+        if value not in roles_permitidos:
+            raise serializers.ValidationError(
+                "Solo se permiten invitaciones para docentes o administradores."
+            )
         return value
     
     def validate_datos_adicionales(self, value):

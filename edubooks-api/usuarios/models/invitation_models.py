@@ -66,6 +66,10 @@ class InvitacionRegistro(models.Model):
         # Validar que solo administradores puedan crear invitaciones
         if self.creado_por and self.creado_por.rol != 'administrador':
             raise ValidationError('Solo los administradores pueden crear invitaciones')
+
+        # Restringir invitaciones únicamente a docentes y administradores
+        if self.rol_asignado not in ['docente', 'administrador']:
+            raise ValidationError('Solo se pueden crear invitaciones para docentes o administradores')
         
         # Validar que la fecha de expiración sea futura
         if self.fecha_expiracion and self.fecha_expiracion <= timezone.now():

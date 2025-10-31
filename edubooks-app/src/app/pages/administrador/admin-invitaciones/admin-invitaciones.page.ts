@@ -76,7 +76,6 @@ export class AdminInvitacionesPage implements OnInit {
   
   // Configuración de roles
   roles = [
-    { value: 'estudiante', label: 'Estudiante' },
     { value: 'docente', label: 'Docente' },
     { value: 'administrador', label: 'Administrador' }
   ];
@@ -433,6 +432,54 @@ export class AdminInvitacionesPage implements OnInit {
               const toast = await this.toastController.create({
                 message: error.error?.message || 'Error al cancelar la invitación',
                 duration: 3000,
+                color: 'danger'
+              });
+              await toast.present();
+            } finally {
+              await loading.dismiss();
+            }
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  async eliminarInvitacion(invitacion: Invitacion) {
+    const alert = await this.alertController.create({
+      header: 'Eliminar invitación',
+      message: `¿Seguro que deseas eliminar la invitación para <strong>${invitacion.email_invitado}</strong>? Esta acción no se puede deshacer.`,
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel'
+        },
+        {
+          text: 'Eliminar',
+          role: 'destructive',
+          handler: async () => {
+            const loading = await this.loadingController.create({
+              message: 'Eliminando invitación...'
+            });
+            await loading.present();
+
+            try {
+              await this.authService.eliminarInvitacion(invitacion.token).toPromise();
+
+              const toast = await this.toastController.create({
+                message: 'Invitación eliminada correctamente',
+                duration: 3000,
+                color: 'success'
+              });
+              await toast.present();
+
+              await this.cargarInvitaciones();
+              await this.aplicarFiltros();
+            } catch (error: any) {
+              const toast = await this.toastController.create({
+                message: error?.message || 'No se pudo eliminar la invitación',
+                duration: 4000,
                 color: 'danger'
               });
               await toast.present();

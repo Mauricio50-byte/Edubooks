@@ -320,6 +320,15 @@
             <ion-icon name="close-outline" slot="start"></ion-icon>
             Cancelar
           </ion-button>
+
+          <ion-button 
+            fill="solid" 
+            color="danger"
+            (click)="eliminarInvitacion(invitacion)"
+            class="action-delete">
+            <ion-icon name="trash-outline" slot="start"></ion-icon>
+            Eliminar
+          </ion-button>
         </div>
       </ion-card-content>
     </ion-card>
