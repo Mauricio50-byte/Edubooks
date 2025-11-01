@@ -1,9 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { LoadingController, ToastController, AlertController } from '@ionic/angular';
+import { LoadingController, ToastController, ModalController, AlertController } from '@ionic/angular';
 import { AuthService } from '../../../core/services/auth.service';
 import { UsuarioService, UsuarioAdmin } from '../../../core/services/usuario.service';
 import { Router } from '@angular/router';
 import { FilterOption } from '../../../shared/componentes/filter-dropdown/filter-dropdown.component';
+import { UserDetailsComponent } from '../../../shared/componentes/user-details/user-details.component';
+import { firstValueFrom } from 'rxjs';
+import { Usuario } from '../../../core/models/usuario.model';
 
 @Component({
   selector: 'app-admin-usuarios',
@@ -15,7 +18,7 @@ export class AdminUsuariosPage implements OnInit {
   usuarios: UsuarioAdmin[] = [];
   isLoading = true;
   error: string = '';
-  usuarioActual: any = null;
+  usuarioActual: Usuario | null = null;
   searchTerm: string = '';
   filtroRol: string = '';
   filtroEstado: string = '';
@@ -37,6 +40,7 @@ export class AdminUsuariosPage implements OnInit {
   constructor(
     private authService: AuthService,
     private usuarioService: UsuarioService,
+    private modalController: ModalController,
     private alertController: AlertController,
     private loadingController: LoadingController,
     private toastController: ToastController,
@@ -64,7 +68,7 @@ export class AdminUsuariosPage implements OnInit {
 
     try {
       // Llamar al servicio real para obtener usuarios
-      const usuarios = await this.usuarioService.getUsuarios().toPromise();
+      const usuarios = await firstValueFrom(this.usuarioService.getUsuarios());
       this.usuarios = usuarios || [];
       
     } catch (error: any) {
@@ -78,7 +82,7 @@ export class AdminUsuariosPage implements OnInit {
   /**
    * Filtrar usuarios
    */
-  get usuariosFiltrados() {
+  get usuariosFiltrados(): UsuarioAdmin[] {
     return this.usuarios.filter(usuario => {
       const cumpleBusqueda = !this.searchTerm || 
         usuario.nombre.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
@@ -130,7 +134,7 @@ export class AdminUsuariosPage implements OnInit {
 
     try {
       // Llamar al servicio real
-      await this.usuarioService.cambiarEstadoUsuario(usuario.id).toPromise();
+      await firstValueFrom(this.usuarioService.cambiarEstadoUsuario(usuario.id));
       
       // Actualizar estado local
       usuario.is_active = !usuario.is_active;
@@ -147,22 +151,14 @@ export class AdminUsuariosPage implements OnInit {
   /**
    * Ver detalles del usuario
    */
-  async verDetallesUsuario(usuario: any) {
-    const alert = await this.alertController.create({
-      header: `${usuario.nombre} ${usuario.apellido}`,
-      message: `
-        <strong>Email:</strong> ${usuario.email}<br>
-        <strong>Username:</strong> ${usuario.username}<br>
-        <strong>Rol:</strong> ${usuario.rol}<br>
-        ${usuario.matricula ? `<strong>Matrícula:</strong> ${usuario.matricula}<br>` : ''}
-        ${usuario.carrera ? `<strong>Carrera:</strong> ${usuario.carrera}<br>` : ''}
-        ${usuario.departamento ? `<strong>Departamento:</strong> ${usuario.departamento}<br>` : ''}
-        <strong>Estado:</strong> ${usuario.is_active ? 'Activo' : 'Inactivo'}
-      `,
-      buttons: ['Cerrar']
+  async verDetallesUsuario(usuario: UsuarioAdmin) {
+    const modal = await this.modalController.create({
+      component: UserDetailsComponent,
+      componentProps: { usuario },
+      cssClass: 'user-details-modal'
     });
 
-    await alert.present();
+    await modal.present();
   }
 
   /**
@@ -249,6 +245,26 @@ export class AdminUsuariosPage implements OnInit {
       case 'Docente': return 'school-outline';
       case 'Estudiante': return 'person-outline';
       default: return 'person-outline';
+    }
+  }
+
+  /**
+   * Inicial para avatar de usuario
+   */
+  getInicialUsuario(usuario: UsuarioAdmin): string {
+    const base = usuario.nombre || usuario.username || usuario.email || '';
+    return base ? base.charAt(0).toUpperCase() : 'U';
+  }
+
+  /**
+   * Clase de color para avatar según rol
+   */
+  getRolAvatarClass(rol: string): string {
+    switch (rol) {
+      case 'Administrador': return 'rol-admin';
+      case 'Docente': return 'rol-docente';
+      case 'Estudiante': return 'rol-estudiante';
+      default: return 'rol-default';
     }
   }
 }

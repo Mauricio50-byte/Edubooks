@@ -16,7 +16,6 @@ import { HasPermissionDirective } from './directives/has-permission.directive';
     FormsModule,
     ReactiveFormsModule,
     IonicModule,
-    ComponentesModule,
     HasRoleDirective,
     HasPermissionDirective
   ],
@@ -25,7 +24,6 @@ import { HasPermissionDirective } from './directives/has-permission.directive';
     FormsModule,
     ReactiveFormsModule,
     IonicModule,
-    ComponentesModule,
     HasRoleDirective,
     HasPermissionDirective
   ]

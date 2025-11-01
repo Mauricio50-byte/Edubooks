@@ -5,7 +5,9 @@ import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 
 import { AdminUsuariosPageRoutingModule } from './admin-usuarios-routing.module';
+import { SharedModule } from '../../../shared/shared.module';
 import { FilterDropdownComponent } from '../../../shared/componentes/filter-dropdown/filter-dropdown.component';
+import { ComponentesModule } from '../../../shared/componentes/componentes.module';
 
 import { AdminUsuariosPage } from './admin-usuarios.page';
 
@@ -15,7 +17,9 @@ import { AdminUsuariosPage } from './admin-usuarios.page';
     FormsModule,
     IonicModule,
     AdminUsuariosPageRoutingModule,
-    FilterDropdownComponent
+    FilterDropdownComponent,
+    SharedModule,
+    ComponentesModule
   ],
   declarations: [AdminUsuariosPage]
 })

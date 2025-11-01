@@ -114,7 +114,7 @@ ion-card-header {
 .usuario-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   margin-bottom: 12px;
 }
 
@@ -174,7 +174,7 @@ ion-card-header {
 }
 
 .usuario-details {
-  background: var(--ion-color-light-tint);
+  background: transparent;
   border-radius: 8px;
   padding: 12px;
   margin: 12px 0;
@@ -205,6 +205,13 @@ ion-card-header {
   }
 }
 
+// Chip de username compacto
+.username-chip {
+  font-size: 12px;
+  font-weight: 600;
+  ion-icon { font-size: 14px; }
+}
+
 .usuario-footer {
   display: flex;
   gap: 8px;
@@ -229,8 +236,9 @@ ion-card-header {
   }
   
   .usuario-header {
-    flex-direction: column;
-    gap: 12px;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
   }
   
   .usuario-actions {
@@ -265,4 +273,43 @@ ion-card-header {
   .usuario-details {
     background: var(--ion-color-dark-tint);
   }
+}
+
+// Avatar del usuario
+.usuario-avatar {
+  margin-right: 12px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: #fff;
+  background: var(--ion-color-medium);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.usuario-avatar.rol-admin {
+  background: var(--ion-color-danger);
+}
+
+.usuario-avatar.rol-docente {
+  background: var(--ion-color-warning);
+}
+
+.usuario-avatar.rol-estudiante {
+  background: var(--ion-color-primary);
+}
+
+.avatar-initial {
+  font-size: 18px;
+}
+
+// Ajustes extra para móvil pequeño
+@media (max-width: 480px) {
+  .usuario-avatar { width: 40px; height: 40px; }
+  .usuario-name-section h3 { font-size: 16px; }
+  .usuario-card ion-card-content { padding: 12px; }
+  .rol-chip, .estado-chip, .username-chip { font-size: 11px; }
 }

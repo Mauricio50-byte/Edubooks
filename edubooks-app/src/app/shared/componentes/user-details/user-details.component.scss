@@ -1,0 +1,102 @@
+.user-details-container {
+  --padding-top: 16px;
+  --padding-bottom: 16px;
+  --padding-start: 16px;
+  --padding-end: 16px;
+}
+
+.user-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 8px 20px 8px;
+  border-bottom: 1px solid var(--ion-color-step-150, #e6e6e6);
+}
+
+.user-avatar .avatar-circle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-primary-tint));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 20px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+}
+
+.user-basic-info .user-name {
+  margin: 0 0 6px 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.status-chip {
+  margin-left: 8px;
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  padding: 12px 4px 8px 4px;
+}
+
+@media (max-width: 640px) {
+  .details-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.detail-section ion-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+}
+
+.detail-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+}
+
+.detail-label {
+  color: var(--ion-color-medium);
+}
+
+.detail-value {
+  font-weight: 500;
+}
+
+.role-badge {
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: var(--ion-color-primary-tint);
+  color: var(--ion-color-primary-contrast);
+}
+
+.status-active {
+  color: var(--ion-color-success);
+}
+
+.status-inactive {
+  color: var(--ion-color-danger);
+}
+
+.modal-actions {
+  padding: 8px 12px 20px 12px;
+}
+
+/* Dark mode tweaks */
+@media (prefers-color-scheme: dark) {
+  .user-header {
+    border-bottom-color: var(--ion-color-step-250, #2a2a2a);
+  }
+  .role-badge {
+    background: var(--ion-color-primary-shade);
+  }
+}
