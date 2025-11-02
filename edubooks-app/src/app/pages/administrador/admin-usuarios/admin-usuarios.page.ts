@@ -26,9 +26,9 @@ export class AdminUsuariosPage implements OnInit {
   // Opciones para los filtros desplegables
   rolOptions: FilterOption[] = [
     { value: '', label: 'Todos los roles', icon: 'people-outline' },
-    { value: 'Administrador', label: 'Administradores', icon: 'shield-outline', color: 'danger' },
-    { value: 'Docente', label: 'Docentes', icon: 'school-outline', color: 'warning' },
-    { value: 'Estudiante', label: 'Estudiantes', icon: 'person-outline', color: 'primary' }
+    { value: 'administrador', label: 'Administradores', icon: 'shield-outline', color: 'danger' },
+    { value: 'docente', label: 'Docentes', icon: 'school-outline', color: 'warning' },
+    { value: 'estudiante', label: 'Estudiantes', icon: 'person-outline', color: 'primary' }
   ];
 
   estadoOptions: FilterOption[] = [
@@ -89,7 +89,9 @@ export class AdminUsuariosPage implements OnInit {
         usuario.apellido.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
         usuario.email.toLowerCase().includes(this.searchTerm.toLowerCase());
       
-      const cumpleRol = !this.filtroRol || usuario.rol === this.filtroRol;
+      const rolUsuario = (usuario.rol || '').toLowerCase();
+      const rolFiltro = (this.filtroRol || '').toLowerCase();
+      const cumpleRol = !rolFiltro || rolUsuario === rolFiltro;
       
       const cumpleEstado = !this.filtroEstado || 
         (this.filtroEstado === 'activo' && usuario.is_active) ||
@@ -200,10 +202,11 @@ export class AdminUsuariosPage implements OnInit {
    * Obtener color del rol
    */
   getRolColor(rol: string): string {
-    switch (rol) {
-      case 'Administrador': return 'danger';
-      case 'Docente': return 'warning';
-      case 'Estudiante': return 'primary';
+    const r = (rol || '').toLowerCase();
+    switch (r) {
+      case 'administrador': return 'danger';
+      case 'docente': return 'warning';
+      case 'estudiante': return 'primary';
       default: return 'medium';
     }
   }
@@ -240,10 +243,11 @@ export class AdminUsuariosPage implements OnInit {
    * Obtener icono del rol
    */
   getRolIcon(rol: string): string {
-    switch (rol) {
-      case 'Administrador': return 'shield-outline';
-      case 'Docente': return 'school-outline';
-      case 'Estudiante': return 'person-outline';
+    const r = (rol || '').toLowerCase();
+    switch (r) {
+      case 'administrador': return 'shield-outline';
+      case 'docente': return 'school-outline';
+      case 'estudiante': return 'person-outline';
       default: return 'person-outline';
     }
   }
@@ -260,11 +264,21 @@ export class AdminUsuariosPage implements OnInit {
    * Clase de color para avatar según rol
    */
   getRolAvatarClass(rol: string): string {
-    switch (rol) {
-      case 'Administrador': return 'rol-admin';
-      case 'Docente': return 'rol-docente';
-      case 'Estudiante': return 'rol-estudiante';
+    const r = (rol || '').toLowerCase();
+    switch (r) {
+      case 'administrador': return 'rol-admin';
+      case 'docente': return 'rol-docente';
+      case 'estudiante': return 'rol-estudiante';
       default: return 'rol-default';
     }
+  }
+
+  // Nueva lógica: selección mediante chips
+  selectRol(value: string) {
+    this.filtroRol = (value || '').toLowerCase();
+  }
+
+  selectEstado(value: string) {
+    this.filtroEstado = value;
   }
 }

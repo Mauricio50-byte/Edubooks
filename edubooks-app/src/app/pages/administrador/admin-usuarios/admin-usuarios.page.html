@@ -35,27 +35,40 @@
       </ion-searchbar>
       
       <div class="filters-container">
-        <app-filter-dropdown
-          title="Filtrar por Rol"
-          [options]="rolOptions"
-          [(selectedValue)]="filtroRol"
-          placeholder="Todos los roles"
-          icon="people-outline"
-          color="primary"
-          [clearable]="true"
-          (selectionChange)="onRolFilterChange($event)">
-        </app-filter-dropdown>
-        
-        <app-filter-dropdown
-          title="Filtrar por Estado"
-          [options]="estadoOptions"
-          [(selectedValue)]="filtroEstado"
-          placeholder="Todos los estados"
-          icon="checkmark-circle-outline"
-          color="success"
-          [clearable]="true"
-          (selectionChange)="onEstadoFilterChange($event)">
-        </app-filter-dropdown>
+        <div class="filter-chips">
+          <div class="chip-group rol-chip-group">
+            <div class="group-label">
+              <ion-icon name="people-outline"></ion-icon>
+              Filtrar por Rol
+            </div>
+            <div class="chips">
+              <ion-chip color="primary" [outline]="filtroRol !== ''" (click)="selectRol('')">
+                <ion-icon name="people-outline" slot="start"></ion-icon>
+                <ion-label>Todos los roles</ion-label>
+              </ion-chip>
+              <ion-chip *ngFor="let opt of rolOptions | slice:1" [color]="opt.color || 'primary'" [outline]="filtroRol !== opt.value" (click)="selectRol(opt.value)">
+                <ion-icon [name]="opt.icon" slot="start"></ion-icon>
+                <ion-label>{{ opt.label }}</ion-label>
+              </ion-chip>
+            </div>
+          </div>
+          <div class="chip-group estado-chip-group">
+            <div class="group-label">
+              <ion-icon name="checkmark-circle-outline"></ion-icon>
+              Filtrar por Estado
+            </div>
+            <div class="chips">
+              <ion-chip color="success" [outline]="filtroEstado !== ''" (click)="selectEstado('')">
+                <ion-icon name="list-outline" slot="start"></ion-icon>
+                <ion-label>Todos los estados</ion-label>
+              </ion-chip>
+              <ion-chip *ngFor="let opt of estadoOptions | slice:1" [color]="opt.color || 'primary'" [outline]="filtroEstado !== opt.value" (click)="selectEstado(opt.value)">
+                <ion-icon [name]="opt.icon" slot="start"></ion-icon>
+                <ion-label>{{ opt.label }}</ion-label>
+              </ion-chip>
+            </div>
+          </div>
+        </div>
       </div>
     </ion-card-content>
   </ion-card>
@@ -76,13 +89,13 @@
         <div class="stat-item">
             <ion-chip color="success">
               <ion-icon name="checkmark-circle" slot="start"></ion-icon>
-              <ion-label>{{ getUsuariosActivos() }} activos</ion-label>
+              <ion-label>{{ getUsuariosActivos() }} Activos</ion-label>
             </ion-chip>
           </div>
           <div class="stat-item">
             <ion-chip color="danger">
               <ion-icon name="close-circle" slot="start"></ion-icon>
-              <ion-label>{{ getUsuariosInactivos() }} inactivos</ion-label>
+              <ion-label>{{ getUsuariosInactivos() }} Inactivos</ion-label>
             </ion-chip>
           </div>
       </div>

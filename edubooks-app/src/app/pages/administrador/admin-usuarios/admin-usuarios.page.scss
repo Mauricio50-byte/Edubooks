@@ -44,16 +44,60 @@
   }
 }
 
-// Estilos para los filtros
+// Estilos para los filtros (nuevo diseño)
 .filters-container {
+  margin-top: 16px;
+}
+
+.filter-chips {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
-  margin-top: 16px;
-  
+
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
     gap: 8px;
+  }
+}
+
+.chip-group {
+  border: 1px solid var(--ion-color-light-shade);
+  border-radius: 10px;
+  padding: 10px;
+  background: var(--ion-color-light-tint);
+}
+
+.group-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  color: var(--ion-color-primary);
+  margin-bottom: 8px;
+
+  ion-icon {
+    font-size: 18px;
+  }
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chips ion-chip {
+  height: 32px;
+  font-size: 12px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .chip-group {
+    background: var(--ion-color-dark-tint);
+    border-color: var(--ion-color-dark-shade);
+  }
+  .group-label {
+    color: var(--ion-color-primary-tint);
   }
 }
 
