@@ -61,10 +61,10 @@
 }
 
 .chip-group {
-  border: 1px solid var(--ion-color-light-shade);
+  border: 1px solid var(--ion-color-medium-shade);
   border-radius: 10px;
   padding: 10px;
-  background: var(--ion-color-light-tint);
+  background: var(--ion-color-step-100);
 }
 
 .group-label {
@@ -93,8 +93,8 @@
 
 @media (prefers-color-scheme: dark) {
   .chip-group {
-    background: var(--ion-color-dark-tint);
-    border-color: var(--ion-color-dark-shade);
+    background: var(--ion-color-step-150);
+    border-color: var(--ion-color-medium);
   }
   .group-label {
     color: var(--ion-color-primary-tint);

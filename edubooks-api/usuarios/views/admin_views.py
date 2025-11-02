@@ -281,19 +281,33 @@ def cambiar_estado_usuario(request, usuario_id):
         
         estado_anterior = usuario.activo
         usuario.activo = nuevo_estado
-        usuario.actualizado_por = request.user
+        
+        # Actualizar el campo 'estado' para mantener coherencia con la validación del modelo
+        if nuevo_estado:
+            usuario.estado = 'activo'
+        else:
+            usuario.estado = 'inactivo'
+        
+        # Verificar que request.user sea una instancia válida de Usuario
+        if hasattr(request.user, 'id') and request.user.id:
+            usuario.actualizado_por = request.user
+        
         usuario.save()
         
-        # Registrar en auditoría
-        AuditService.registrar_accion(
-            usuario=request.user,
-            accion=TipoAccion.ACTUALIZAR,
-            descripcion=f"Usuario {usuario.email} {'activado' if nuevo_estado else 'desactivado'}",
-            objeto_afectado=usuario,
-            datos_anteriores={'activo': estado_anterior},
-            datos_nuevos={'activo': nuevo_estado},
-            nivel_riesgo=NivelRiesgo.ALTO
-        )
+        # Registrar en auditoría solo si AuditService está disponible
+        try:
+            AuditService.registrar_accion(
+                usuario=request.user,
+                accion=TipoAccion.ACTUALIZAR,
+                descripcion=f"Usuario {usuario.email} {'activado' if nuevo_estado else 'desactivado'}",
+                objeto_afectado=usuario,
+                datos_anteriores={'activo': estado_anterior},
+                datos_nuevos={'activo': nuevo_estado},
+                nivel_riesgo=NivelRiesgo.ALTO
+            )
+        except Exception as audit_error:
+            # Log audit error but don't fail the main operation
+            print(f"Error en auditoría: {audit_error}")
         
         return Response({
             'success': True,
@@ -301,9 +315,22 @@ def cambiar_estado_usuario(request, usuario_id):
             'usuario': UsuarioPerfilSerializer(usuario).data
         })
         
-    except Exception as e:
+    except Usuario.DoesNotExist:
         return Response(
-            {'error': str(e)},
+            {'error': 'Usuario no encontrado'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+    except ValueError as ve:
+        return Response(
+            {'error': f'Error de valor: {str(ve)}'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    except Exception as e:
+        # Log the full error for debugging
+        import traceback
+        print(f"Error completo en cambiar_estado_usuario: {traceback.format_exc()}")
+        return Response(
+            {'error': f'Error interno del servidor: {str(e)}'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 

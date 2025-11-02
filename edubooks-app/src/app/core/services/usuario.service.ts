@@ -73,8 +73,8 @@ export class UsuarioService {
   /**
    * Cambiar estado de un usuario (activar/desactivar)
    */
-  cambiarEstadoUsuario(usuarioId: number): Observable<any> {
-    return this.apiService.post(`/auth/admin/usuarios/${usuarioId}/estado/`, {})
+  cambiarEstadoUsuario(usuarioId: number, nuevoEstado: boolean): Observable<any> {
+    return this.apiService.post(`/auth/admin/usuarios/${usuarioId}/estado/`, { activo: nuevoEstado })
       .pipe(
         catchError(error => {
           console.error('Error cambiando estado del usuario:', error);

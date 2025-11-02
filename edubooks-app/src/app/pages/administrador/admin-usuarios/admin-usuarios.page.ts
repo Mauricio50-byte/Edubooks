@@ -135,11 +135,14 @@ export class AdminUsuariosPage implements OnInit {
     await loading.present();
 
     try {
-      // Llamar al servicio real
-      await firstValueFrom(this.usuarioService.cambiarEstadoUsuario(usuario.id));
+      // Calcular el nuevo estado (opuesto al actual)
+      const nuevoEstado = !usuario.is_active;
+      
+      // Llamar al servicio real con el nuevo estado
+      await firstValueFrom(this.usuarioService.cambiarEstadoUsuario(usuario.id, nuevoEstado));
       
       // Actualizar estado local
-      usuario.is_active = !usuario.is_active;
+      usuario.is_active = nuevoEstado;
       
       await loading.dismiss();
       await this.mostrarToast(`Usuario ${usuario.is_active ? 'activado' : 'desactivado'} exitosamente`, 'success');
