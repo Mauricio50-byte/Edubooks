@@ -1,0 +1,14 @@
+# Ignorar cachés y bytecode de Python
+_pycache_/
+*.pyc
+*.pyo
+*.pyd
+
+# Entornos virtuales (opcional, por si existe)
+venv/
+.venv/
+
+# Archivos temporales comunes
+*.log
+*.tmp
+*.swp
