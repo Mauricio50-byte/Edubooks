@@ -1,357 +1,591 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
+<ion-header [translucent]="true" class="dark-header">
+  <ion-toolbar class="dark-toolbar">
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/home"></ion-back-button>
+      <ion-back-button defaultHref="/home" class="dark-back-button"></ion-back-button>
     </ion-buttons>
-    <ion-title>Gestión de Invitaciones</ion-title>
+    <ion-title class="header-title">
+      <ion-icon name="people-outline" class="title-icon"></ion-icon>
+      Gestión de Invitaciones
+    </ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="cargarDatos()">
+      <ion-button (click)="cargarDatos()" class="refresh-button">
         <ion-icon name="refresh-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Gestión de Invitaciones</ion-title>
-    </ion-toolbar>
-  </ion-header>
-
-  <!-- Estadísticas compactas -->
-  <div class="stats-compact" *ngIf="estadisticas">
-    <div class="stats-row">
-      <div class="stat-compact">
-        <ion-icon name="mail-outline" color="primary"></ion-icon>
-        <div class="stat-number">{{ estadisticas.resumen.total_invitaciones }}</div>
-        <div class="stat-label">Total</div>
+<ion-content [fullscreen]="true" class="dark-content">
+  <div class="page-container">
+    <!-- Hero Section with Modern Statistics -->
+    <div class="hero-section" *ngIf="estadisticas">
+      <div class="hero-header">
+        <h1 class="page-title">
+          <ion-icon name="analytics-outline" class="page-icon"></ion-icon>
+          Panel de Invitaciones
+        </h1>
+        <p class="page-subtitle">Administra y supervisa todas las invitaciones del sistema</p>
       </div>
-      <div class="stat-compact">
-        <ion-icon name="time-outline" color="warning"></ion-icon>
-        <div class="stat-number">{{ estadisticas.resumen.pendientes }}</div>
-        <div class="stat-label">Pendientes</div>
-      </div>
-      <div class="stat-compact">
-        <ion-icon name="checkmark-circle-outline" color="success"></ion-icon>
-        <div class="stat-number">{{ estadisticas.resumen.usadas }}</div>
-        <div class="stat-label">Usadas</div>
-      </div>
-      <div class="stat-compact">
-        <ion-icon name="close-circle-outline" color="danger"></ion-icon>
-        <div class="stat-number">{{ estadisticas.resumen.expiradas }}</div>
-        <div class="stat-label">Expiradas</div>
-      </div>
-      <div class="stat-compact usage-rate">
-        <ion-icon name="analytics-outline" color="tertiary"></ion-icon>
-        <div class="stat-number">{{ estadisticas.resumen.tasa_uso }}%</div>
-        <div class="stat-label">Tasa de uso</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Botón para crear nueva invitación -->
-  <div class="action-buttons">
-    <ion-button expand="block" (click)="toggleCrearForm()" [color]="showCrearForm ? 'medium' : 'primary'">
-      <ion-icon [name]="showCrearForm ? 'close-outline' : 'add-outline'" slot="start"></ion-icon>
-      {{ showCrearForm ? 'Cancelar' : 'Nueva Invitación' }}
-    </ion-button>
-  </div>
-
-  <!-- Formulario para crear invitación -->
-  <ion-card *ngIf="showCrearForm">
-    <ion-card-header>
-      <ion-card-title>Crear Nueva Invitación</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <form [formGroup]="crearInvitacionForm" (ngSubmit)="crearInvitacion()">
-        <!-- Email del invitado -->
-        <ion-item>
-          <ion-label position="stacked">Email del Invitado *</ion-label>
-          <ion-input 
-            type="email" 
-            formControlName="email_invitado"
-            placeholder="ejemplo@correo.com">
-          </ion-input>
-        </ion-item>
-        <div class="error-message" *ngIf="email_invitado?.invalid && email_invitado?.touched">
-          <span *ngIf="email_invitado?.errors?.['required']">El email es requerido</span>
-          <span *ngIf="email_invitado?.errors?.['email']">Ingrese un email válido</span>
-        </div>
-
-        <!-- Rol asignado -->
-        <ion-item>
-          <ion-label position="stacked">Rol *</ion-label>
-          <ion-select formControlName="rol_asignado" (ionChange)="onRolChange()" placeholder="Seleccionar rol">
-            <ion-select-option *ngFor="let rol of roles" [value]="rol.value">
-              <ion-icon [name]="getRolIcon(rol.value)" slot="start"></ion-icon>
-              {{ rol.label }}
-            </ion-select-option>
-          </ion-select>
-        </ion-item>
-        <div class="error-message" *ngIf="rol_asignado?.invalid && rol_asignado?.touched">
-          <span *ngIf="rol_asignado?.errors?.['required']">El rol es requerido</span>
-        </div>
-
-        <!-- Fecha de expiración -->
-        <ion-item>
-          <ion-label position="stacked">Fecha de Expiración *</ion-label>
-          <ion-datetime 
-            formControlName="fecha_expiracion"
-            presentation="date"
-            [min]="fechaMinima"
-            placeholder="Seleccionar fecha">
-          </ion-datetime>
-        </ion-item>
-        <div class="error-message" *ngIf="fecha_expiracion?.invalid && fecha_expiracion?.touched">
-          <span *ngIf="fecha_expiracion?.errors?.['required']">La fecha de expiración es requerida</span>
-        </div>
-
-        <!-- Campos específicos por rol -->
-        <div *ngIf="rol_asignado?.value === 'estudiante'">
-          <ion-item>
-            <ion-label position="stacked">Código de Estudiante</ion-label>
-            <ion-input formControlName="codigo_estudiante" placeholder="Ej: EST001"></ion-input>
-          </ion-item>
-          <ion-item>
-            <ion-label position="stacked">Carrera</ion-label>
-            <ion-input formControlName="carrera" placeholder="Ej: Ingeniería de Sistemas"></ion-input>
-          </ion-item>
-          <ion-item>
-            <ion-label position="stacked">Semestre</ion-label>
-            <ion-input type="number" formControlName="semestre" placeholder="Ej: 5"></ion-input>
-          </ion-item>
-        </div>
-
-        <div *ngIf="rol_asignado?.value === 'docente'">
-          <ion-item>
-            <ion-label position="stacked">Código de Empleado</ion-label>
-            <ion-input formControlName="codigo_empleado" placeholder="Ej: DOC001"></ion-input>
-          </ion-item>
-          <ion-item>
-            <ion-label position="stacked">Departamento</ion-label>
-            <ion-input formControlName="departamento" placeholder="Ej: Sistemas"></ion-input>
-          </ion-item>
-          <ion-item>
-            <ion-label position="stacked">Especialidad</ion-label>
-            <ion-input formControlName="especialidad" placeholder="Ej: Programación"></ion-input>
-          </ion-item>
-        </div>
-
-        <div *ngIf="rol_asignado?.value === 'bibliotecario'">
-          <ion-item>
-            <ion-label position="stacked">Código de Empleado</ion-label>
-            <ion-input formControlName="codigo_empleado" placeholder="Ej: BIB001"></ion-input>
-          </ion-item>
-          <ion-item>
-            <ion-label position="stacked">Turno</ion-label>
-            <ion-select formControlName="turno" placeholder="Seleccionar turno">
-              <ion-select-option value="mañana">Mañana</ion-select-option>
-              <ion-select-option value="tarde">Tarde</ion-select-option>
-              <ion-select-option value="noche">Noche</ion-select-option>
-            </ion-select>
-          </ion-item>
-        </div>
-
-        <div *ngIf="rol_asignado?.value === 'administrador'">
-          <ion-item>
-            <ion-label position="stacked">Código de Empleado</ion-label>
-            <ion-input formControlName="codigo_empleado" placeholder="Ej: ADM001"></ion-input>
-          </ion-item>
-          <ion-item>
-            <ion-label position="stacked">Nivel de Acceso</ion-label>
-            <ion-select formControlName="nivel_acceso" placeholder="Seleccionar nivel">
-              <ion-select-option value="basico">Básico</ion-select-option>
-              <ion-select-option value="avanzado">Avanzado</ion-select-option>
-              <ion-select-option value="completo">Completo</ion-select-option>
-            </ion-select>
-          </ion-item>
-        </div>
-
-        <!-- Botón de envío -->
-        <ion-button 
-          type="submit" 
-          expand="block" 
-          [disabled]="crearInvitacionForm.invalid || isCreatingInvitation"
-          class="submit-btn">
-          <ion-spinner *ngIf="isCreatingInvitation" name="crescent"></ion-spinner>
-          <span *ngIf="!isCreatingInvitation">Crear Invitación</span>
-          <span *ngIf="isCreatingInvitation">Creando...</span>
-        </ion-button>
-      </form>
-    </ion-card-content>
-  </ion-card>
-
-  <!-- Filtros -->
-  <div class="filters-container">
-    <ion-searchbar 
-      placeholder="Buscar por email o nombre..."
-      [(ngModel)]="filtroTexto"
-      (ionInput)="aplicarFiltros()"
-      debounce="300"
-      class="custom-searchbar">
-    </ion-searchbar>
-
-    <app-filter-dropdown
-      label="Estado"
-      [options]="estadoOptions"
-      [(selectedValue)]="filtroEstado"
-      (selectionChange)="aplicarFiltros()"
-      placeholder="Todos los estados">
-    </app-filter-dropdown>
-
-    <app-filter-dropdown
-      label="Rol"
-      [options]="rolFilterOptions"
-      [(selectedValue)]="filtroRol"
-      (selectionChange)="aplicarFiltros()"
-      placeholder="Todos los roles">
-    </app-filter-dropdown>
-
-    <div class="filter-actions">
-      <ion-button 
-        fill="outline" 
-        color="medium" 
-        (click)="limpiarFiltros()"
-        class="clear-filters-btn">
-        <ion-icon name="refresh-outline" slot="start"></ion-icon>
-        Limpiar Filtros
-      </ion-button>
       
-      <div class="filter-summary" *ngIf="invitacionesFiltradas.length !== invitaciones.length">
-        <ion-chip color="primary" outline="true">
-          <ion-icon name="filter-outline" slot="start"></ion-icon>
-          <ion-label>{{ invitacionesFiltradas.length }} de {{ invitaciones.length }}</ion-label>
-        </ion-chip>
+      <!-- Compact Statistics -->
+      <div class="compact-stats-container">
+        <div class="stats-header-compact">
+          <h3 class="stats-title-compact">
+            <ion-icon name="bar-chart-outline"></ion-icon>
+            Estadísticas
+          </h3>
+          <ion-button fill="clear" size="small" (click)="cargarDatos()">
+            <ion-icon name="refresh-outline" slot="icon-only"></ion-icon>
+          </ion-button>
+        </div>
+
+        <div class="stats-row">
+          <!-- Total -->
+          <div class="stat-item primary">
+            <ion-icon name="mail-outline" class="stat-icon"></ion-icon>
+            <div class="stat-content">
+              <div class="stat-number">{{ estadisticas.resumen.total_invitaciones }}</div>
+              <div class="stat-label">Total</div>
+            </div>
+          </div>
+
+          <!-- Pendientes -->
+          <div class="stat-item warning">
+            <ion-icon name="hourglass-outline" class="stat-icon"></ion-icon>
+            <div class="stat-content">
+              <div class="stat-number">{{ estadisticas.resumen.pendientes }}</div>
+              <div class="stat-label">Pendientes</div>
+            </div>
+          </div>
+
+          <!-- Completadas -->
+          <div class="stat-item success">
+            <ion-icon name="checkmark-circle-outline" class="stat-icon"></ion-icon>
+            <div class="stat-content">
+              <div class="stat-number">{{ estadisticas.resumen.usadas }}</div>
+              <div class="stat-label">Completadas</div>
+            </div>
+          </div>
+
+          <!-- Expiradas -->
+          <div class="stat-item danger">
+            <ion-icon name="close-circle-outline" class="stat-icon"></ion-icon>
+            <div class="stat-content">
+              <div class="stat-number">{{ estadisticas.resumen.expiradas }}</div>
+              <div class="stat-label">Expiradas</div>
+            </div>
+          </div>
+
+          <!-- Tasa de Éxito -->
+          <div class="stat-item tertiary">
+            <ion-icon name="analytics-outline" class="stat-icon"></ion-icon>
+            <div class="stat-content">
+              <div class="stat-number">{{ estadisticas.resumen.tasa_uso }}%</div>
+              <div class="stat-label">Tasa de Éxito</div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- Loading -->
-  <div class="loading-state" *ngIf="isLoading">
-    <ion-spinner name="crescent"></ion-spinner>
-    <h3>Cargando invitaciones...</h3>
-    <p>Por favor espera un momento</p>
-  </div>
+    <!-- Action Section -->
+    <div class="action-section">
+      <div class="section-header">
+        <h2 class="section-title">
+          <ion-icon name="add-circle-outline" class="section-icon"></ion-icon>
+          Crear Invitación
+        </h2>
+        <ion-button 
+          (click)="toggleCrearForm()" 
+          [color]="showCrearForm ? 'medium' : 'primary'"
+          class="toggle-form-btn"
+          [fill]="showCrearForm ? 'outline' : 'solid'">
+          <ion-icon [name]="showCrearForm ? 'close-outline' : 'add-outline'" slot="start"></ion-icon>
+          {{ showCrearForm ? 'Cancelar' : 'Nueva Invitación' }}
+        </ion-button>
+      </div>
 
-  <!-- Error -->
-  <ion-card color="danger" *ngIf="error && !isLoading">
-    <ion-card-content class="error-content">
-      <ion-icon name="alert-circle-outline" size="large"></ion-icon>
-      <h3>Error al cargar</h3>
-      <p>{{ error }}</p>
-      <ion-button fill="outline" (click)="cargarDatos()">
-        <ion-icon name="refresh-outline" slot="start"></ion-icon>
-        Reintentar
-      </ion-button>
-    </ion-card-content>
-  </ion-card>
+      <!-- Formulario para crear invitación -->
+      <div class="form-container" *ngIf="showCrearForm">
+        <ion-card class="create-form-card dark-card">
+          <ion-card-header class="form-header">
+            <ion-card-title class="form-title">
+              <ion-icon name="person-add-outline" class="form-icon"></ion-icon>
+              Datos de la Nueva Invitación
+            </ion-card-title>
+            <ion-card-subtitle class="form-subtitle">
+              Complete la información requerida para enviar la invitación
+            </ion-card-subtitle>
+          </ion-card-header>
+          
+          <ion-card-content class="form-content">
+            <form [formGroup]="crearInvitacionForm" (ngSubmit)="crearInvitacion()">
+              <div class="form-grid">
+                <!-- Email del invitado -->
+                <div class="form-field">
+                  <ion-item class="dark-item">
+                    <ion-label position="stacked" class="field-label">
+                      <ion-icon name="mail-outline" class="label-icon"></ion-icon>
+                      Email del Invitado *
+                    </ion-label>
+                    <ion-input 
+                      type="email" 
+                      formControlName="email_invitado"
+                      placeholder="ejemplo@correo.com"
+                      class="dark-input">
+                    </ion-input>
+                  </ion-item>
+                  <div class="error-message" *ngIf="email_invitado?.invalid && email_invitado?.touched">
+                    <ion-icon name="alert-circle-outline" class="error-icon"></ion-icon>
+                    <span *ngIf="email_invitado?.errors?.['required']">El email es requerido</span>
+                    <span *ngIf="email_invitado?.errors?.['email']">Ingrese un email válido</span>
+                  </div>
+                </div>
 
-  <!-- Lista de invitaciones -->
-  <div class="invitations-list" *ngIf="!isLoading && !error">
-    <ion-card *ngFor="let invitacion of invitaciones; trackBy: trackByInvitacion" class="invitation-card">
-      <ion-card-content class="invitation-content">
-        <div class="invitation-header">
-          <h3>{{ invitacion.email_invitado }}</h3>
-          <ion-chip [color]="getEstadoColor(invitacion.estado)" class="status-chip">
-            <ion-icon [name]="getEstadoIcon(invitacion.estado)" slot="start"></ion-icon>
-            <ion-label>{{ getEstadoLabel(invitacion.estado) }}</ion-label>
-          </ion-chip>
-        </div>
+                <!-- Rol asignado -->
+                <div class="form-field">
+                  <ion-item class="dark-item">
+                    <ion-label position="stacked" class="field-label">
+                      <ion-icon name="person-outline" class="label-icon"></ion-icon>
+                      Rol Asignado *
+                    </ion-label>
+                    <ion-select 
+                      formControlName="rol_asignado" 
+                      (ionChange)="onRolChange()" 
+                      placeholder="Seleccionar rol"
+                      class="dark-select">
+                      <ion-select-option *ngFor="let rol of roles" [value]="rol.value">
+                        <ion-icon [name]="getRolIcon(rol.value)" slot="start"></ion-icon>
+                        {{ rol.label }}
+                      </ion-select-option>
+                    </ion-select>
+                  </ion-item>
+                  <div class="error-message" *ngIf="rol_asignado?.invalid && rol_asignado?.touched">
+                    <ion-icon name="alert-circle-outline" class="error-icon"></ion-icon>
+                    <span *ngIf="rol_asignado?.errors?.['required']">El rol es requerido</span>
+                  </div>
+                </div>
 
-        <div class="detail-item">
-          <ion-icon name="person-outline"></ion-icon>
-          <span><strong>Rol:</strong></span>
-          <ion-chip [color]="getRolColor(invitacion.rol_asignado)" size="small">
-            <ion-icon [name]="getRolIcon(invitacion.rol_asignado)" slot="start"></ion-icon>
-            <ion-label>{{ getRolLabel(invitacion.rol_asignado) }}</ion-label>
-          </ion-chip>
-        </div>
+                <!-- Fecha de expiración -->
+                <div class="form-field full-width">
+                  <ion-item class="dark-item">
+                    <ion-label position="stacked" class="field-label">
+                      <ion-icon name="calendar-outline" class="label-icon"></ion-icon>
+                      Fecha de Expiración *
+                    </ion-label>
+                    <ion-datetime 
+                      formControlName="fecha_expiracion"
+                      presentation="date"
+                      [min]="fechaMinima"
+                      placeholder="Seleccionar fecha"
+                      class="dark-datetime">
+                    </ion-datetime>
+                  </ion-item>
+                  <div class="error-message" *ngIf="fecha_expiracion?.invalid && fecha_expiracion?.touched">
+                    <ion-icon name="alert-circle-outline" class="error-icon"></ion-icon>
+                    <span *ngIf="fecha_expiracion?.errors?.['required']">La fecha de expiración es requerida</span>
+                  </div>
+                </div>
+              </div>
 
-        <div class="detail-item">
-          <ion-icon name="calendar-outline"></ion-icon>
-          <span><strong>Creada:</strong> {{ invitacion.fecha_creacion | date:'dd/MM/yyyy HH:mm' }}</span>
-        </div>
+              <!-- Campos específicos por rol -->
+              <div class="role-specific-fields" *ngIf="rol_asignado?.value">
+                <div class="role-header">
+                  <h3 class="role-title">
+                    <ion-icon [name]="getRolIcon(rol_asignado?.value)" class="role-icon"></ion-icon>
+                    Información Específica de {{ getRolLabel(rol_asignado?.value) }}
+                  </h3>
+                </div>
 
-        <div class="detail-item">
-          <ion-icon name="time-outline"></ion-icon>
-          <span><strong>Expira:</strong> {{ invitacion.fecha_expiracion | date:'dd/MM/yyyy' }}</span>
-        </div>
+                <div class="role-fields-grid" *ngIf="rol_asignado?.value === 'estudiante'">
+                  <div class="form-field">
+                    <ion-item class="dark-item">
+                      <ion-label position="stacked" class="field-label">
+                        <ion-icon name="id-card-outline" class="label-icon"></ion-icon>
+                        Código de Estudiante
+                      </ion-label>
+                      <ion-input formControlName="codigo_estudiante" placeholder="Ej: EST001" class="dark-input"></ion-input>
+                    </ion-item>
+                  </div>
+                  <div class="form-field">
+                    <ion-item class="dark-item">
+                      <ion-label position="stacked" class="field-label">
+                        <ion-icon name="school-outline" class="label-icon"></ion-icon>
+                        Carrera
+                      </ion-label>
+                      <ion-input formControlName="carrera" placeholder="Ej: Ingeniería de Sistemas" class="dark-input"></ion-input>
+                    </ion-item>
+                  </div>
+                  <div class="form-field">
+                    <ion-item class="dark-item">
+                      <ion-label position="stacked" class="field-label">
+                        <ion-icon name="layers-outline" class="label-icon"></ion-icon>
+                        Semestre
+                      </ion-label>
+                      <ion-input type="number" formControlName="semestre" placeholder="Ej: 5" class="dark-input"></ion-input>
+                    </ion-item>
+                  </div>
+                </div>
 
-        <div class="detail-item" *ngIf="invitacion.fecha_uso">
-          <ion-icon name="checkmark-circle-outline"></ion-icon>
-          <span><strong>Usada:</strong> {{ invitacion.fecha_uso | date:'dd/MM/yyyy HH:mm' }}</span>
-        </div>
+                <div class="role-fields-grid" *ngIf="rol_asignado?.value === 'docente'">
+                  <div class="form-field">
+                    <ion-item class="dark-item">
+                      <ion-label position="stacked" class="field-label">
+                        <ion-icon name="id-card-outline" class="label-icon"></ion-icon>
+                        Código de Empleado
+                      </ion-label>
+                      <ion-input formControlName="codigo_empleado" placeholder="Ej: DOC001" class="dark-input"></ion-input>
+                    </ion-item>
+                  </div>
+                  <div class="form-field">
+                    <ion-item class="dark-item">
+                      <ion-label position="stacked" class="field-label">
+                        <ion-icon name="business-outline" class="label-icon"></ion-icon>
+                        Departamento
+                      </ion-label>
+                      <ion-input formControlName="departamento" placeholder="Ej: Sistemas" class="dark-input"></ion-input>
+                    </ion-item>
+                  </div>
+                  <div class="form-field">
+                    <ion-item class="dark-item">
+                      <ion-label position="stacked" class="field-label">
+                        <ion-icon name="library-outline" class="label-icon"></ion-icon>
+                        Especialidad
+                      </ion-label>
+                      <ion-input formControlName="especialidad" placeholder="Ej: Programación" class="dark-input"></ion-input>
+                    </ion-item>
+                  </div>
+                </div>
 
-        <!-- Datos adicionales -->
-        <div class="additional-data" *ngIf="invitacion.datos_adicionales && Object.keys(invitacion.datos_adicionales).length > 0">
-          <h4>Información adicional:</h4>
-          <div class="formatted-data" [innerHTML]="getFormattedAdditionalData(invitacion.datos_adicionales)"></div>
-        </div>
+                <div class="role-fields-grid" *ngIf="rol_asignado?.value === 'bibliotecario'">
+                  <div class="form-field">
+                    <ion-item class="dark-item">
+                      <ion-label position="stacked" class="field-label">
+                        <ion-icon name="id-card-outline" class="label-icon"></ion-icon>
+                        Código de Empleado
+                      </ion-label>
+                      <ion-input formControlName="codigo_empleado" placeholder="Ej: BIB001" class="dark-input"></ion-input>
+                    </ion-item>
+                  </div>
+                  <div class="form-field">
+                    <ion-item class="dark-item">
+                      <ion-label position="stacked" class="field-label">
+                        <ion-icon name="time-outline" class="label-icon"></ion-icon>
+                        Turno
+                      </ion-label>
+                      <ion-select formControlName="turno" placeholder="Seleccionar turno" class="dark-select">
+                        <ion-select-option value="mañana">Mañana</ion-select-option>
+                        <ion-select-option value="tarde">Tarde</ion-select-option>
+                        <ion-select-option value="noche">Noche</ion-select-option>
+                      </ion-select>
+                    </ion-item>
+                  </div>
+                </div>
 
-        <!-- Acciones -->
-        <div class="invitation-actions">
-          <ion-button 
-            *ngIf="invitacion.estado === 'pendiente'" 
-            fill="outline" 
-            color="primary"
-            (click)="reenviarInvitacion(invitacion)"
-            class="action-resend">
-            <ion-icon name="mail-outline" slot="start"></ion-icon>
-            Reenviar
-          </ion-button>
+                <div class="role-fields-grid" *ngIf="rol_asignado?.value === 'administrador'">
+                  <div class="form-field">
+                    <ion-item class="dark-item">
+                      <ion-label position="stacked" class="field-label">
+                        <ion-icon name="id-card-outline" class="label-icon"></ion-icon>
+                        Código de Empleado
+                      </ion-label>
+                      <ion-input formControlName="codigo_empleado" placeholder="Ej: ADM001" class="dark-input"></ion-input>
+                    </ion-item>
+                  </div>
+                  <div class="form-field">
+                    <ion-item class="dark-item">
+                      <ion-label position="stacked" class="field-label">
+                        <ion-icon name="shield-outline" class="label-icon"></ion-icon>
+                        Nivel de Acceso
+                      </ion-label>
+                      <ion-select formControlName="nivel_acceso" placeholder="Seleccionar nivel" class="dark-select">
+                        <ion-select-option value="basico">Básico</ion-select-option>
+                        <ion-select-option value="avanzado">Avanzado</ion-select-option>
+                        <ion-select-option value="completo">Completo</ion-select-option>
+                      </ion-select>
+                    </ion-item>
+                  </div>
+                </div>
+              </div>
 
-          <ion-button 
-            *ngIf="invitacion.estado === 'pendiente'" 
-            fill="outline" 
-            color="warning"
-            (click)="extenderInvitacion(invitacion)"
-            class="action-extend">
-            <ion-icon name="time-outline" slot="start"></ion-icon>
-            Extender
-          </ion-button>
-
-          <ion-button 
-            *ngIf="invitacion.estado === 'pendiente'" 
-            fill="outline" 
-            color="danger"
-            (click)="cancelarInvitacion(invitacion)"
-            class="action-cancel">
-            <ion-icon name="close-outline" slot="start"></ion-icon>
-            Cancelar
-          </ion-button>
-
-          <ion-button 
-            fill="solid" 
-            color="danger"
-            (click)="eliminarInvitacion(invitacion)"
-            class="action-delete">
-            <ion-icon name="trash-outline" slot="start"></ion-icon>
-            Eliminar
-          </ion-button>
-        </div>
-      </ion-card-content>
-    </ion-card>
-
-    <!-- Estado vacío -->
-    <div class="empty-state" *ngIf="invitaciones.length === 0 && invitacionesOriginales.length > 0">
-      <ion-icon name="filter-outline" size="large"></ion-icon>
-      <h3>No se encontraron invitaciones</h3>
-      <p>No hay invitaciones que coincidan con los filtros aplicados</p>
-      <ion-button fill="outline" (click)="limpiarFiltros()">
-        <ion-icon name="refresh-outline" slot="start"></ion-icon>
-        Limpiar Filtros
-      </ion-button>
+              <!-- Botón de envío -->
+              <div class="form-actions">
+                <ion-button 
+                  type="submit" 
+                  expand="block" 
+                  [disabled]="crearInvitacionForm.invalid || isCreatingInvitation"
+                  class="submit-btn primary-btn">
+                  <ion-spinner *ngIf="isCreatingInvitation" name="crescent" class="loading-spinner"></ion-spinner>
+                  <ion-icon *ngIf="!isCreatingInvitation" name="send-outline" slot="start"></ion-icon>
+                  <span *ngIf="!isCreatingInvitation">Crear y Enviar Invitación</span>
+                  <span *ngIf="isCreatingInvitation">Enviando invitación...</span>
+                </ion-button>
+              </div>
+            </form>
+          </ion-card-content>
+        </ion-card>
+      </div>
     </div>
 
-    <div class="empty-state" *ngIf="invitacionesOriginales.length === 0">
-      <ion-icon name="mail-outline" size="large"></ion-icon>
-      <h3>No hay invitaciones</h3>
-      <p>Aún no se han creado invitaciones</p>
-      <ion-button fill="solid" (click)="toggleCrearForm()">
-        <ion-icon name="add-outline" slot="start"></ion-icon>
-        Crear Primera Invitación
-      </ion-button>
+    <!-- Filters Section -->
+    <div class="filters-section">
+      <div class="section-header">
+        <h2 class="section-title">
+          <ion-icon name="filter-outline" class="section-icon"></ion-icon>
+          Filtros y Búsqueda
+        </h2>
+        <div class="filter-summary" *ngIf="invitacionesFiltradas.length !== invitaciones.length">
+          <ion-chip color="primary" class="filter-chip">
+            <ion-icon name="funnel-outline" slot="start"></ion-icon>
+            <ion-label>{{ invitacionesFiltradas.length }} de {{ invitaciones.length }}</ion-label>
+          </ion-chip>
+        </div>
+      </div>
+
+      <div class="filters-grid">
+        <div class="search-container">
+          <ion-searchbar 
+            placeholder="Buscar por email o nombre..."
+            [(ngModel)]="filtroTexto"
+            (ionInput)="aplicarFiltros()"
+            debounce="300"
+            class="dark-searchbar">
+            <ion-icon name="search-outline" slot="start"></ion-icon>
+          </ion-searchbar>
+        </div>
+
+        <!-- Chips de filtros (diseño como admin usuarios) -->
+        <div class="filters-container">
+          <div class="filter-chips">
+            <div class="chip-group rol-chip-group">
+              <div class="group-label">
+                <ion-icon name="people-outline"></ion-icon>
+                Filtrar por Rol
+              </div>
+              <div class="chips">
+                <ion-chip color="primary" [outline]="filtroRol !== ''" (click)="selectRolFilter('')">
+                  <ion-icon name="people-outline" slot="start"></ion-icon>
+                  <ion-label>Todos los roles</ion-label>
+                </ion-chip>
+                <ion-chip *ngFor="let opt of rolFilterOptions | slice:1" [color]="opt.color || 'primary'" [outline]="filtroRol !== opt.value" (click)="selectRolFilter(opt.value)">
+                  <ion-icon [name]="opt.icon" slot="start"></ion-icon>
+                  <ion-label>{{ opt.label }}</ion-label>
+                </ion-chip>
+              </div>
+            </div>
+
+            <div class="chip-group estado-chip-group">
+              <div class="group-label">
+                <ion-icon name="funnel-outline"></ion-icon>
+                Filtrar por Estado
+              </div>
+              <div class="chips">
+                <ion-chip color="success" [outline]="filtroEstado !== ''" (click)="selectEstadoFilter('')">
+                  <ion-icon name="list-outline" slot="start"></ion-icon>
+                  <ion-label>Todos los estados</ion-label>
+                </ion-chip>
+                <ion-chip *ngFor="let opt of estadoOptions | slice:1" [color]="opt.color || 'primary'" [outline]="filtroEstado !== opt.value" (click)="selectEstadoFilter(opt.value)">
+                  <ion-icon [name]="opt.icon" slot="start"></ion-icon>
+                  <ion-label>{{ opt.label }}</ion-label>
+                </ion-chip>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="filter-actions">
+          <ion-button 
+            fill="outline" 
+            color="medium" 
+            (click)="limpiarFiltros()"
+            class="clear-filters-btn">
+            <ion-icon name="refresh-outline" slot="start"></ion-icon>
+            Limpiar Filtros
+          </ion-button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div class="loading-state dark-state" *ngIf="isLoading">
+      <div class="state-content">
+        <ion-spinner name="crescent" class="loading-spinner"></ion-spinner>
+        <h3 class="state-title">Cargando invitaciones...</h3>
+        <p class="state-message">Por favor espera un momento mientras obtenemos los datos</p>
+      </div>
+    </div>
+
+    <!-- Error State -->
+    <div class="error-state dark-state" *ngIf="error && !isLoading">
+      <ion-card color="danger" class="error-card dark-card">
+        <ion-card-content class="error-content">
+          <div class="error-icon-container">
+            <ion-icon name="alert-circle-outline" class="error-icon"></ion-icon>
+          </div>
+          <h3 class="error-title">Error al cargar los datos</h3>
+          <p class="error-message">{{ error }}</p>
+          <ion-button fill="outline" color="light" (click)="cargarDatos()" class="retry-btn">
+            <ion-icon name="refresh-outline" slot="start"></ion-icon>
+            Reintentar
+          </ion-button>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Invitations List -->
+    <div class="invitations-section" *ngIf="!isLoading && !error">
+      <div class="section-header">
+        <h2 class="section-title">
+          <ion-icon name="list-outline" class="section-icon"></ion-icon>
+          Lista de Invitaciones
+          <span class="count-badge" *ngIf="invitaciones.length > 0">({{ invitaciones.length }})</span>
+        </h2>
+      </div>
+
+      <div class="invitations-grid">
+        <ion-card *ngFor="let invitacion of invitaciones; trackBy: trackByInvitacion" class="invitation-card dark-card">
+          <div class="card-header">
+            <div class="user-info">
+              <div class="avatar">
+                <ion-icon name="person-outline" class="avatar-icon"></ion-icon>
+              </div>
+              <div class="user-details">
+                <h3 class="user-email">{{ invitacion.email_invitado }}</h3>
+                <p class="user-role">
+                  <ion-icon [name]="getRolIcon(invitacion.rol_asignado)" class="role-icon"></ion-icon>
+                  {{ getRolLabel(invitacion.rol_asignado) }}
+                </p>
+              </div>
+            </div>
+            <ion-chip [color]="getEstadoColor(invitacion.estado)" class="status-chip">
+              <ion-icon [name]="getEstadoIcon(invitacion.estado)" slot="start"></ion-icon>
+              <ion-label>{{ getEstadoLabel(invitacion.estado) }}</ion-label>
+            </ion-chip>
+          </div>
+
+          <ion-card-content class="card-content">
+            <div class="invitation-details">
+              <div class="detail-row">
+                <div class="detail-item">
+                  <ion-icon name="calendar-outline" class="detail-icon"></ion-icon>
+                  <div class="detail-content">
+                    <span class="detail-label">Fecha de Creación</span>
+                    <span class="detail-value">{{ invitacion.fecha_creacion | date:'dd/MM/yyyy HH:mm' }}</span>
+                  </div>
+                </div>
+                
+                <div class="detail-item">
+                  <ion-icon name="time-outline" class="detail-icon"></ion-icon>
+                  <div class="detail-content">
+                    <span class="detail-label">Fecha de Expiración</span>
+                    <span class="detail-value">{{ invitacion.fecha_expiracion | date:'dd/MM/yyyy' }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="detail-row" *ngIf="invitacion.fecha_uso">
+                <div class="detail-item">
+                  <ion-icon name="checkmark-circle-outline" class="detail-icon success"></ion-icon>
+                  <div class="detail-content">
+                    <span class="detail-label">Fecha de Uso</span>
+                    <span class="detail-value">{{ invitacion.fecha_uso | date:'dd/MM/yyyy HH:mm' }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="detail-row" *ngIf="invitacion.invitado_por">
+                <div class="detail-item">
+                  <ion-icon name="person-add-outline" class="detail-icon"></ion-icon>
+                  <div class="detail-content">
+                    <span class="detail-label">Invitado por</span>
+                    <span class="detail-value">{{ invitacion.invitado_por.nombre }} {{ invitacion.invitado_por.apellido }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Additional Data -->
+            <div class="additional-data" *ngIf="invitacion.datos_adicionales && Object.keys(invitacion.datos_adicionales).length > 0">
+              <div class="additional-header">
+                <ion-icon name="information-circle-outline" class="additional-icon"></ion-icon>
+                <h4 class="additional-title">Información Adicional</h4>
+              </div>
+              <div class="additional-content" [innerHTML]="getFormattedAdditionalData(invitacion.datos_adicionales)"></div>
+            </div>
+
+            <!-- Actions -->
+            <div class="card-actions">
+              <ion-button 
+                *ngIf="invitacion.estado === 'pendiente'" 
+                fill="solid" 
+                color="primary"
+                (click)="reenviarInvitacion(invitacion)"
+                class="action-btn">
+                <ion-icon name="mail-outline" slot="start"></ion-icon>
+                Reenviar
+              </ion-button>
+
+              <ion-button 
+                *ngIf="invitacion.estado === 'pendiente'" 
+                fill="solid" 
+                color="warning"
+                (click)="extenderInvitacion(invitacion)"
+                class="action-btn">
+                <ion-icon name="time-outline" slot="start"></ion-icon>
+                Extender
+              </ion-button>
+
+              <ion-button 
+                *ngIf="invitacion.estado === 'pendiente'" 
+                fill="outline" 
+                color="medium"
+                (click)="cancelarInvitacion(invitacion)"
+                class="action-btn">
+                <ion-icon name="close-outline" slot="start"></ion-icon>
+                Cancelar
+              </ion-button>
+
+              <ion-button 
+                fill="solid" 
+                color="danger"
+                (click)="eliminarInvitacion(invitacion)"
+                class="action-btn delete-btn">
+                <ion-icon name="trash-outline" slot="start"></ion-icon>
+                Eliminar
+              </ion-button>
+            </div>
+          </ion-card-content>
+        </ion-card>
+      </div>
+
+      <!-- Empty States -->
+      <div class="empty-state dark-state" *ngIf="invitaciones.length === 0 && invitacionesOriginales.length > 0">
+        <div class="state-content">
+          <div class="empty-icon-container">
+            <ion-icon name="filter-outline" class="empty-icon"></ion-icon>
+          </div>
+          <h3 class="state-title">No se encontraron invitaciones</h3>
+          <p class="state-message">No hay invitaciones que coincidan con los filtros aplicados</p>
+          <ion-button fill="outline" color="primary" (click)="limpiarFiltros()" class="empty-action-btn">
+            <ion-icon name="refresh-outline" slot="start"></ion-icon>
+            Limpiar Filtros
+          </ion-button>
+        </div>
+      </div>
+
+      <div class="empty-state dark-state" *ngIf="invitacionesOriginales.length === 0">
+        <div class="state-content">
+          <div class="empty-icon-container">
+            <ion-icon name="mail-outline" class="empty-icon"></ion-icon>
+          </div>
+          <h3 class="state-title">No hay invitaciones</h3>
+          <p class="state-message">Aún no se han creado invitaciones en el sistema</p>
+          <ion-button fill="solid" color="primary" (click)="toggleCrearForm()" class="empty-action-btn">
+            <ion-icon name="add-outline" slot="start"></ion-icon>
+            Crear Primera Invitación
+          </ion-button>
+        </div>
+      </div>
     </div>
   </div>
 </ion-content>

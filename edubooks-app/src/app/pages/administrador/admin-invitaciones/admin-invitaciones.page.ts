@@ -3,7 +3,8 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } 
 import { AlertController, LoadingController, ToastController, ModalController, IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../core/services/auth.service';
-import { FilterDropdownComponent, FilterOption } from '../../../shared/componentes/filter-dropdown/filter-dropdown.component';
+import { FilterOption } from '../../../shared/componentes/filter-dropdown/filter-dropdown.component';
+import { trigger, state, style, transition, animate, query, stagger } from '@angular/animations';
 
 interface Invitacion {
   token: string;
@@ -31,7 +32,32 @@ interface Invitacion {
     IonicModule,
     ReactiveFormsModule,
     FormsModule,
-    FilterDropdownComponent
+  ],
+  animations: [
+    trigger('slideInUp', [
+      transition(':enter', [
+        style({ transform: 'translateY(50px)', opacity: 0 }),
+        animate('0.6s cubic-bezier(0.4, 0, 0.2, 1)', 
+          style({ transform: 'translateY(0)', opacity: 1 }))
+      ])
+    ]),
+    trigger('fadeIn', [
+      transition(':enter', [
+        style({ opacity: 0 }),
+        animate('0.4s ease-in', style({ opacity: 1 }))
+      ])
+    ]),
+    trigger('staggerCards', [
+      transition('* => *', [
+        query(':enter', [
+          style({ transform: 'translateY(30px)', opacity: 0 }),
+          stagger(100, [
+            animate('0.5s cubic-bezier(0.4, 0, 0.2, 1)', 
+              style({ transform: 'translateY(0)', opacity: 1 }))
+          ])
+        ], { optional: true })
+      ])
+    ])
   ]
 })
 export class AdminInvitacionesPage implements OnInit {
@@ -45,6 +71,12 @@ export class AdminInvitacionesPage implements OnInit {
   
   // Exponer Object para el template
   Object = Object;
+  
+  // Propiedad para la fecha actual
+  currentDate = new Date();
+  // Texto en tiempo real para "Última actualización"
+  timeAgoText = '';
+  private timeAgoInterval: any;
   
   // Formulario para crear invitación
   crearInvitacionForm: FormGroup;
@@ -121,6 +153,13 @@ export class AdminInvitacionesPage implements OnInit {
 
   ngOnInit() {
     this.cargarDatos();
+    this.startTimeAgoTimer();
+  }
+
+  ngOnDestroy() {
+    if (this.timeAgoInterval) {
+      clearInterval(this.timeAgoInterval);
+    }
   }
 
   async cargarDatos() {
@@ -132,11 +171,45 @@ export class AdminInvitacionesPage implements OnInit {
         this.cargarInvitaciones(),
         this.cargarEstadisticas()
       ]);
+      // Actualizar la fecha cuando se cargan los datos
+      this.currentDate = new Date();
+      this.updateTimeAgoText();
     } catch (error) {
       console.error('Error cargando datos:', error);
       this.error = 'Error al cargar los datos';
     } finally {
       this.isLoading = false;
+    }
+  }
+
+  private startTimeAgoTimer() {
+    this.updateTimeAgoText();
+    this.timeAgoInterval = setInterval(() => {
+      this.updateTimeAgoText();
+    }, 1000);
+  }
+
+  private updateTimeAgoText() {
+    if (!this.currentDate) {
+      this.timeAgoText = '';
+      return;
+    }
+    const now = new Date().getTime();
+    const updated = new Date(this.currentDate).getTime();
+    const diffMs = Math.max(0, now - updated);
+    const seconds = Math.floor(diffMs / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+
+    if (days > 0) {
+      this.timeAgoText = `hace ${days} día${days !== 1 ? 's' : ''}`;
+    } else if (hours > 0) {
+      this.timeAgoText = `hace ${hours} hora${hours !== 1 ? 's' : ''}`;
+    } else if (minutes > 0) {
+      this.timeAgoText = `hace ${minutes} minuto${minutes !== 1 ? 's' : ''}`;
+    } else {
+      this.timeAgoText = `hace ${seconds} segundo${seconds !== 1 ? 's' : ''}`;
     }
   }
 
@@ -690,6 +763,17 @@ export class AdminInvitacionesPage implements OnInit {
   getEstadoLabel(estado: string): string {
     const estadoOption = this.estadoOptions.find(option => option.value === estado);
     return estadoOption ? estadoOption.label : estado;
+  }
+
+  // Selección mediante chips (como admin usuarios)
+  selectRolFilter(value: string) {
+    this.filtroRol = (value || '').toLowerCase();
+    this.aplicarFiltros();
+  }
+
+  selectEstadoFilter(value: string) {
+    this.filtroEstado = value || '';
+    this.aplicarFiltros();
   }
 
   // Función de seguimiento para optimizar el rendimiento del *ngFor
