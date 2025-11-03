@@ -17,91 +17,26 @@
 
 <ion-content [fullscreen]="true" class="dark-content">
   <div class="page-container">
-    <!-- Hero Section with Modern Statistics -->
-    <div class="hero-section" *ngIf="estadisticas">
-      <div class="hero-header">
-        <h1 class="page-title">
-          <ion-icon name="analytics-outline" class="page-icon"></ion-icon>
-          Panel de Invitaciones
-        </h1>
-        <p class="page-subtitle">Administra y supervisa todas las invitaciones del sistema</p>
-      </div>
-      
-      <!-- Compact Statistics -->
-      <div class="compact-stats-container">
-        <div class="stats-header-compact">
-          <h3 class="stats-title-compact">
-            <ion-icon name="bar-chart-outline"></ion-icon>
-            Estadísticas
-          </h3>
-          <ion-button fill="clear" size="small" (click)="cargarDatos()">
-            <ion-icon name="refresh-outline" slot="icon-only"></ion-icon>
-          </ion-button>
-        </div>
-
-        <div class="stats-row">
-          <!-- Total -->
-          <div class="stat-item primary">
-            <ion-icon name="mail-outline" class="stat-icon"></ion-icon>
-            <div class="stat-content">
-              <div class="stat-number">{{ estadisticas.resumen.total_invitaciones }}</div>
-              <div class="stat-label">Total</div>
-            </div>
-          </div>
-
-          <!-- Pendientes -->
-          <div class="stat-item warning">
-            <ion-icon name="hourglass-outline" class="stat-icon"></ion-icon>
-            <div class="stat-content">
-              <div class="stat-number">{{ estadisticas.resumen.pendientes }}</div>
-              <div class="stat-label">Pendientes</div>
-            </div>
-          </div>
-
-          <!-- Completadas -->
-          <div class="stat-item success">
-            <ion-icon name="checkmark-circle-outline" class="stat-icon"></ion-icon>
-            <div class="stat-content">
-              <div class="stat-number">{{ estadisticas.resumen.usadas }}</div>
-              <div class="stat-label">Completadas</div>
-            </div>
-          </div>
-
-          <!-- Expiradas -->
-          <div class="stat-item danger">
-            <ion-icon name="close-circle-outline" class="stat-icon"></ion-icon>
-            <div class="stat-content">
-              <div class="stat-number">{{ estadisticas.resumen.expiradas }}</div>
-              <div class="stat-label">Expiradas</div>
-            </div>
-          </div>
-
-          <!-- Tasa de Éxito -->
-          <div class="stat-item tertiary">
-            <ion-icon name="analytics-outline" class="stat-icon"></ion-icon>
-            <div class="stat-content">
-              <div class="stat-number">{{ estadisticas.resumen.tasa_uso }}%</div>
-              <div class="stat-label">Tasa de Éxito</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    
+    <!-- Estadísticas compactas -->
+    <app-compact-stats 
+      [statistics]="compactStatistics"
+      [showSuccessRate]="true"
+      [animateOnLoad]="true"
+      [loading]="isLoading">
+    </app-compact-stats>
 
     <!-- Action Section -->
     <div class="action-section">
-      <div class="section-header">
-        <h2 class="section-title">
-          <ion-icon name="add-circle-outline" class="section-icon"></ion-icon>
-          Crear Invitación
-        </h2>
+      <!-- Create Invitation Button -->
+      <div class="create-button-container" *ngIf="!showCrearForm">
         <ion-button 
+          fill="solid" 
+          color="primary" 
           (click)="toggleCrearForm()" 
-          [color]="showCrearForm ? 'medium' : 'primary'"
-          class="toggle-form-btn"
-          [fill]="showCrearForm ? 'outline' : 'solid'">
-          <ion-icon [name]="showCrearForm ? 'close-outline' : 'add-outline'" slot="start"></ion-icon>
-          {{ showCrearForm ? 'Cancelar' : 'Nueva Invitación' }}
+          class="create-invitation-btn">
+          <ion-icon name="add-outline" slot="start"></ion-icon>
+          Crear Nueva Invitación
         </ion-button>
       </div>
 
@@ -327,84 +262,21 @@
       </div>
     </div>
 
-    <!-- Filters Section -->
-    <div class="filters-section">
-      <div class="section-header">
-        <h2 class="section-title">
-          <ion-icon name="filter-outline" class="section-icon"></ion-icon>
-          Filtros y Búsqueda
-        </h2>
-        <div class="filter-summary" *ngIf="invitacionesFiltradas.length !== invitaciones.length">
-          <ion-chip color="primary" class="filter-chip">
-            <ion-icon name="funnel-outline" slot="start"></ion-icon>
-            <ion-label>{{ invitacionesFiltradas.length }} de {{ invitaciones.length }}</ion-label>
-          </ion-chip>
-        </div>
-      </div>
-
-      <div class="filters-grid">
-        <div class="search-container">
-          <ion-searchbar 
-            placeholder="Buscar por email o nombre..."
-            [(ngModel)]="filtroTexto"
-            (ionInput)="aplicarFiltros()"
-            debounce="300"
-            class="dark-searchbar">
-            <ion-icon name="search-outline" slot="start"></ion-icon>
-          </ion-searchbar>
-        </div>
-
-        <!-- Chips de filtros (diseño como admin usuarios) -->
-        <div class="filters-container">
-          <div class="filter-chips">
-            <div class="chip-group rol-chip-group">
-              <div class="group-label">
-                <ion-icon name="people-outline"></ion-icon>
-                Filtrar por Rol
-              </div>
-              <div class="chips">
-                <ion-chip color="primary" [outline]="filtroRol !== ''" (click)="selectRolFilter('')">
-                  <ion-icon name="people-outline" slot="start"></ion-icon>
-                  <ion-label>Todos los roles</ion-label>
-                </ion-chip>
-                <ion-chip *ngFor="let opt of rolFilterOptions | slice:1" [color]="opt.color || 'primary'" [outline]="filtroRol !== opt.value" (click)="selectRolFilter(opt.value)">
-                  <ion-icon [name]="opt.icon" slot="start"></ion-icon>
-                  <ion-label>{{ opt.label }}</ion-label>
-                </ion-chip>
-              </div>
-            </div>
-
-            <div class="chip-group estado-chip-group">
-              <div class="group-label">
-                <ion-icon name="funnel-outline"></ion-icon>
-                Filtrar por Estado
-              </div>
-              <div class="chips">
-                <ion-chip color="success" [outline]="filtroEstado !== ''" (click)="selectEstadoFilter('')">
-                  <ion-icon name="list-outline" slot="start"></ion-icon>
-                  <ion-label>Todos los estados</ion-label>
-                </ion-chip>
-                <ion-chip *ngFor="let opt of estadoOptions | slice:1" [color]="opt.color || 'primary'" [outline]="filtroEstado !== opt.value" (click)="selectEstadoFilter(opt.value)">
-                  <ion-icon [name]="opt.icon" slot="start"></ion-icon>
-                  <ion-label>{{ opt.label }}</ion-label>
-                </ion-chip>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="filter-actions">
-          <ion-button 
-            fill="outline" 
-            color="medium" 
-            (click)="limpiarFiltros()"
-            class="clear-filters-btn">
-            <ion-icon name="refresh-outline" slot="start"></ion-icon>
-            Limpiar Filtros
-          </ion-button>
-        </div>
-      </div>
-    </div>
+    <!-- Filters Section (refactorizado a componente reusable) -->
+    <app-filter-dropdown
+      [title]="'Filtros y Búsqueda'"
+      [totalCount]="invitaciones.length"
+      [filteredCount]="invitacionesFiltradas.length"
+      [rolOptions]="rolFilterOptions"
+      [estadoOptions]="estadoOptions"
+      [(filtroTexto)]="filtroTexto"
+      (filtroTextoChange)="aplicarFiltros()"
+      [(filtroRol)]="filtroRol"
+      (filtroRolChange)="aplicarFiltros()"
+      [(filtroEstado)]="filtroEstado"
+      (filtroEstadoChange)="aplicarFiltros()"
+      (limpiarFiltros)="limpiarFiltros()"
+    ></app-filter-dropdown>
 
     <!-- Loading State -->
     <div class="loading-state dark-state" *ngIf="isLoading">
@@ -565,11 +437,7 @@
             <ion-icon name="filter-outline" class="empty-icon"></ion-icon>
           </div>
           <h3 class="state-title">No se encontraron invitaciones</h3>
-          <p class="state-message">No hay invitaciones que coincidan con los filtros aplicados</p>
-          <ion-button fill="outline" color="primary" (click)="limpiarFiltros()" class="empty-action-btn">
-            <ion-icon name="refresh-outline" slot="start"></ion-icon>
-            Limpiar Filtros
-          </ion-button>
+          <p class="state-message">No hay invitaciones que coincidan con los filtros aplicados. Usa los filtros de arriba para limpiar la búsqueda.</p>
         </div>
       </div>
 

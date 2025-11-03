@@ -6,6 +6,7 @@ import { IonicModule } from '@ionic/angular';
 // Importar módulos de auth
 import { AuthModule } from './auth/auth.module';
 import { UserDetailsComponent } from './user-details/user-details.component';
+import { CompactStatsComponent } from './compact-stats/compact-stats.component';
 
 @NgModule({
   imports: [
@@ -15,11 +16,13 @@ import { UserDetailsComponent } from './user-details/user-details.component';
     AuthModule
   ],
   declarations: [
-    UserDetailsComponent
+    UserDetailsComponent,
+    CompactStatsComponent
   ],
   exports: [
     AuthModule,
-    UserDetailsComponent
+    UserDetailsComponent,
+    CompactStatsComponent
   ]
 })
 export class ComponentesModule { }

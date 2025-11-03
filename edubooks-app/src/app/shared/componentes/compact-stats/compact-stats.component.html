@@ -1,0 +1,71 @@
+<div class="compact-stats-container" *ngIf="statistics">
+  <!-- Stats Grid -->
+  <div class="stats-grid">
+    <div class="stat-item total" 
+         [class.animate]="animateOnLoad"
+         [style.animation-delay]="'0.1s'">
+      <div class="stat-icon-container">
+        <ion-icon name="mail-outline" class="stat-icon"></ion-icon>
+      </div>
+      <div class="stat-content">
+        <span class="stat-number">{{ statistics.total || 0 }}</span>
+        <span class="stat-label">Total</span>
+      </div>
+    </div>
+
+    <div class="stat-item pending" 
+         [class.animate]="animateOnLoad"
+         [style.animation-delay]="'0.2s'">
+      <div class="stat-icon-container">
+        <ion-icon name="hourglass-outline" class="stat-icon"></ion-icon>
+      </div>
+      <div class="stat-content">
+        <span class="stat-number">{{ statistics.pending || 0 }}</span>
+        <span class="stat-label">Pendientes</span>
+      </div>
+    </div>
+
+    <div class="stat-item completed" 
+         [class.animate]="animateOnLoad"
+         [style.animation-delay]="'0.3s'">
+      <div class="stat-icon-container">
+        <ion-icon name="checkmark-circle-outline" class="stat-icon"></ion-icon>
+      </div>
+      <div class="stat-content">
+        <span class="stat-number">{{ statistics.completed || 0 }}</span>
+        <span class="stat-label">Completadas</span>
+      </div>
+    </div>
+
+    <div class="stat-item expired" 
+         [class.animate]="animateOnLoad"
+         [style.animation-delay]="'0.4s'">
+      <div class="stat-icon-container">
+        <ion-icon name="close-circle-outline" class="stat-icon"></ion-icon>
+      </div>
+      <div class="stat-content">
+        <span class="stat-number">{{ statistics.expired || 0 }}</span>
+        <span class="stat-label">Expiradas</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Rate -->
+  <div class="success-rate-container" 
+       [class.animate]="animateOnLoad"
+       [style.animation-delay]="'0.5s'"
+       *ngIf="showSuccessRate && statistics.successRate !== undefined">
+    <div class="rate-icon-container">
+      <ion-icon name="analytics-outline" class="rate-icon"></ion-icon>
+    </div>
+    <div class="rate-content">
+      <span class="rate-label">Tasa de Uso</span>
+      <span class="rate-value">{{ statistics.successRate }}%</span>
+    </div>
+    <div class="rate-progress">
+      <div class="progress-bar" 
+           [style.width.%]="statistics.successRate">
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,189 +1,151 @@
-.filter-dropdown-container {
-  position: relative;
-  display: inline-block;
-  width: 100%;
+// Estilos del componente de filtros reutilizable
+
+.filters-section {
+  margin-bottom: 24px;
 }
 
-.filter-button {
-  width: 100%;
-  --border-radius: 8px;
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 0;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--ion-color-primary, #1a73e8);
+  margin: 0;
+}
+
+.section-icon {
+  color: var(--ion-color-primary, #1a73e8);
+}
+
+.filter-summary .filter-chip {
+  --padding-start: 8px;
+  --padding-end: 8px;
+}
+
+.filters-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.search-container {
+  .dark-searchbar {
+    --background: #ffffff;
+    --color: var(--ion-color-dark, #1f2937);
+    --placeholder-color: #6b7280;
+    --icon-color: var(--ion-color-primary, #1a73e8);
+    --border-radius: 16px;
+    --box-shadow: 0 1px 2px rgba(16, 24, 40, 0.06);
+    border: 1px solid #d7d8da;
+  }
+
+  /* Estado focus para dar realce sutil */
+  .dark-searchbar:focus-within {
+    --box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.18);
+    border-color: #1a73e8;
+  }
+}
+
+.filters-container {
+  .filter-chips {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+}
+
+.chip-group {
+  background: #fff;
+  border: 1px solid #d7d8da;
+  border-radius: 12px;
+  padding: 12px 16px;
+
+  .group-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--ion-color-primary, #1a73e8);
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+}
+
+.filter-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (max-width: 768px) {
+  .filters-grid {
+    gap: 8px;
+  }
+  .filters-container .filter-chips {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Chips estilo pastel y outline por color para coincidir con referencia visual */
+ion-chip {
   --padding-start: 12px;
   --padding-end: 12px;
-  height: 44px;
-  
-  &.active {
-    --color: var(--ion-color-primary);
-    --border-color: var(--ion-color-primary);
-  }
-  
-  &.has-selection {
-    --background: var(--ion-color-primary-tint);
-    --color: var(--ion-color-primary-shade);
-  }
-  
-  ion-label {
-    font-weight: 500;
-    margin-left: 8px;
-    margin-right: 8px;
-  }
-  
-  .selection-badge {
-    margin-left: 8px;
-    font-size: 12px;
-    font-weight: 600;
-  }
-  
-  .dropdown-arrow {
-    margin-left: 8px;
-    transition: transform 0.2s ease;
-    font-size: 16px;
-  }
+  --border-radius: 16px;
+  font-weight: 500;
 }
 
-.dropdown-menu {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  z-index: 1000;
-  margin-top: 4px;
-  opacity: 0;
-  transform: translateY(-10px);
-  transition: all 0.2s ease;
-  pointer-events: none;
-  
-  &.open {
-    opacity: 1;
-    transform: translateY(0);
-    pointer-events: all;
-  }
+/* Primary (azul) */
+ion-chip[color="primary"]:not([outline]) {
+  --background: rgba(56, 128, 255, 0.16);
+  --color: #1a73e8;
+  --border-color: rgba(56, 128, 255, 0.35);
+}
+ion-chip[color="primary"][outline] {
+  --color: #1a73e8;
+  --border-color: #1a73e8;
 }
 
-.dropdown-card {
-  margin: 0;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-  border-radius: 12px;
-  overflow: hidden;
-  max-height: 300px;
-  
-  ion-card-header {
-    padding: 12px 16px 8px 16px;
-    
-    .dropdown-title {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--ion-color-primary);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      
-      ion-icon {
-        font-size: 16px;
-      }
-    }
-  }
+/* Success (verde) */
+ion-chip[color="success"]:not([outline]) {
+  --background: rgba(45, 211, 111, 0.16);
+  --color: #1e8e3e;
+  --border-color: rgba(45, 211, 111, 0.35);
+}
+ion-chip[color="success"][outline] {
+  --color: #1e8e3e;
+  --border-color: #1e8e3e;
 }
 
-.dropdown-content {
-  padding: 0;
-  max-height: 240px;
-  overflow-y: auto;
-  
-  &::-webkit-scrollbar {
-    width: 4px;
-  }
-  
-  &::-webkit-scrollbar-track {
-    background: var(--ion-color-light);
-  }
-  
-  &::-webkit-scrollbar-thumb {
-    background: var(--ion-color-medium);
-    border-radius: 2px;
-  }
+/* Danger (rojo) */
+ion-chip[color="danger"]:not([outline]) {
+  --background: rgba(234, 84, 85, 0.12);
+  --color: #d93025;
+  --border-color: rgba(234, 84, 85, 0.35);
+}
+ion-chip[color="danger"][outline] {
+  --color: #d93025;
+  --border-color: #d93025;
 }
 
-.filter-option {
-  --padding-start: 16px;
-  --padding-end: 16px;
-  --min-height: 44px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  
-  &:hover {
-    --background: var(--ion-color-light-tint);
-  }
-  
-  &.selected {
-    --background: var(--ion-color-primary-tint);
-    --color: var(--ion-color-primary-shade);
-    
-    ion-label {
-      font-weight: 600;
-    }
-  }
-  
-  ion-icon {
-    margin-right: 12px;
-    font-size: 18px;
-  }
-  
-  ion-checkbox {
-    margin-left: 12px;
-  }
+/* Warning (amarillo) */
+ion-chip[color="warning"]:not([outline]) {
+  --background: rgba(255, 199, 0, 0.16);
+  --color: #b7791f;
+  --border-color: rgba(255, 199, 0, 0.35);
 }
-
-.clear-option {
-  --padding-start: 16px;
-  --padding-end: 16px;
-  --min-height: 40px;
-  cursor: pointer;
-  
-  &:hover {
-    --background: var(--ion-color-danger-tint);
-  }
-  
-  ion-icon {
-    margin-right: 12px;
-    font-size: 18px;
-  }
-  
-  ion-label {
-    font-size: 14px;
-    font-style: italic;
-  }
-}
-
-.dropdown-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 999;
-  background: transparent;
-}
-
-// Responsive design
-@media (max-width: 768px) {
-  .dropdown-menu {
-    left: -8px;
-    right: -8px;
-  }
-  
-  .dropdown-card {
-    border-radius: 8px;
-  }
-}
-
-// Dark mode support
-@media (prefers-color-scheme: dark) {
-  .dropdown-card {
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-  }
-  
-  .filter-button.has-selection {
-    --background: var(--ion-color-primary-shade);
-    --color: var(--ion-color-primary-tint);
-  }
+ion-chip[color="warning"][outline] {
+  --color: #b7791f;
+  --border-color: #b7791f;
 }

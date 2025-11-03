@@ -3,7 +3,9 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } 
 import { AlertController, LoadingController, ToastController, ModalController, IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../core/services/auth.service';
-import { FilterOption } from '../../../shared/componentes/filter-dropdown/filter-dropdown.component';
+import { FilterDropdownComponent, FilterOption } from '../../../shared/componentes/filter-dropdown/filter-dropdown.component';
+import { ComponentesModule } from '../../../shared/componentes/componentes.module';
+import { CompactStatistics } from '../../../shared/componentes/compact-stats/compact-stats.component';
 import { trigger, state, style, transition, animate, query, stagger } from '@angular/animations';
 
 interface Invitacion {
@@ -32,6 +34,8 @@ interface Invitacion {
     IonicModule,
     ReactiveFormsModule,
     FormsModule,
+    FilterDropdownComponent,
+    ComponentesModule,
   ],
   animations: [
     trigger('slideInUp', [
@@ -119,6 +123,21 @@ export class AdminInvitacionesPage implements OnInit {
     { value: 'expirado', label: 'Expirado' },
     { value: 'cancelado', label: 'Cancelado' }
   ];
+
+  // Getter para convertir estadísticas al formato del componente CompactStats
+  get compactStatistics(): CompactStatistics | null {
+    if (!this.estadisticas || !this.estadisticas.resumen) {
+      return null;
+    }
+    
+    return {
+      total: this.estadisticas.resumen.total_invitaciones || 0,
+      pending: this.estadisticas.resumen.pendientes || 0,
+      completed: this.estadisticas.resumen.usadas || 0,
+      expired: this.estadisticas.resumen.expiradas || 0,
+      successRate: this.estadisticas.resumen.tasa_uso || 0
+    };
+  }
 
   constructor(
     private authService: AuthService,

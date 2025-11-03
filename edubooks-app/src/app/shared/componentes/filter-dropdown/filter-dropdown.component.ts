@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
@@ -17,92 +17,62 @@ export interface FilterOption {
   standalone: true,
   imports: [CommonModule, IonicModule, FormsModule]
 })
-export class FilterDropdownComponent implements OnInit {
-  @Input() title: string = 'Filtros';
-  @Input() options: FilterOption[] = [];
-  @Input() selectedValue: string | string[] = '';
-  @Input() placeholder: string = 'Seleccionar...';
-  @Input() icon: string = 'filter-outline';
-  @Input() color: string = 'primary';
-  @Input() multiple: boolean = false;
-  @Input() clearable: boolean = true;
+export class FilterDropdownComponent {
+  // Título y placeholders
+  @Input() title: string = 'Filtros y Búsqueda';
+  @Input() placeholderBusqueda: string = 'Buscar por email o nombre...';
 
-  @Output() selectedValueChange = new EventEmitter<string | string[]>();
-  @Output() selectionChange = new EventEmitter<string | string[]>();
-  @Output() clear = new EventEmitter<void>();
+  // Conteo para resumen
+  @Input() totalCount: number = 0;
+  @Input() filteredCount: number = 0;
 
-  isOpen = false;
-  selectedValues: string[] = [];
+  // Opciones de chips
+  @Input() rolOptions: FilterOption[] = [];
+  @Input() estadoOptions: FilterOption[] = [];
 
-  ngOnInit() {
-    if (this.multiple && this.selectedValue) {
-      this.selectedValues = Array.isArray(this.selectedValue) 
-        ? this.selectedValue 
-        : [this.selectedValue];
-    }
+  // Valores seleccionados (two-way binding compatibles)
+  @Input() filtroTexto: string = '';
+  @Output() filtroTextoChange = new EventEmitter<string>();
+
+  @Input() filtroRol: string = '';
+  @Output() filtroRolChange = new EventEmitter<string>();
+
+  @Input() filtroEstado: string = '';
+  @Output() filtroEstadoChange = new EventEmitter<string>();
+
+  // Acciones
+  @Output() limpiarFiltros = new EventEmitter<void>();
+
+  // Handlers
+  onSearchInput(event: any) {
+    this.filtroTexto = (event?.detail?.value ?? '').toString();
+    this.filtroTextoChange.emit(this.filtroTexto);
   }
 
-  toggleDropdown() {
-    this.isOpen = !this.isOpen;
+  selectRol(value: string) {
+    this.filtroRol = (value || '').toLowerCase();
+    this.filtroRolChange.emit(this.filtroRol);
   }
 
-  selectOption(value: string) {
-    if (this.multiple) {
-      const index = this.selectedValues.indexOf(value);
-      if (index > -1) {
-        this.selectedValues.splice(index, 1);
-      } else {
-        this.selectedValues.push(value);
-      }
-      this.selectedValue = [...this.selectedValues];
-      this.selectedValueChange.emit([...this.selectedValues]);
-      this.selectionChange.emit([...this.selectedValues]);
-    } else {
-      this.selectedValue = value;
-      this.selectedValueChange.emit(value);
-      this.selectionChange.emit(value);
-      this.isOpen = false;
-    }
+  selectEstado(value: string) {
+    this.filtroEstado = value || '';
+    this.filtroEstadoChange.emit(this.filtroEstado);
   }
 
-  clearSelection() {
-    if (this.multiple) {
-      this.selectedValues = [];
-      this.selectedValue = [];
-      this.selectedValueChange.emit([]);
-      this.selectionChange.emit([]);
-    } else {
-      this.selectedValue = '';
-      this.selectedValueChange.emit('');
-      this.selectionChange.emit('');
-    }
-    this.clear.emit();
-    this.isOpen = false;
+  clearAll() {
+    this.filtroTexto = '';
+    this.filtroRol = '';
+    this.filtroEstado = '';
+    this.filtroTextoChange.emit(this.filtroTexto);
+    this.filtroRolChange.emit(this.filtroRol);
+    this.filtroEstadoChange.emit(this.filtroEstado);
+    this.limpiarFiltros.emit();
   }
 
-  isSelected(value: string): boolean {
-    if (this.multiple) {
-      return this.selectedValues.includes(value);
-    }
-    return this.selectedValue === value;
-  }
-
-  getSelectedLabel(): string {
-    if (this.multiple) {
-      if (this.selectedValues.length === 0) return this.placeholder;
-      if (this.selectedValues.length === 1) {
-        const option = this.options.find(opt => opt.value === this.selectedValues[0]);
-        return option?.label || this.selectedValues[0];
-      }
-      return `${this.selectedValues.length} seleccionados`;
-    } else {
-      if (!this.selectedValue) return this.placeholder;
-      const option = this.options.find(opt => opt.value === this.selectedValue as string);
-      return option?.label || this.selectedValue as string;
-    }
-  }
-
-  getSelectedCount(): number {
-    return this.multiple ? this.selectedValues.length : (this.selectedValue ? 1 : 0);
+  // Utilidades
+  getFirstLabel(options: FilterOption[], defaultLabel: string): string {
+    return (Array.isArray(options) && options.length > 0 && options[0] && options[0].label)
+      ? options[0].label
+      : defaultLabel;
   }
 }
