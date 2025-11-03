@@ -1,3 +1,16 @@
+// ===== VARIABLES DE TEMA OSCURO =====
+:root {
+  --card-bg: #2a2a2a;
+  --card-border: #404040;
+  --text-primary: #ffffff;
+  --text-secondary: #b0b0b0;
+  --text-muted: #888888;
+  --accent-primary: #4fc3f7;
+  --accent-success: #4caf50;
+  --accent-warning: #ffc107;
+  --accent-danger: #f44336;
+}
+
 .loading-container, .error-container, .empty-state {
   display: flex;
   flex-direction: column;
@@ -13,158 +26,233 @@
 
   h3 {
     margin: 0.5rem 0;
-    color: var(--ion-color-dark);
+    color: var(--text-primary);
   }
 
   p {
-    color: var(--ion-color-medium);
+    color: var(--text-secondary);
     margin-bottom: 1rem;
   }
 }
 
 .solicitudes-container {
-  padding: 1rem;
+  padding: 16px;
+  display: grid;
+  gap: 12px;
 }
 
 .solicitud-card {
-  margin-bottom: 1rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  }
 }
 
-.solicitud-header {
+// ===== HEADER DE LA TARJETA =====
+.card-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 1rem;
+  margin-bottom: 12px;
+  gap: 12px;
 }
 
-.libro-info {
+.libro-section {
   display: flex;
-  gap: 1rem;
+  gap: 12px;
   flex: 1;
+  align-items: center;
 }
 
 .libro-imagen {
-  width: 60px;
-  height: 80px;
+  width: 48px;
+  height: 64px;
   object-fit: cover;
-  border-radius: 6px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  flex-shrink: 0;
 }
 
-.libro-detalles {
+.libro-info {
   flex: 1;
+  min-width: 0;
 
-  ion-card-title {
-    font-size: 1.1rem;
+  .libro-titulo {
+    font-size: 14px;
     font-weight: 600;
-    margin-bottom: 0.25rem;
+    color: var(--text-primary);
+    margin: 0 0 4px 0;
     line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
-  ion-card-subtitle {
-    font-size: 0.9rem;
-    color: var(--ion-color-medium);
+  .libro-autor {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
+}
+
+.status-chip {
+  --padding-start: 8px;
+  --padding-end: 8px;
+  height: 28px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+// ===== CONTENIDO DE LA TARJETA =====
+.card-content {
+  margin-bottom: 12px;
+}
+
+.usuario-section {
+  background: rgba(79, 195, 247, 0.1);
+  border: 1px solid rgba(79, 195, 247, 0.2);
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 8px;
 }
 
 .usuario-info {
-  background: var(--ion-color-light);
-  padding: 1rem;
-  border-radius: 8px;
-  margin-bottom: 1rem;
-
-  h4 {
-    margin: 0 0 0.5rem 0;
-    color: var(--ion-color-dark);
-    font-size: 0.9rem;
+  .usuario-nombre {
+    font-size: 14px;
     font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 4px 0;
   }
 
-  p {
-    margin: 0.25rem 0;
-    font-size: 0.9rem;
-
-    &:first-of-type {
-      font-size: 1rem;
-    }
+  .usuario-email {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin: 0 0 8px 0;
   }
-}
 
-.fecha-info {
-  margin-bottom: 1rem;
-
-  p {
-    margin: 0;
-    font-size: 0.9rem;
-    color: var(--ion-color-medium);
+  .rol-chip {
+    --padding-start: 6px;
+    --padding-end: 6px;
+    height: 24px;
+    font-size: 10px;
+    font-weight: 500;
   }
 }
 
-.observaciones {
-  background: var(--ion-color-warning-tint);
-  padding: 1rem;
-  border-radius: 8px;
-  margin-bottom: 1rem;
-  border-left: 4px solid var(--ion-color-warning);
-
-  h4 {
-    margin: 0 0 0.5rem 0;
-    color: var(--ion-color-warning-shade);
-    font-size: 0.9rem;
-    font-weight: 600;
-  }
-
-  p {
-    margin: 0;
-    font-size: 0.9rem;
-    color: var(--ion-color-warning-shade);
-    font-style: italic;
-  }
-}
-
-.acciones {
+.fecha-section, .observaciones-section {
   display: flex;
-  gap: 0.5rem;
-  margin-top: 1rem;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+
+  ion-icon {
+    font-size: 16px;
+    color: var(--accent-primary);
+    flex-shrink: 0;
+  }
+
+  span {
+    line-height: 1.3;
+  }
+}
+
+.observaciones-section {
+  background: rgba(255, 193, 7, 0.1);
+  border: 1px solid rgba(255, 193, 7, 0.2);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-top: 8px;
+
+  ion-icon {
+    color: var(--accent-warning);
+  }
+
+  span {
+    font-style: italic;
+    color: var(--accent-warning);
+  }
+}
+
+// ===== ACCIONES DE LA TARJETA =====
+.card-actions {
+  display: flex;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--card-border);
 
   ion-button {
     flex: 1;
     margin: 0;
-    height: 44px;
-    font-weight: 600;
+    height: 36px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    
+    &[color="success"] {
+      --background: var(--accent-success);
+      --background-hover: #45a049;
+    }
+    
+    &[color="danger"] {
+      --color: var(--accent-danger);
+      --border-color: var(--accent-danger);
+      
+      &:hover {
+        --background: rgba(244, 67, 54, 0.1);
+      }
+    }
   }
 }
 
-// Responsive design
+// ===== RESPONSIVE DESIGN =====
 @media (max-width: 768px) {
-  .solicitud-header {
-    flex-direction: column;
-    align-items: flex-start;
+  .solicitudes-container {
+    padding: 12px;
+    gap: 10px;
   }
 
-  .libro-info {
+  .solicitud-card {
+    padding: 12px;
+  }
+
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .libro-section {
     width: 100%;
   }
 
-  .acciones {
+  .status-chip {
+    align-self: flex-start;
+  }
+
+  .card-actions {
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 6px;
   }
 }
 
-// Dark mode support
-@media (prefers-color-scheme: dark) {
-  .solicitud-card {
-    box-shadow: 0 2px 8px rgba(255, 255, 255, 0.1);
-  }
-
-  .usuario-info {
-    background: var(--ion-color-dark-tint);
-  }
-
-  .observaciones {
-    background: rgba(255, 193, 7, 0.1);
+@media (min-width: 769px) {
+  .solicitudes-container {
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    max-width: 1200px;
+    margin: 0 auto;
   }
 }

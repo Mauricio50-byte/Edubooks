@@ -43,65 +43,65 @@
 
   <!-- Solicitudes list -->
   <div class="solicitudes-container" *ngIf="!isLoading && !error && solicitudes.length > 0">
-    <ion-card *ngFor="let solicitud of solicitudes" class="solicitud-card">
-      <ion-card-header>
-        <div class="solicitud-header">
+    <div *ngFor="let solicitud of solicitudes" class="solicitud-card">
+      <div class="card-header">
+        <div class="libro-section">
+          <img [src]="solicitud.libro.imagen_portada" [alt]="solicitud.libro.titulo" class="libro-imagen"
+               onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22400%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%23cccccc%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 font-family=%22Arial%22 font-size=%2218%22 fill=%22%23666666%22%3ELibro%3C/text%3E%3C/svg%3E'">
           <div class="libro-info">
-            <img [src]="solicitud.libro.imagen_portada" [alt]="solicitud.libro.titulo" class="libro-imagen"
-                 onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22400%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%23cccccc%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 font-family=%22Arial%22 font-size=%2218%22 fill=%22%23666666%22%3ELibro%3C/text%3E%3C/svg%3E'">
-            <div class="libro-detalles">
-              <ion-card-title>{{ solicitud.libro.titulo }}</ion-card-title>
-              <ion-card-subtitle>{{ solicitud.libro.autor }}</ion-card-subtitle>
-            </div>
+            <h3 class="libro-titulo">{{ solicitud.libro.titulo }}</h3>
+            <p class="libro-autor">{{ solicitud.libro.autor }}</p>
           </div>
-          <ion-chip color="warning">
-            <ion-icon name="time-outline"></ion-icon>
-            <ion-label>Pendiente</ion-label>
-          </ion-chip>
         </div>
-      </ion-card-header>
+        <ion-chip class="status-chip" color="warning">
+          <ion-icon name="time-outline"></ion-icon>
+          <ion-label>Pendiente</ion-label>
+        </ion-chip>
+      </div>
 
-      <ion-card-content>
-        <div class="usuario-info">
-          <h4>Solicitante:</h4>
-          <p><strong>{{ solicitud.usuario.nombre }} {{ solicitud.usuario.apellido }}</strong></p>
-          <p>{{ solicitud.usuario.email }}</p>
-          <ion-chip [color]="solicitud.usuario.rol === 'Estudiante' ? 'primary' : 'secondary'" size="small">
-            {{ solicitud.usuario.rol }}
-          </ion-chip>
-        </div>
-
-        <div class="fecha-info">
-          <p><strong>Fecha de solicitud:</strong> {{ solicitud.fecha_solicitud | date:'dd/MM/yyyy HH:mm' }}</p>
+      <div class="card-content">
+        <div class="usuario-section">
+          <div class="usuario-info">
+            <h4 class="usuario-nombre">{{ solicitud.usuario.nombre }} {{ solicitud.usuario.apellido }}</h4>
+            <p class="usuario-email">{{ solicitud.usuario.email }}</p>
+            <ion-chip class="rol-chip" [color]="solicitud.usuario.rol === 'estudiante' ? 'primary' : 'secondary'">
+              {{ solicitud.usuario.rol }}
+            </ion-chip>
+          </div>
         </div>
 
-        <div class="observaciones" *ngIf="solicitud.observaciones">
-          <h4>Observaciones:</h4>
-          <p>{{ solicitud.observaciones }}</p>
+        <div class="fecha-section">
+          <ion-icon name="calendar-outline"></ion-icon>
+          <span>{{ solicitud.fecha_solicitud | date:'dd/MM/yyyy HH:mm' }}</span>
         </div>
 
-        <div class="acciones">
-          <ion-button 
-            expand="block" 
-            fill="solid" 
-            color="success"
-            (click)="aprobarSolicitud(solicitud)"
-            *appHasPermission="{ action: 'update', resource: 'prestamo' }">
-            <ion-icon name="checkmark-outline" slot="start"></ion-icon>
-            Aprobar
-          </ion-button>
-          
-          <ion-button 
-            expand="block" 
-            fill="outline" 
-            color="danger"
-            (click)="rechazarSolicitud(solicitud)"
-            *appHasPermission="{ action: 'delete', resource: 'prestamo' }">
-            <ion-icon name="close-outline" slot="start"></ion-icon>
-            Rechazar
-          </ion-button>
+        <div class="observaciones-section" *ngIf="solicitud.observaciones">
+          <ion-icon name="chatbubble-outline"></ion-icon>
+          <span>{{ solicitud.observaciones }}</span>
         </div>
-      </ion-card-content>
-    </ion-card>
+      </div>
+
+      <div class="card-actions">
+        <ion-button 
+          size="small"
+          fill="solid" 
+          color="success"
+          (click)="aprobarSolicitud(solicitud)"
+          *appHasPermission="{ action: 'update', resource: 'prestamo' }">
+          <ion-icon name="checkmark-outline" slot="start"></ion-icon>
+          APROBAR
+        </ion-button>
+        
+        <ion-button 
+          size="small"
+          fill="outline" 
+          color="danger"
+          (click)="rechazarSolicitud(solicitud)"
+          *appHasPermission="{ action: 'delete', resource: 'prestamo' }">
+          <ion-icon name="close-outline" slot="start"></ion-icon>
+          RECHAZAR
+        </ion-button>
+      </div>
+    </div>
   </div>
 </ion-content>
