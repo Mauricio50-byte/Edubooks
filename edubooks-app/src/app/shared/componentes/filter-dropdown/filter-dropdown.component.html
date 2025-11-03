@@ -28,8 +28,18 @@
       <div class="filter-chips">
         <div class="chip-group rol-chip-group">
           <div class="group-label">
-            <ion-icon name="people-outline"></ion-icon>
-            Filtrar por Rol
+            <ion-icon name="people-outline" aria-hidden="true"></ion-icon>
+            <span class="group-title">Filtrar por Rol</span>
+            <ion-icon
+              name="refresh-outline"
+              class="label-action-icon"
+              title="Limpiar filtros"
+              aria-label="Limpiar filtros"
+              role="button"
+              tabindex="0"
+              (click)="clearAll()"
+              (keydown.enter)="clearAll()"
+            ></ion-icon>
           </div>
           <div class="chips">
             <ion-chip color="primary" [outline]="filtroRol !== ''" (click)="selectRol('')">
@@ -47,6 +57,7 @@
           <div class="group-label">
             <ion-icon name="checkmark-circle-outline"></ion-icon>
             Filtrar por Estado
+            <ion-icon name="refresh-outline" class="label-action-icon" title="Limpiar filtros" (click)="clearAll()"></ion-icon>
           </div>
           <div class="chips">
             <ion-chip color="success" [outline]="filtroEstado !== ''" (click)="selectEstado('')">
@@ -62,15 +73,6 @@
       </div>
     </div>
 
-    <div class="filter-actions">
-      <ion-button 
-        fill="outline" 
-        color="medium" 
-        (click)="clearAll()"
-        class="clear-filters-btn">
-        <ion-icon name="refresh-outline" slot="start"></ion-icon>
-        Limpiar Filtros
-      </ion-button>
-    </div>
+
   </div>
 </div>

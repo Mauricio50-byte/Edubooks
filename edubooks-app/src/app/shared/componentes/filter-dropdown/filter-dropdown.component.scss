@@ -77,6 +77,20 @@
     font-weight: 600;
     margin-bottom: 12px;
   }
+  .group-label .label-action-icon {
+    margin-left: auto;
+    font-size: 18px;
+    color: var(--ion-color-medium, #6b7280);
+    cursor: pointer;
+  }
+  .group-label .label-action-icon:hover {
+    color: var(--ion-color-primary, #1a73e8);
+  }
+  .group-label .label-action-icon:focus {
+    outline: 2px solid var(--ion-color-primary, #1a73e8);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
   .chips {
     display: flex;
     gap: 8px;
