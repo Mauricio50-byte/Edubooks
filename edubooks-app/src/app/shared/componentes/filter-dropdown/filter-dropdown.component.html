@@ -1,7 +1,6 @@
 <div class="filters-section">
   <div class="section-header">
     <h2 class="section-title">
-      <ion-icon name="filter-outline" class="section-icon"></ion-icon>
       {{ title }}
     </h2>
     <div class="filter-summary" *ngIf="filteredCount !== totalCount">
@@ -20,7 +19,6 @@
         (ionInput)="onSearchInput($event)"
         debounce="300"
         class="dark-searchbar">
-        <ion-icon name="search-outline" slot="start"></ion-icon>
       </ion-searchbar>
     </div>
 
