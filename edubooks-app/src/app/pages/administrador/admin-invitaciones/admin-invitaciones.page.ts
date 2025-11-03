@@ -685,16 +685,6 @@ export class AdminInvitacionesPage implements OnInit {
     }
   }
 
-  getEstadoColor(estado: string): string {
-    switch (estado) {
-      case 'pendiente': return 'warning';
-      case 'usado': return 'success';
-      case 'expirado': return 'danger';
-      case 'cancelado': return 'medium';
-      default: return 'primary';
-    }
-  }
-
   // Getters para validaciones del formulario
   get email_invitado() { return this.crearInvitacionForm.get('email_invitado'); }
   get rol_asignado() { return this.crearInvitacionForm.get('rol_asignado'); }
@@ -708,82 +698,6 @@ export class AdminInvitacionesPage implements OnInit {
   get area() { return this.crearInvitacionForm.get('area'); }
   get nivel_acceso() { return this.crearInvitacionForm.get('nivel_acceso'); }
 
-  // Métodos auxiliares para obtener etiquetas legibles
-  getRolLabel(rol: string): string {
-    const rolOption = this.rolFilterOptions.find(option => option.value === rol);
-    return rolOption ? rolOption.label : rol;
-  }
-
-  // Métodos para obtener iconos y colores
-  getRolIcon(rol: string): string {
-    switch (rol) {
-      case 'estudiante': return 'school-outline';
-      case 'docente': return 'library-outline';
-      case 'administrador': return 'settings-outline';
-      default: return 'person-outline';
-    }
-  }
-
-  getRolColor(rol: string): string {
-    switch (rol) {
-      case 'estudiante': return 'primary';
-      case 'docente': return 'secondary';
-      case 'administrador': return 'tertiary';
-      default: return 'medium';
-    }
-  }
-
-  getEstadoIcon(estado: string): string {
-    switch (estado) {
-      case 'pendiente': return 'time-outline';
-      case 'usado': return 'checkmark-circle-outline';
-      case 'expirado': return 'close-circle-outline';
-      case 'cancelado': return 'ban-outline';
-      default: return 'help-circle-outline';
-    }
-  }
-
-  // Método para formatear datos adicionales
-  getFormattedAdditionalData(datosAdicionales: any): { label: string, value: string }[] {
-    if (!datosAdicionales) return [];
-    
-    const formatted: { label: string, value: string }[] = [];
-    
-    Object.keys(datosAdicionales).forEach(key => {
-      let label = key;
-      let value = datosAdicionales[key];
-      
-      // Formatear etiquetas más amigables
-      switch (key) {
-        case 'especialidad': label = 'Especialidad'; break;
-        case 'departamento': label = 'Departamento'; break;
-        case 'fecha_contratacion': label = 'Fecha de Contratación'; break;
-        case 'numero_empleado': label = 'Número de Empleado'; break;
-        case 'carrera': label = 'Carrera'; break;
-        case 'semestre': label = 'Semestre'; break;
-        case 'numero_estudiante': label = 'Número de Estudiante'; break;
-        case 'cargo': label = 'Cargo'; break;
-        case 'nivel_acceso': label = 'Nivel de Acceso'; break;
-        case 'fecha_nombramiento': label = 'Fecha de Nombramiento'; break;
-      }
-      
-      // Formatear fechas
-      if (key.includes('fecha') && value) {
-        value = new Date(value).toLocaleDateString('es-ES');
-      }
-      
-      formatted.push({ label, value });
-    });
-    
-    return formatted;
-  }
-
-  // Método para obtener la etiqueta del estado
-  getEstadoLabel(estado: string): string {
-    const estadoOption = this.estadoOptions.find(option => option.value === estado);
-    return estadoOption ? estadoOption.label : estado;
-  }
-
   // Selección mediante chips (como admin usuarios)
   selectRolFilter(value: string) {
     this.filtroRol = (value || '').toLowerCase();
@@ -793,6 +707,17 @@ export class AdminInvitacionesPage implements OnInit {
   selectEstadoFilter(value: string) {
     this.filtroEstado = value || '';
     this.aplicarFiltros();
+  }
+
+  // Métodos auxiliares para obtener etiquetas legibles
+  getRolLabel(rol: string): string {
+    const rolOption = this.rolFilterOptions.find(option => option.value === rol);
+    return rolOption ? rolOption.label : rol;
+  }
+
+  getEstadoLabel(estado: string): string {
+    const estadoOption = this.estadoOptions.find(option => option.value === estado);
+    return estadoOption ? estadoOption.label : estado;
   }
 
   // Función de seguimiento para optimizar el rendimiento del *ngFor

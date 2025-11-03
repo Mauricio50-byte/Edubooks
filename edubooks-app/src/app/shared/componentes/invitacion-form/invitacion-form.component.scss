@@ -1,0 +1,349 @@
+:host {
+  display: block;
+  height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  overflow-y: auto;
+}
+
+/* Header */
+.invitation-header {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 1rem 1.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 800px;
+  margin: 0 auto;
+  gap: 1rem;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+  min-width: 0; /* Permite que el contenido se contraiga */
+}
+
+.back-btn {
+  --color: #6366f1;
+  --background: transparent;
+  --border-radius: 8px;
+  min-width: 44px;
+  height: 44px;
+  flex-shrink: 0; /* No se contrae */
+}
+
+.header-title {
+  flex: 1;
+  min-width: 0; /* Permite que el contenido se contraiga */
+}
+
+.header-title h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1f2937;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.header-subtitle {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #6b7280;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.send-btn {
+  --background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  --background-activated: linear-gradient(135deg, #4f46e5, #7c3aed);
+  --color: white;
+  --border-radius: 8px;
+  font-weight: 500;
+  flex-shrink: 0; /* No se contrae */
+  min-width: fit-content;
+}
+
+.send-icon {
+  font-size: 1.1rem;
+}
+
+.send-text {
+  font-size: 0.9rem;
+}
+
+/* Formulario principal */
+.invitation-form {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+.form-section {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0 0 1.5rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.section-title ion-icon {
+  color: #6366f1;
+  font-size: 1.5rem;
+}
+
+/* Formulario */
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+  color: #374151;
+  font-size: 0.875rem;
+}
+
+.form-label ion-icon {
+  color: #6366f1;
+  font-size: 1rem;
+}
+
+/* Inputs y selects */
+.form-input,
+.form-select,
+.form-datetime {
+  --background: #f9fafb;
+  --color: #1f2937;
+  --border-color: #d1d5db;
+  --border-radius: 8px;
+  --padding-start: 1rem;
+  --padding-end: 1rem;
+  --padding-top: 0.75rem;
+  --padding-bottom: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.form-input:focus-within,
+.form-select:focus-within,
+.form-datetime:focus-within {
+  --border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.form-input::part(native) {
+  font-size: 1rem;
+}
+
+.form-select {
+  --placeholder-color: #9ca3af;
+}
+
+.form-datetime {
+  --background: #f9fafb;
+}
+
+/* Mensajes de error */
+.error-message {
+  color: #ef4444;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+/* Resumen */
+.summary-card {
+  background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+  border: 1px solid #bae6fd;
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.summary-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #0f172a;
+  font-weight: 500;
+}
+
+.summary-item ion-icon {
+  color: #0ea5e9;
+  font-size: 1.25rem;
+}
+
+/* Botones de acción */
+.form-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.primary-button {
+  --background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  --background-activated: linear-gradient(135deg, #4f46e5, #7c3aed);
+  --color: white;
+  --border-radius: 12px;
+  --padding-top: 1rem;
+  --padding-bottom: 1rem;
+  font-weight: 600;
+  font-size: 1rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.secondary-button {
+  --color: #6b7280;
+  --background: transparent;
+  font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .invitation-form {
+    padding: 1rem;
+  }
+  
+  .form-section {
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .header-content {
+    padding: 0 1rem;
+  }
+  
+  .header-title h1 {
+    font-size: 1.25rem;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .summary-card {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .invitation-header {
+    padding: 0.75rem 1rem;
+  }
+  
+  .header-content {
+    gap: 0.75rem;
+  }
+  
+  .header-left {
+    gap: 0.5rem;
+    overflow: hidden;
+  }
+  
+  .header-title h1 {
+    font-size: 1.125rem;
+  }
+  
+  .header-subtitle {
+    font-size: 0.8rem;
+    display: none; /* Ocultar en pantallas muy pequeñas */
+  }
+  
+  .send-btn {
+    --padding-start: 0.75rem;
+    --padding-end: 0.75rem;
+    min-width: auto;
+  }
+  
+  .send-text {
+    display: none; /* Solo mostrar icono en móviles pequeños */
+  }
+  
+  .send-icon {
+    margin: 0 !important;
+  }
+  
+  .form-section {
+    padding: 1rem;
+  }
+  
+  .section-title {
+    font-size: 1.125rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .header-title h1 {
+    font-size: 1rem;
+  }
+  
+  .back-btn {
+    min-width: 40px;
+    height: 40px;
+  }
+  
+  .send-btn {
+    min-width: 40px;
+    height: 40px;
+  }
+}
+
+/* Estados de carga */
+.primary-button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Animaciones */
+.form-section {
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

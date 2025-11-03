@@ -1,0 +1,196 @@
+<!-- Header simplificado -->
+<div class="invitation-header">
+  <div class="header-content">
+    <div class="header-left">
+      <ion-button fill="clear" (click)="close.emit()" class="back-btn">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </ion-button>
+      <div class="header-title">
+        <h1>Nueva Invitación</h1>
+        <p class="header-subtitle">Invita a un nuevo usuario al sistema</p>
+      </div>
+    </div>
+    <ion-button 
+      [disabled]="form.invalid || isCreating" 
+      (click)="submitForm.emit()" 
+      class="send-btn">
+      <ion-icon name="send-outline" slot="start" class="send-icon"></ion-icon>
+      <span class="send-text">Enviar</span>
+    </ion-button>
+  </div>
+</div>
+
+<!-- Formulario principal -->
+<div class="invitation-form">
+  <form [formGroup]="form" (ngSubmit)="submitForm.emit()">
+    
+    <!-- Información básica -->
+    <div class="form-section">
+      <h2 class="section-title">Información Básica</h2>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">
+            <ion-icon name="mail-outline"></ion-icon>
+            Email del invitado *
+          </label>
+          <ion-input 
+            type="email" 
+            formControlName="email_invitado"
+            placeholder="ejemplo@correo.com"
+            class="form-input">
+          </ion-input>
+          <div class="error-message" *ngIf="email_invitado?.invalid && email_invitado?.touched">
+            <span *ngIf="email_invitado?.errors?.['required']">El email es requerido</span>
+            <span *ngIf="email_invitado?.errors?.['email']">Ingrese un email válido</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            <ion-icon name="person-outline"></ion-icon>
+            Rol asignado *
+          </label>
+          <ion-select 
+            formControlName="rol_asignado" 
+            (ionChange)="rolChange.emit($event)" 
+            placeholder="Seleccionar rol"
+            class="form-select">
+            <ion-select-option *ngFor="let rol of roles" [value]="rol.value">
+              {{ rol.label }}
+            </ion-select-option>
+          </ion-select>
+          <div class="error-message" *ngIf="rol_asignado?.invalid && rol_asignado?.touched">
+            <span *ngIf="rol_asignado?.errors?.['required']">El rol es requerido</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">
+          <ion-icon name="calendar-outline"></ion-icon>
+          Fecha de expiración *
+        </label>
+        <ion-datetime 
+          formControlName="fecha_expiracion"
+          presentation="date"
+          [min]="fechaMinima"
+          placeholder="Seleccionar fecha"
+          class="form-datetime">
+        </ion-datetime>
+        <div class="error-message" *ngIf="fecha_expiracion?.invalid && fecha_expiracion?.touched">
+          <span *ngIf="fecha_expiracion?.errors?.['required']">La fecha de expiración es requerida</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Información específica del rol -->
+    <div class="form-section" *ngIf="rol_asignado?.value">
+      <h2 class="section-title">
+        <ion-icon [name]="getRolIcon(rol_asignado?.value)"></ion-icon>
+        Información de {{ getRolLabel(rol_asignado?.value) }}
+      </h2>
+
+      <!-- Campos para Estudiante -->
+      <div class="form-row" *ngIf="rol_asignado?.value === 'estudiante'">
+        <div class="form-group">
+          <label class="form-label">Código de estudiante</label>
+          <ion-input formControlName="codigo_estudiante" placeholder="EST001" class="form-input"></ion-input>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Carrera</label>
+          <ion-input formControlName="carrera" placeholder="Ingeniería de Sistemas" class="form-input"></ion-input>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Semestre</label>
+          <ion-input type="number" formControlName="semestre" placeholder="5" class="form-input"></ion-input>
+        </div>
+      </div>
+
+      <!-- Campos para Docente -->
+      <div class="form-row" *ngIf="rol_asignado?.value === 'docente'">
+        <div class="form-group">
+          <label class="form-label">Código de empleado</label>
+          <ion-input formControlName="codigo_empleado" placeholder="DOC001" class="form-input"></ion-input>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Departamento</label>
+          <ion-input formControlName="departamento" placeholder="Sistemas" class="form-input"></ion-input>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Especialidad</label>
+          <ion-input formControlName="especialidad" placeholder="Programación" class="form-input"></ion-input>
+        </div>
+      </div>
+
+      <!-- Campos para Bibliotecario -->
+      <div class="form-row" *ngIf="rol_asignado?.value === 'bibliotecario'">
+        <div class="form-group">
+          <label class="form-label">Código de empleado</label>
+          <ion-input formControlName="codigo_empleado" placeholder="BIB001" class="form-input"></ion-input>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Turno</label>
+          <ion-select formControlName="turno" placeholder="Seleccionar turno" class="form-select">
+            <ion-select-option value="mañana">Mañana</ion-select-option>
+            <ion-select-option value="tarde">Tarde</ion-select-option>
+            <ion-select-option value="noche">Noche</ion-select-option>
+          </ion-select>
+        </div>
+      </div>
+
+      <!-- Campos para Administrador -->
+      <div class="form-row" *ngIf="rol_asignado?.value === 'administrador'">
+        <div class="form-group">
+          <label class="form-label">Código de empleado</label>
+          <ion-input formControlName="codigo_empleado" placeholder="ADM001" class="form-input"></ion-input>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nivel de acceso</label>
+          <ion-select formControlName="nivel_acceso" placeholder="Seleccionar nivel" class="form-select">
+            <ion-select-option value="basico">Básico</ion-select-option>
+            <ion-select-option value="avanzado">Avanzado</ion-select-option>
+            <ion-select-option value="completo">Completo</ion-select-option>
+          </ion-select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Resumen -->
+    <div class="form-section" *ngIf="email_invitado?.value || rol_asignado?.value || fecha_expiracion?.value">
+      <h2 class="section-title">Resumen</h2>
+      <div class="summary-card">
+        <div class="summary-item" *ngIf="email_invitado?.value">
+          <ion-icon name="mail-outline"></ion-icon>
+          <span>{{ email_invitado?.value }}</span>
+        </div>
+        <div class="summary-item" *ngIf="rol_asignado?.value">
+          <ion-icon [name]="getRolIcon(rol_asignado?.value)"></ion-icon>
+          <span>{{ getRolLabel(rol_asignado?.value) }}</span>
+        </div>
+        <div class="summary-item" *ngIf="fecha_expiracion?.value">
+          <ion-icon name="calendar-outline"></ion-icon>
+          <span>Expira: {{ fecha_expiracion?.value | date:'dd/MM/yyyy' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botones de acción -->
+    <div class="form-actions">
+      <ion-button 
+        type="submit" 
+        expand="block" 
+        [disabled]="form.invalid || isCreating"
+        class="primary-button">
+        <ion-spinner *ngIf="isCreating" name="crescent"></ion-spinner>
+        <ion-icon *ngIf="!isCreating" name="send-outline" slot="start"></ion-icon>
+        <span *ngIf="!isCreating">Enviar Invitación</span>
+        <span *ngIf="isCreating">Enviando...</span>
+      </ion-button>
+      
+      <ion-button fill="clear" (click)="close.emit()" class="secondary-button">
+        Cancelar
+      </ion-button>
+    </div>
+  </form>
+</div>

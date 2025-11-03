@@ -1,0 +1,148 @@
+<!-- Invitations List -->
+<div class="invitations-section" *ngIf="!isLoading && !error">
+  <div class="section-header">
+    <h3 class="section-title">
+      <ion-icon name="list-outline" class="section-icon"></ion-icon>
+      Lista de Invitaciones
+      <span class="count-badge" *ngIf="invitaciones.length > 0">({{ invitaciones.length }})</span>
+    </h3>
+  </div>
+
+  <div class="invitations-grid">
+    <ion-card *ngFor="let invitacion of invitaciones; trackBy: trackByInvitacion" class="invitation-card dark-card">
+      <div class="card-header">
+        <div class="user-info">
+          <div class="avatar">
+            <ion-icon name="person-outline" class="avatar-icon"></ion-icon>
+          </div>
+          <div class="user-details">
+            <h4 class="user-email">{{ invitacion.email_invitado }}</h4>
+            <p class="user-role">
+              <ion-icon [name]="getRolIcon(invitacion.rol_asignado)" class="role-icon"></ion-icon>
+              {{ getRolLabel(invitacion.rol_asignado) }}
+            </p>
+          </div>
+        </div>
+        <ion-chip [color]="getEstadoColor(invitacion.estado)" class="status-chip">
+          <ion-icon [name]="getEstadoIcon(invitacion.estado)" slot="start"></ion-icon>
+          <ion-label>{{ getEstadoLabel(invitacion.estado) }}</ion-label>
+        </ion-chip>
+      </div>
+
+      <ion-card-content class="card-content">
+        <div class="invitation-details">
+          <div class="detail-row">
+            <div class="detail-item compact">
+              <ion-icon name="calendar-outline" class="detail-icon"></ion-icon>
+              <div class="detail-content">
+                <span class="detail-label">Creación</span>
+                <span class="detail-value">{{ invitacion.fecha_creacion | date:'dd/MM/yyyy' }}</span>
+              </div>
+            </div>
+            
+            <div class="detail-item compact">
+              <ion-icon name="time-outline" class="detail-icon"></ion-icon>
+              <div class="detail-content">
+                <span class="detail-label">Expira</span>
+                <span class="detail-value">{{ invitacion.fecha_expiracion | date:'dd/MM/yyyy' }}</span>
+              </div>
+            </div>
+
+            <div class="detail-item compact" *ngIf="invitacion.fecha_uso">
+              <ion-icon name="checkmark-circle-outline" class="detail-icon success"></ion-icon>
+              <div class="detail-content">
+                <span class="detail-label">Usado</span>
+                <span class="detail-value">{{ invitacion.fecha_uso | date:'dd/MM/yyyy' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-row" *ngIf="invitacion.invitado_por">
+            <div class="detail-item compact full-width">
+              <ion-icon name="person-add-outline" class="detail-icon"></ion-icon>
+              <div class="detail-content">
+                <span class="detail-label">Invitado por</span>
+                <span class="detail-value">{{ invitacion.invitado_por.nombre }} {{ invitacion.invitado_por.apellido }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Additional Data -->
+        <div class="additional-data compact" *ngIf="invitacion.datos_adicionales && Object.keys(invitacion.datos_adicionales).length > 0">
+          <div class="additional-header">
+            <ion-icon name="information-circle-outline" class="additional-icon"></ion-icon>
+            <span class="additional-title">Info Adicional</span>
+          </div>
+          <div class="additional-content" [innerHTML]="getFormattedAdditionalData(invitacion.datos_adicionales)"></div>
+        </div>
+
+        <!-- Actions -->
+        <div class="card-actions compact">
+          <ion-button 
+            *ngIf="invitacion.estado === 'pendiente'" 
+            fill="solid" 
+            color="primary"
+            size="small"
+            (click)="onReenviarInvitacion(invitacion)"
+            class="action-btn">
+            <ion-icon name="mail-outline"></ion-icon>
+          </ion-button>
+
+          <ion-button 
+            *ngIf="invitacion.estado === 'pendiente'" 
+            fill="solid" 
+            color="warning"
+            size="small"
+            (click)="onExtenderInvitacion(invitacion)"
+            class="action-btn">
+            <ion-icon name="time-outline"></ion-icon>
+          </ion-button>
+
+          <ion-button 
+            *ngIf="invitacion.estado === 'pendiente'" 
+            fill="outline" 
+            color="medium"
+            size="small"
+            (click)="onCancelarInvitacion(invitacion)"
+            class="action-btn">
+            <ion-icon name="close-outline"></ion-icon>
+          </ion-button>
+
+          <ion-button 
+            fill="solid" 
+            color="danger"
+            size="small"
+            (click)="onEliminarInvitacion(invitacion)"
+            class="action-btn delete-btn">
+            <ion-icon name="trash-outline"></ion-icon>
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="invitaciones.length === 0">
+    <div class="empty-icon-container">
+      <ion-icon name="mail-outline" class="empty-icon"></ion-icon>
+    </div>
+    <h3 class="empty-title">No hay invitaciones</h3>
+    <p class="empty-message">Aún no se han creado invitaciones en el sistema.</p>
+  </div>
+</div>
+
+<!-- Loading State -->
+<div class="loading-state" *ngIf="isLoading">
+  <ion-spinner name="crescent" class="loading-spinner"></ion-spinner>
+  <p class="loading-message">Cargando invitaciones...</p>
+</div>
+
+<!-- Error State -->
+<div class="error-state" *ngIf="error">
+  <div class="error-icon-container">
+    <ion-icon name="alert-circle-outline" class="error-icon"></ion-icon>
+  </div>
+  <h3 class="error-title">Error al cargar invitaciones</h3>
+  <p class="error-message">{{ error }}</p>
+</div>
