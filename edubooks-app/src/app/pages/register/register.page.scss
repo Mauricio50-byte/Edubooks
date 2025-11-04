@@ -86,10 +86,6 @@
       border-radius: 12px;
       box-shadow: 0 4px 16px rgba(255, 75, 107, 0.35);
       
-      &.gradient-primary {
-        /* Utiliza clase global para gradiente principal */
-      }
-      
       &[fill="outline"] {
         --border-width: 2px;
         --border-color: var(--ion-color-tertiary);
@@ -208,10 +204,6 @@
     font-weight: 600;
     font-size: 1.05rem;
     box-shadow: 0 4px 20px rgba(255, 75, 107, 0.3);
-
-    &.gradient-primary {
-      /* se aplica el gradiente desde la clase global */
-    }
 
     &:not([disabled]):hover {
       transform: translateY(-2px);
