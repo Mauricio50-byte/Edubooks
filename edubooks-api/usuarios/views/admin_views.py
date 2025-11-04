@@ -36,6 +36,7 @@ class UsuarioListCreateView(generics.ListCreateAPIView):
         # Filtros
         rol = self.request.query_params.get('rol')
         estado = self.request.query_params.get('estado')
+        genero = self.request.query_params.get('genero')
         search = self.request.query_params.get('search')
         fecha_desde = self.request.query_params.get('fecha_desde')
         fecha_hasta = self.request.query_params.get('fecha_hasta')
@@ -45,6 +46,9 @@ class UsuarioListCreateView(generics.ListCreateAPIView):
         
         if estado:
             queryset = queryset.filter(estado=estado)
+
+        if genero:
+            queryset = queryset.filter(genero=genero)
         
         if search:
             queryset = queryset.filter(

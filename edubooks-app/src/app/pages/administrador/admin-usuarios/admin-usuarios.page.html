@@ -68,6 +68,22 @@
               </ion-chip>
             </div>
           </div>
+          <div class="chip-group genero-chip-group">
+            <div class="group-label">
+              <ion-icon name="transgender-outline"></ion-icon>
+              Filtrar por Género
+            </div>
+            <div class="chips">
+              <ion-chip color="primary" [outline]="filtroGenero !== ''" (click)="selectGenero('')">
+                <ion-icon name="transgender-outline" slot="start"></ion-icon>
+                <ion-label>Todos los géneros</ion-label>
+              </ion-chip>
+              <ion-chip *ngFor="let opt of generoOptions | slice:1" [color]="opt.color || 'primary'" [outline]="filtroGenero !== opt.value" (click)="selectGenero(opt.value)">
+                <ion-icon [name]="opt.icon" slot="start"></ion-icon>
+                <ion-label>{{ opt.label }}</ion-label>
+              </ion-chip>
+            </div>
+          </div>
         </div>
       </div>
     </ion-card-content>
@@ -148,6 +164,10 @@
                 <ion-chip [color]="getEstadoColor(usuario.is_active)" class="estado-chip">
                   <ion-icon [name]="usuario.is_active ? 'checkmark-circle' : 'close-circle'" slot="start"></ion-icon>
                   <ion-label>{{ usuario.is_active ? 'Activo' : 'Inactivo' }}</ion-label>
+                </ion-chip>
+                <ion-chip *ngIf="usuario.genero" [color]="getGeneroColor(usuario.genero)" class="genero-chip">
+                  <ion-icon [name]="getGeneroIcon(usuario.genero)" slot="start"></ion-icon>
+                  <ion-label>{{ getGeneroLabel(usuario.genero) }}</ion-label>
                 </ion-chip>
                 <ion-chip color="medium" class="username-chip" *ngIf="usuario.username">
                   <ion-icon name="person-circle" slot="start"></ion-icon>

@@ -18,7 +18,7 @@ class UsuarioRegistroSerializer(serializers.ModelSerializer):
         model = Usuario
         fields = [
             'email', 'username', 'nombre', 'apellido', 'rol', 
-            'password', 'password_confirm', 'telefono', 'numero_identificacion', 'genero', 'direccion',
+            'password', 'password_confirm', 'telefono', 'numero_identificacion', 'genero',
             # Preferencias
             'notificaciones_email', 'notificaciones_push', 'idioma_preferido',
             # Datos específicos por rol
@@ -182,7 +182,7 @@ class UsuarioPerfilSerializer(serializers.ModelSerializer):
         model = Usuario
         fields = [
             'id', 'email', 'username', 'nombre', 'apellido', 'nombre_completo', 'rol',
-            'fecha_registro', 'estado', 'telefono', 'numero_identificacion', 'genero', 'direccion',
+            'fecha_registro', 'estado', 'telefono', 'numero_identificacion', 'genero',
             # Campos de préstamos y sanciones (solo lectura)
             'prestamos_activos', 'max_prestamos_permitidos', 'multas_pendientes', 
             'puede_prestar', 'dias_sancion_restantes', 'fecha_ultima_sancion', 'sancionado_hasta',
@@ -237,11 +237,11 @@ class UsuarioListSerializer(serializers.ModelSerializer):
     
     # Campos específicos por rol (serializados desde modelos relacionados)
     datos_rol = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = Usuario
         fields = [
-            'id', 'email', 'username', 'nombre', 'apellido', 'nombre_completo', 'rol',
+            'id', 'email', 'username', 'nombre', 'apellido', 'nombre_completo', 'rol', 'genero',
             'is_active', 'estado', 'fecha_registro', 'prestamos_activos', 'multas_pendientes',
             'puede_prestar', 'telefono', 'datos_rol'
         ]

@@ -22,6 +22,7 @@ export class AdminUsuariosPage implements OnInit {
   searchTerm: string = '';
   filtroRol: string = '';
   filtroEstado: string = '';
+  filtroGenero: string = '';
 
   // Opciones para los filtros desplegables
   rolOptions: FilterOption[] = [
@@ -35,6 +36,14 @@ export class AdminUsuariosPage implements OnInit {
     { value: '', label: 'Todos los estados', icon: 'list-outline' },
     { value: 'activo', label: 'Usuarios Activos', icon: 'checkmark-circle-outline', color: 'success' },
     { value: 'inactivo', label: 'Usuarios Inactivos', icon: 'close-circle-outline', color: 'danger' }
+  ];
+
+  generoOptions: FilterOption[] = [
+    { value: '', label: 'Todos los géneros', icon: 'transgender-outline' },
+    { value: 'M', label: 'Masculino', icon: 'male-outline', color: 'primary' },
+    { value: 'F', label: 'Femenino', icon: 'female-outline', color: 'warning' },
+    { value: 'O', label: 'Otro', icon: 'ellipse-outline', color: 'medium' },
+    { value: 'N', label: 'Prefiero no decir', icon: 'remove-outline', color: 'tertiary' }
   ];
 
   constructor(
@@ -96,8 +105,10 @@ export class AdminUsuariosPage implements OnInit {
       const cumpleEstado = !this.filtroEstado || 
         (this.filtroEstado === 'activo' && usuario.is_active) ||
         (this.filtroEstado === 'inactivo' && !usuario.is_active);
+
+      const cumpleGenero = !this.filtroGenero || (usuario.genero || '') === this.filtroGenero;
       
-      return cumpleBusqueda && cumpleRol && cumpleEstado;
+      return cumpleBusqueda && cumpleRol && cumpleEstado && cumpleGenero;
     });
   }
 
@@ -255,6 +266,36 @@ export class AdminUsuariosPage implements OnInit {
     }
   }
 
+  getGeneroLabel(genero?: string): string {
+    switch (genero) {
+      case 'M': return 'Masculino';
+      case 'F': return 'Femenino';
+      case 'O': return 'Otro';
+      case 'N': return 'Prefiero no decir';
+      default: return 'Sin especificar';
+    }
+  }
+
+  getGeneroColor(genero?: string): string {
+    switch (genero) {
+      case 'M': return 'primary';
+      case 'F': return 'warning';
+      case 'O': return 'medium';
+      case 'N': return 'tertiary';
+      default: return 'medium';
+    }
+  }
+
+  getGeneroIcon(genero?: string): string {
+    switch (genero) {
+      case 'M': return 'male-outline';
+      case 'F': return 'female-outline';
+      case 'O': return 'ellipse-outline';
+      case 'N': return 'remove-outline';
+      default: return 'transgender-outline';
+    }
+  }
+
   /**
    * Inicial para avatar de usuario
    */
@@ -283,5 +324,9 @@ export class AdminUsuariosPage implements OnInit {
 
   selectEstado(value: string) {
     this.filtroEstado = value;
+  }
+
+  selectGenero(value: string) {
+    this.filtroGenero = value;
   }
 }

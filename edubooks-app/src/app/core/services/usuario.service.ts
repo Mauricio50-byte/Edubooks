@@ -11,6 +11,7 @@ export interface UsuarioAdmin {
   nombre: string;
   apellido: string;
   rol: 'Estudiante' | 'Docente' | 'Administrador';
+  genero?: 'M' | 'F' | 'O' | 'N';
   is_active: boolean;
   fecha_registro: string;
   ultimo_acceso?: string;

@@ -261,7 +261,7 @@ export class RegisterInvitationPage implements OnInit {
       case 'nivel_acceso':
         return ['basico', 'intermedio', 'avanzado', 'super_admin'];
       case 'genero':
-        return ['M', 'F', 'Otro'];
+        return ['M', 'F', 'O', 'N'];
       default:
         return [];
     }
@@ -360,5 +360,4 @@ export class RegisterInvitationPage implements OnInit {
   get telefono() { return this.registerForm.get('telefono'); }
   get numero_identificacion() { return this.registerForm.get('numero_identificacion'); }
   get genero() { return this.registerForm.get('genero'); }
-  get direccion() { return this.registerForm.get('direccion'); }
 }

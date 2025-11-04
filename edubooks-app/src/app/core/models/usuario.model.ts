@@ -11,9 +11,8 @@ export interface Usuario {
     
     // Nuevos campos del modelo híbrido
     telefono?: string;
-    direccion?: string;
     numero_identificacion?: string;
-    genero?: 'M' | 'F' | 'Otro';
+    genero?: 'M' | 'F' | 'O' | 'N';
     
     // Campos de gestión académica
     sancionado?: boolean;
@@ -63,9 +62,8 @@ export interface UsuarioRegistro {
     
     // Campos adicionales opcionales
     telefono?: string;
-    direccion?: string;
     numero_identificacion?: string;
-    genero?: 'M' | 'F' | 'Otro';
+    genero?: 'M' | 'F' | 'O' | 'N';
     
     // Preferencias
     notificaciones_email?: boolean;

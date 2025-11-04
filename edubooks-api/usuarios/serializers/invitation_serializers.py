@@ -128,7 +128,7 @@ class RegistroConInvitacionSerializer(serializers.ModelSerializer):
         model = Usuario
         fields = [
             'username', 'nombre', 'apellido', 'telefono', 'numero_identificacion',
-            'genero', 'direccion', 'password', 'password_confirm', 'token_invitacion',
+            'genero', 'password', 'password_confirm', 'token_invitacion',
             'datos_estudiante', 'datos_docente', 'datos_administrador'
         ]
     

@@ -77,7 +77,6 @@ class Usuario(AbstractBaseUser, PermissionsMixin, SupabaseModelMixin):
     telefono = models.CharField(max_length=20, blank=True, null=True)
     numero_identificacion = models.CharField(max_length=20, unique=True, blank=True, null=True)
     genero = models.CharField(max_length=1, choices=GENERO_CHOICES, blank=True, null=True)
-    direccion = models.TextField(blank=True, null=True)
     
     # Campos de estado y control
     fecha_registro = models.DateTimeField(auto_now_add=True)

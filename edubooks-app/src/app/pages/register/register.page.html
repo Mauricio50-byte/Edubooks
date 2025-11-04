@@ -49,6 +49,17 @@
         <ion-note slot="error" *ngIf="apellido?.errors?.['required'] && apellido?.touched">El apellido es requerido</ion-note>
       </ion-item>
 
+      <!-- Género -->
+      <ion-item class="form-item">
+        <ion-label position="stacked">Género</ion-label>
+        <ion-select id="register-genero" name="genero" formControlName="genero" placeholder="Selecciona tu género">
+          <ion-select-option value="M">Masculino</ion-select-option>
+          <ion-select-option value="F">Femenino</ion-select-option>
+          <ion-select-option value="O">Otro</ion-select-option>
+          <ion-select-option value="N">Prefiero no decir</ion-select-option>
+        </ion-select>
+      </ion-item>
+
       <!-- Password -->
       <ion-item class="form-item" [class.ion-invalid]="password?.invalid && password?.touched">
         <ion-label position="stacked">Contraseña *</ion-label>
