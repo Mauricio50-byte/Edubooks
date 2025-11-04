@@ -1,5 +1,5 @@
 .login-content {
-  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --background: var(--ion-color-dark);
 }
 
 .login-container {
@@ -16,29 +16,29 @@
   
   .logo-icon {
     font-size: 80px;
-    color: white;
+    color: var(--ion-color-light);
     margin-bottom: 20px;
   }
   
   h1 {
-    color: white;
+    color: var(--ion-color-light);
     font-size: 32px;
     font-weight: 700;
     margin: 0 0 10px 0;
   }
   
   p {
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--ion-color-medium);
     font-size: 16px;
     margin: 0;
   }
 }
 
 .login-form {
-  background: white;
+  background: #2A2A50; /* tono ligeramente más claro que el fondo */
   border-radius: 20px;
   padding: 30px 20px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
   margin-bottom: 20px;
 }
 
@@ -54,12 +54,11 @@
     left: 0;
     right: 0;
     height: 1px;
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(170, 170, 170, 0.3);
   }
   
   span {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    color: var(--ion-color-light);
     padding: 0 15px;
     font-size: 14px;
     position: relative;
@@ -68,9 +67,9 @@
 }
 
 .google-button {
-  --background: white;
-  --color: #333;
-  --border-color: rgba(255, 255, 255, 0.3);
+  --background: transparent;
+  --color: var(--ion-color-light);
+  --border-color: var(--ion-color-tertiary);
   --border-width: 2px;
   --border-style: solid;
   margin: 0 0 20px 0;
@@ -83,7 +82,7 @@
   }
   
   &:hover {
-    --background: #f8f9fa;
+    --background: #2A2A50;
   }
 }
 
@@ -94,48 +93,48 @@
   
   ion-label {
     font-weight: 600;
-    color: #333;
+    color: var(--ion-color-light);
     margin-bottom: 8px;
   }
   
   ion-input {
     --padding-start: 40px;
     --border-width: 2px;
-    --border-color: #e0e0e0;
+    --border-color: var(--ion-color-medium);
     --border-radius: 12px;
-    --background: #f8f9fa;
-    --color: #333333;
+    --background: #2A2A50;
+    --color: var(--ion-color-light);
+    --placeholder-color: var(--ion-color-medium);
   }
   
   ion-icon[slot="start"] {
-    color: #667eea;
+    color: var(--ion-color-tertiary);
     margin-right: 10px;
   }
   
   &.ion-invalid {
     ion-input {
-      --border-color: #ff6b6b;
+      --border-color: var(--ion-color-danger);
     }
   }
   
   &.ion-valid {
     ion-input {
-      --border-color: #51cf66;
+      --border-color: var(--ion-color-success);
     }
   }
 }
 
 .login-button {
-  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   --border-radius: 12px;
-  --box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  --box-shadow: 0 4px 15px rgba(255, 75, 107, 0.35);
   height: 50px;
   font-weight: 600;
   font-size: 16px;
   margin-top: 20px;
   
   &:not([disabled]):hover {
-    --box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    --box-shadow: 0 6px 20px rgba(255, 75, 107, 0.55);
   }
   
   &[disabled] {
@@ -148,12 +147,12 @@
   text-align: center;
   
   .register-link {
-    --color: white;
+    --color: var(--ion-color-light);
     font-size: 14px;
     text-decoration: none;
     
     &:hover {
-      --color: rgba(255, 255, 255, 0.8);
+      --color: var(--ion-color-medium);
     }
   }
 }

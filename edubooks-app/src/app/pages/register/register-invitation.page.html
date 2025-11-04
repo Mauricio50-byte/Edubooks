@@ -1,5 +1,5 @@
 <ion-header [translucent]="true">
-  <ion-toolbar color="primary">
+  <ion-toolbar color="dark">
     <ion-buttons slot="start">
       <ion-back-button (click)="goToLogin()"></ion-back-button>
     </ion-buttons>
@@ -310,8 +310,8 @@
         <ion-button 
           expand="block" 
           type="submit" 
-          [disabled]="!registerForm.valid || isLoading"
-          color="primary">
+          class="gradient-primary"
+          [disabled]="!registerForm.valid || isLoading">
           <ion-icon name="person-add-outline" slot="start"></ion-icon>
           {{ isLoading ? 'Registrando...' : 'Completar Registro' }}
         </ion-button>

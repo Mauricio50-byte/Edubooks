@@ -1,5 +1,5 @@
 .register-content {
-  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --background: var(--ion-color-dark);
   
   .loading-container {
     display: flex;
@@ -7,11 +7,11 @@
     align-items: center;
     justify-content: center;
     height: 100%;
-    color: white;
+    color: var(--ion-color-light);
     
     ion-spinner {
       margin-bottom: 20px;
-      --color: white;
+      --color: var(--ion-color-light);
     }
     
     p {
@@ -28,7 +28,7 @@
     height: 100%;
     padding: 20px;
     text-align: center;
-    color: white;
+    color: var(--ion-color-light);
     
     ion-icon {
       font-size: 4rem;
@@ -56,15 +56,15 @@
     margin-bottom: 30px;
     
     ion-card {
-      --background: rgba(255, 255, 255, 0.95);
+      --background: #2A2A50;
       border-radius: 15px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
       
       ion-card-header {
         ion-card-title {
           display: flex;
           align-items: center;
-          color: var(--ion-color-primary);
+          color: var(--ion-color-light);
           font-size: 1.3rem;
           
           ion-icon {
@@ -79,7 +79,7 @@
           margin: 8px 0;
           
           strong {
-            color: var(--ion-color-dark);
+            color: var(--ion-color-light);
           }
         }
         
@@ -94,15 +94,15 @@
 
 .register-form {
   .form-section {
-    background: rgba(255, 255, 255, 0.95);
+    background: #2A2A50;
     border-radius: 15px;
     padding: 20px;
     margin-bottom: 20px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
     
     h3 {
       margin: 0 0 20px 0;
-      color: var(--ion-color-primary);
+      color: var(--ion-color-light);
       font-size: 1.2rem;
       font-weight: 600;
       display: flex;
@@ -112,7 +112,7 @@
         content: '';
         width: 4px;
         height: 20px;
-        background: var(--ion-color-primary);
+        background: var(--ion-color-tertiary);
         margin-right: 10px;
         border-radius: 2px;
       }
@@ -120,7 +120,7 @@
     
     .form-item {
       --background: transparent;
-      --border-color: rgba(0, 0, 0, 0.1);
+      --border-color: var(--ion-color-medium);
       --border-radius: 10px;
       --padding-start: 16px;
       --padding-end: 16px;
@@ -130,14 +130,14 @@
       transition: all 0.3s ease;
       
       &:hover {
-        --border-color: var(--ion-color-primary);
+        --border-color: var(--ion-color-tertiary);
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 12px rgba(75, 107, 255, 0.2);
       }
       
       &.ion-focused {
-        --border-color: var(--ion-color-primary);
-        box-shadow: 0 0 0 3px rgba(var(--ion-color-primary-rgb), 0.2);
+        --border-color: var(--ion-color-tertiary);
+        box-shadow: 0 0 0 3px rgba(var(--ion-color-tertiary-rgb), 0.2);
       }
       
       &.ion-invalid {
@@ -150,7 +150,7 @@
       
       ion-label {
         font-weight: 600;
-        color: var(--ion-color-dark);
+        color: var(--ion-color-light);
         
         span {
           color: var(--ion-color-danger);
@@ -158,20 +158,21 @@
       }
       
       ion-icon {
-        color: var(--ion-color-medium);
+        color: var(--ion-color-tertiary);
         margin-right: 10px;
       }
       
       ion-note {
         font-size: 0.85rem;
         margin-top: 5px;
+        color: var(--ion-color-medium);
       }
       
       ion-button {
         --color: var(--ion-color-medium);
         
         &:hover {
-          --color: var(--ion-color-primary);
+          --color: var(--ion-color-tertiary);
         }
       }
     }
@@ -185,11 +186,15 @@
       height: 50px;
       font-weight: 600;
       font-size: 1.1rem;
-      box-shadow: 0 4px 20px rgba(var(--ion-color-primary-rgb), 0.3);
+      box-shadow: 0 4px 20px rgba(255, 75, 107, 0.3);
+      
+      &.gradient-primary {
+        /* usa la clase global para gradiente principal */
+      }
       
       &:not([disabled]):hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 25px rgba(var(--ion-color-primary-rgb), 0.4);
+        box-shadow: 0 6px 25px rgba(255, 75, 107, 0.45);
       }
       
       &[disabled] {
@@ -204,16 +209,16 @@
   margin-top: 20px;
   
   p {
-    color: rgba(255, 255, 255, 0.9);
+    color: var(--ion-color-light);
     margin: 0;
     
     ion-button {
-      --color: white;
+      --color: var(--ion-color-light);
       font-weight: 600;
       text-decoration: underline;
       
       &:hover {
-        --color: var(--ion-color-light);
+        --color: var(--ion-color-medium);
       }
     }
   }
@@ -241,12 +246,12 @@
 // Mejoras para campos específicos
 ion-datetime {
   --background: transparent;
-  --color: var(--ion-color-dark);
+  --color: var(--ion-color-light);
 }
 
 ion-select {
   --background: transparent;
-  --color: var(--ion-color-dark);
+  --color: var(--ion-color-light);
 }
 
 ion-textarea {

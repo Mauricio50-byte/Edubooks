@@ -1,2 +1,66 @@
-// For information on how to create your own theme, please see:
-// http://ionicframework.com/docs/theming/
+:root {
+  /* Fondo y texto base (tema oscuro por defecto) */
+  --ion-background-color: #1E1E3F;
+  --ion-text-color: #FFFFFF;
+
+  /* Toolbar y elementos comunes */
+  --ion-toolbar-background: #1E1E3F;
+  --ion-toolbar-color: #FFFFFF;
+
+  /* Mapeo de paleta semántica */
+  --ion-color-dark: #1E1E3F;
+  --ion-color-dark-rgb: 30, 30, 63;
+  --ion-color-dark-contrast: #FFFFFF;
+  --ion-color-dark-contrast-rgb: 255, 255, 255;
+  --ion-color-dark-shade: #1a1a36;
+  --ion-color-dark-tint: #2a2a50;
+
+  --ion-color-primary: #FF4B6B;
+  --ion-color-primary-rgb: 255, 75, 107;
+  --ion-color-primary-contrast: #FFFFFF;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #e0445f;
+  --ion-color-primary-tint: #ff5e7b;
+
+  --ion-color-secondary: #FF8C4B;
+  --ion-color-secondary-rgb: 255, 140, 75;
+  --ion-color-secondary-contrast: #FFFFFF;
+  --ion-color-secondary-contrast-rgb: 255, 255, 255;
+  --ion-color-secondary-shade: #e07c43;
+  --ion-color-secondary-tint: #ff9d64;
+
+  --ion-color-tertiary: #4B6BFF;
+  --ion-color-tertiary-rgb: 75, 107, 255;
+  --ion-color-tertiary-contrast: #FFFFFF;
+  --ion-color-tertiary-contrast-rgb: 255, 255, 255;
+  --ion-color-tertiary-shade: #445fe0;
+  --ion-color-tertiary-tint: #5c78ff;
+
+  --ion-color-light: #FFFFFF;
+  --ion-color-light-rgb: 255, 255, 255;
+  --ion-color-light-contrast: #000000;
+  --ion-color-light-contrast-rgb: 0, 0, 0;
+  --ion-color-light-shade: #e0e0e0;
+  --ion-color-light-tint: #f2f2f2;
+
+  --ion-color-medium: #AAAAAA;
+  --ion-color-medium-rgb: 170, 170, 170;
+  --ion-color-medium-contrast: #000000;
+  --ion-color-medium-contrast-rgb: 0, 0, 0;
+  --ion-color-medium-shade: #969696;
+  --ion-color-medium-tint: #b8b8b8;
+
+  --ion-color-success: #4CAF50;
+  --ion-color-success-rgb: 76, 175, 80;
+  --ion-color-success-contrast: #FFFFFF;
+  --ion-color-success-contrast-rgb: 255, 255, 255;
+  --ion-color-success-shade: #43a047;
+  --ion-color-success-tint: #66bb6a;
+
+  --ion-color-danger: #F44336;
+  --ion-color-danger-rgb: 244, 67, 54;
+  --ion-color-danger-contrast: #FFFFFF;
+  --ion-color-danger-contrast-rgb: 255, 255, 255;
+  --ion-color-danger-shade: #e53935;
+  --ion-color-danger-tint: #f66558;
+}

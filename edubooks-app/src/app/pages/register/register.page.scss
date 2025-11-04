@@ -1,5 +1,5 @@
 .register-content {
-  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --background: var(--ion-color-dark);
   
   .register-container {
     padding: 20px;
@@ -16,15 +16,15 @@
     margin-bottom: 30px;
     
     h1 {
-      color: white;
+      color: var(--ion-color-light);
       font-size: 2.2rem;
       font-weight: 600;
       margin-bottom: 10px;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      text-shadow: none;
     }
     
     p {
-      color: rgba(255, 255, 255, 0.9);
+      color: var(--ion-color-medium);
       font-size: 1.1rem;
       line-height: 1.5;
       margin: 0;
@@ -36,9 +36,9 @@
     
     ion-card {
       border-radius: 16px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-      backdrop-filter: blur(10px);
-      background: rgba(255, 255, 255, 0.95);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      backdrop-filter: blur(6px);
+      background: #2A2A50;
       
       ion-card-header {
         padding-bottom: 10px;
@@ -49,7 +49,7 @@
           gap: 10px;
           font-size: 1.3rem;
           font-weight: 600;
-          color: var(--ion-color-primary);
+          color: var(--ion-color-light);
         }
       }
       
@@ -57,7 +57,7 @@
         p {
           margin-bottom: 15px;
           line-height: 1.6;
-          color: #555;
+          color: var(--ion-color-medium);
         }
         
         ul {
@@ -67,7 +67,7 @@
           li {
             margin-bottom: 8px;
             line-height: 1.5;
-            color: #666;
+            color: var(--ion-color-medium);
           }
         }
       }
@@ -84,21 +84,21 @@
       height: 50px;
       font-weight: 600;
       border-radius: 12px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 16px rgba(255, 75, 107, 0.35);
       
-      &[color="primary"] {
-        --background: linear-gradient(45deg, var(--ion-color-primary), var(--ion-color-primary-shade));
+      &.gradient-primary {
+        /* Utiliza clase global para gradiente principal */
       }
       
       &[fill="outline"] {
         --border-width: 2px;
-        --border-color: rgba(255, 255, 255, 0.8);
-        --color: white;
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(10px);
+        --border-color: var(--ion-color-tertiary);
+        --color: var(--ion-color-light);
+        background: transparent;
+        backdrop-filter: none;
         
         &:hover {
-          --background: rgba(255, 255, 255, 0.2);
+          --background: #2A2A50;
         }
       }
     }
@@ -108,13 +108,118 @@
     text-align: center;
     
     .login-link {
-      --color: rgba(255, 255, 255, 0.9);
+      --color: var(--ion-color-light);
       font-size: 0.95rem;
       text-decoration: underline;
       
       &:hover {
-        --color: white;
+        --color: var(--ion-color-medium);
       }
+    }
+  }
+}
+
+/* Estilos del formulario para buen contraste y estética en oscuro */
+.register-form {
+  .form-section {
+    background: #2A2A50;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+
+    h3 {
+      margin: 0 0 20px 0;
+      color: var(--ion-color-light);
+      font-size: 1.2rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+
+      &::before {
+        content: '';
+        width: 4px;
+        height: 20px;
+        background: var(--ion-color-tertiary);
+        margin-right: 10px;
+        border-radius: 2px;
+      }
+    }
+  }
+
+  .form-item {
+    --background: transparent;
+    --border-color: var(--ion-color-medium);
+    --border-radius: 10px;
+    --padding-start: 16px;
+    --padding-end: 16px;
+    margin-bottom: 16px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    transition: all 0.3s ease;
+
+    &:hover {
+      --border-color: var(--ion-color-tertiary);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(75, 107, 255, 0.2);
+    }
+
+    &.ion-focused {
+      --border-color: var(--ion-color-tertiary);
+      box-shadow: 0 0 0 3px rgba(var(--ion-color-tertiary-rgb), 0.2);
+    }
+
+    &.ion-invalid {
+      --border-color: var(--ion-color-danger);
+
+      &.ion-touched {
+        animation: shake 0.5s ease-in-out;
+      }
+    }
+
+    ion-label {
+      font-weight: 600;
+      color: var(--ion-color-light);
+    }
+
+    ion-input,
+    ion-select,
+    ion-textarea {
+      --color: var(--ion-color-light);
+    }
+
+    ion-note[slot="error"] {
+      font-size: 0.85rem;
+      margin-top: 5px;
+      color: var(--ion-color-danger);
+    }
+
+    ion-note:not([slot="error"]) {
+      font-size: 0.85rem;
+      margin-top: 5px;
+      color: var(--ion-color-medium);
+    }
+  }
+
+  /* Botón principal del formulario */
+  ion-button[type="submit"] {
+    --border-radius: 25px;
+    height: 50px;
+    font-weight: 600;
+    font-size: 1.05rem;
+    box-shadow: 0 4px 20px rgba(255, 75, 107, 0.3);
+
+    &.gradient-primary {
+      /* se aplica el gradiente desde la clase global */
+    }
+
+    &:not([disabled]):hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(255, 75, 107, 0.45);
+    }
+
+    &[disabled] {
+      opacity: 0.65;
     }
   }
 }
@@ -139,18 +244,4 @@
 }
 
 // Dark mode support
-@media (prefers-color-scheme: dark) {
-  .register-content {
-    .info-section {
-      ion-card {
-        background: rgba(30, 30, 30, 0.95);
-        
-        ion-card-content {
-          p, li {
-            color: #ccc;
-          }
-        }
-      }
-    }
-  }
-}
+/* Ya en tema oscuro por defecto, se omite media query específica */

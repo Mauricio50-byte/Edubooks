@@ -1,5 +1,5 @@
 <ion-header [translucent]="true">
-  <ion-toolbar color="primary">
+  <ion-toolbar color="dark">
     <ion-buttons slot="start">
       <ion-back-button (click)="goToLogin()"></ion-back-button>
     </ion-buttons>
@@ -91,7 +91,7 @@
       </div>
 
       <!-- Botón de registro -->
-      <ion-button expand="block" color="primary" type="submit" [disabled]="isLoading || registerForm.invalid || !checkPasswordsMatch()">
+      <ion-button expand="block" type="submit" class="gradient-primary" [disabled]="isLoading || registerForm.invalid || !checkPasswordsMatch()">
         <ion-spinner name="dots" *ngIf="isLoading" slot="start"></ion-spinner>
         Registrarme
       </ion-button>
@@ -108,7 +108,7 @@
         </ion-card-header>
         <ion-card-content>
           <p>Los docentes reciben una invitación por correo para registrarse.</p>
-          <ion-button expand="block" fill="outline" color="secondary" routerLink="/register-invitation">
+          <ion-button expand="block" fill="outline" routerLink="/register-invitation">
             <ion-icon name="mail-outline" slot="start"></ion-icon>
             Tengo una invitación
           </ion-button>
