@@ -1,5 +1,5 @@
 <ion-header [translucent]="true">
-  <ion-toolbar color="primary">
+  <ion-toolbar color="dark">
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/home" text="" icon="arrow-back-outline"></ion-back-button>
     </ion-buttons>
@@ -8,8 +8,9 @@
       <span class="title-text">Catálogo</span>
     </ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="limpiarFiltros()">
-        <ion-icon name="refresh-outline"></ion-icon>
+      <ion-button class="toolbar-refresh gradient-primary" size="small" (click)="refrescar()" aria-label="Refrescar catálogo">
+        <ion-icon name="refresh-outline" slot="start"></ion-icon>
+        <ion-label>Refrescar</ion-label>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
@@ -66,6 +67,10 @@
         (click)="filtrarPorCategoria('Todas')">
         <ion-label>📚 Todas</ion-label>
       </ion-chip>
+      <ion-chip class="gradient-primary quick-refresh-chip" (click)="limpiarFiltros()">
+        <ion-icon name="refresh-outline"></ion-icon>
+        <ion-label>Limpiar filtros</ion-label>
+      </ion-chip>
     </div>
   </div>
 
@@ -80,9 +85,9 @@
     <ion-icon name="search-outline" color="medium" size="large"></ion-icon>
     <h3>No se encontraron resultados</h3>
     <p>Prueba con otros términos de búsqueda o filtros</p>
-    <ion-button fill="outline" (click)="limpiarFiltros()">
+    <ion-button fill="outline" (click)="refrescar()">
       <ion-icon name="refresh-outline" slot="start"></ion-icon>
-      Limpiar filtros
+      Refrescar
     </ion-button>
   </div>
 

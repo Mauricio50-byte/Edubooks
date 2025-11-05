@@ -81,6 +81,6 @@ ion-page[aria-hidden="true"] {
 
 /* Utilidad de gradiente principal según la paleta de referencia */
 .gradient-primary {
-  background: linear-gradient(to right, #FF4B6B, #FF8C4B) !important;
-  color: #FFFFFF !important;
+  background: linear-gradient(to right, var(--ion-color-primary), var(--ion-color-secondary)) !important;
+  color: var(--ion-color-light) !important;
 }

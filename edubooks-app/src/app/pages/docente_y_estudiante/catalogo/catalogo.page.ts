@@ -144,6 +144,14 @@ export class CatalogoPage implements OnInit {
     this.librosFiltrados = [...this.libros];
   }
 
+  refrescar() {
+    // Reinicia filtros y recarga datos desde el servicio
+    this.searchQuery = '';
+    this.categoriaSeleccionada = 'Todas';
+    this.estadoSeleccionado = 'Todos';
+    this.cargarDatos();
+  }
+
   filtrarPorCategoria(categoria: string) {
     this.categoriaSeleccionada = categoria;
     this.aplicarFiltros();
