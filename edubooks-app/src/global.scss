@@ -84,3 +84,13 @@ ion-page[aria-hidden="true"] {
   background: linear-gradient(to right, var(--ion-color-primary), var(--ion-color-secondary)) !important;
   color: var(--ion-color-light) !important;
 }
+
+/* Overlay del Action Sheet (usado por ion-select con interface="action-sheet") */
+ion-action-sheet {
+  --background: var(--ion-color-dark);
+  --backdrop-opacity: 0.6;
+  --button-color: var(--ion-color-light);
+  --button-background: var(--ion-color-dark);
+  --button-background-selected: var(--ion-color-primary);
+  --header-color: var(--ion-color-light);
+}

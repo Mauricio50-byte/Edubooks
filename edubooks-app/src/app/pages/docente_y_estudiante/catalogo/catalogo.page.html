@@ -38,7 +38,8 @@
           (ionChange)="onCategoriaChange($event)"
           placeholder="Seleccionar Categoría"
           interface="action-sheet"
-          class="category-select">
+          class="category-select"
+          color="light">
           <ion-select-option *ngFor="let categoria of categorias" [value]="categoria">
             {{ getCategoriaIcon(categoria) }} {{ categoria }}
           </ion-select-option>
@@ -50,7 +51,8 @@
           (ionChange)="onEstadoChange($event)"
           placeholder="Filtrar por Estado"
           interface="action-sheet"
-          class="status-select">
+          class="status-select"
+          color="light">
           <ion-select-option value="Todos">📋 Todos los Estados</ion-select-option>
           <ion-select-option value="Disponible">✅ Disponible</ion-select-option>
           <ion-select-option value="Prestado">📤 Prestado</ion-select-option>

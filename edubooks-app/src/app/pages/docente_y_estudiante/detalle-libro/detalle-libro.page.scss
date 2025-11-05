@@ -1,3 +1,23 @@
+// Colorimetría: fondo oscuro base, texto claro, acentos semánticos
+ion-content {
+  --background: var(--ion-color-dark);
+  color: var(--ion-color-light);
+}
+
+ion-toolbar {
+  --background: var(--ion-color-dark);
+  border-bottom: 1px solid var(--ion-color-dark-shade);
+  ion-title {
+    color: var(--ion-color-light);
+  }
+  ion-back-button {
+    --color: var(--ion-color-light);
+  }
+  ion-button[fill="clear"] {
+    --color: var(--ion-color-tertiary);
+  }
+}
+
 // Hero y disposición general
 .libro-detail {
   padding: 16px;
@@ -34,6 +54,7 @@
   margin: 0 0 6px 0;
   font-size: 22px;
   font-weight: 700;
+  color: var(--ion-color-light);
 }
 
 .info-principal .autor {
@@ -64,14 +85,64 @@
 // Segmento y tarjetas
 .segmented {
   margin: 8px 0 12px;
+  --background: var(--ion-color-dark);
+  --indicator-color: var(--ion-color-primary);
+  --color: var(--ion-color-light);
 }
 
 .info-detallada ion-card {
   margin-bottom: 12px;
+  --background: var(--ion-color-dark-tint);
+  color: var(--ion-color-light);
+  border: 1px solid var(--ion-color-dark-shade);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+}
+
+/* Header de la tarjeta: texto claro e icono en contraste frío */
+.info-detallada ion-card-header {
+  background: var(--ion-color-dark);
+  border-bottom: 1px solid var(--ion-color-dark-shade);
+}
+
+.info-detallada ion-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ion-color-light);
+}
+
+.info-detallada ion-card-title ion-icon {
+  color: var(--ion-color-tertiary);
+}
+
+/* Lista y items dentro de la tarjeta: fondo oscuro, texto semántico */
+.info-detallada ion-list {
+  background: transparent;
+}
+
+.info-detallada ion-item {
+  --background: var(--ion-color-dark);
+  --color: var(--ion-color-light);
+  --padding-start: 12px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.info-detallada ion-item ion-icon {
+  color: var(--ion-color-tertiary);
+}
+
+.info-detallada ion-item h3 {
+  color: var(--ion-color-light);
+}
+
+.info-detallada ion-item p {
+  color: var(--ion-color-medium);
 }
 
 .descripcion {
   line-height: 1.6;
+  color: var(--ion-color-light);
 }
 
 // Acciones principales/admin
@@ -81,6 +152,17 @@
 
 .action-button {
   --border-radius: 8px;
+  font-weight: 600;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+}
+
+.prestamo-button {
+  color: var(--ion-color-light);
+}
+
+.reserva-button {
+  --border-color: var(--ion-color-tertiary);
+  --color: var(--ion-color-tertiary);
 }
 
 .info-no-disponible {

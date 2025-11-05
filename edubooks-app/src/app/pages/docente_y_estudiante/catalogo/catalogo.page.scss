@@ -72,13 +72,14 @@ ion-toolbar {
   background: var(--ion-color-dark);
   
   ion-select {
-    --background: #2A2A50;
+    --background: var(--ion-color-dark);
     --color: var(--ion-color-light);
     --placeholder-color: var(--ion-color-medium);
+    --icon-color: var(--ion-color-tertiary);
     --border-radius: 8px;
     --padding-start: 12px;
     --padding-end: 12px;
-    border: 1px solid var(--ion-color-medium);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     margin-bottom: 8px;
     font-size: 14px;
     color: var(--ion-color-light);
@@ -89,6 +90,16 @@ ion-toolbar {
     
     &::part(placeholder) {
       color: var(--ion-color-medium) !important;
+    }
+
+    &::part(icon) {
+      color: var(--ion-color-tertiary);
+    }
+
+    &:focus,
+    &:focus-within {
+      border-color: var(--ion-color-primary);
+      box-shadow: 0 0 0 2px var(--ion-color-primary);
     }
   }
   
