@@ -49,7 +49,7 @@ export class BibliotecaService {
           autor: libro.autor,
           isbn: libro.isbn,
           editorial: libro.editorial,
-          año_publicacion: libro.año_publicacion,
+          anio_publicacion: libro.año_publicacion,
           categoria: libro.categoria,
           ubicacion: libro.ubicacion,
           estado: libro.estado,
@@ -73,8 +73,47 @@ export class BibliotecaService {
   }
 
   getLibroById(id: number): Observable<Libro | undefined> {
-    const libro = this.libros.find(l => l.id === id);
-    return of(libro).pipe(delay(300));
+    const cached = this.libros.find(l => l.id === id);
+    if (cached) {
+      return of(cached).pipe(delay(150));
+    }
+
+    // Fallback: obtener del backend si no está en caché
+    return this.apiService.get(`/libros/${id}/`).pipe(
+      map((libro: any) => {
+        if (!libro) return undefined;
+
+        const mapped: Libro = {
+          id: libro.id,
+          titulo: libro.titulo,
+          autor: libro.autor,
+          isbn: libro.isbn,
+          editorial: libro.editorial,
+          anio_publicacion: libro.año_publicacion,
+          categoria: libro.categoria,
+          ubicacion: libro.ubicacion,
+          estado: libro.estado,
+          cantidad_total: libro.cantidad_total,
+          cantidad_disponible: libro.cantidad_disponible,
+          descripcion: libro.descripcion,
+          imagen_portada: libro.imagen_portada,
+          fecha_registro: libro.fecha_registro
+        };
+
+        const idx = this.libros.findIndex(l => l.id === mapped.id);
+        if (idx >= 0) {
+          this.libros[idx] = mapped;
+        } else {
+          this.libros.push(mapped);
+        }
+        this.librosSubject.next([...this.libros]);
+        return mapped;
+      }),
+      catchError(error => {
+        console.error('Error obteniendo libro por ID:', error);
+        return of(undefined);
+      })
+    );
   }
 
   searchLibros(termino: string): Observable<Libro[]> {

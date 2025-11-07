@@ -1,0 +1,60 @@
+<ion-card class="book-card">
+  <div class="book-image-container">
+    <img [src]="libro.imagen_portada" [alt]="libro.titulo" class="book-image"
+         onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjY2NjY2NjIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzY2NjY2NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkxpYnJvPC90ZXh0Pjwvc3ZnPg=='">
+    <ion-chip class="status-chip" [color]="getEstadoColor(libro.estado)">
+      {{ libro.estado }}
+    </ion-chip>
+  </div>
+
+  <ion-card-content>
+    <h3 class="book-title">{{ libro.titulo }}</h3>
+    <p class="book-author">{{ libro.autor }}</p>
+    <p class="book-category">{{ libro.categoria }}</p>
+
+    <div class="book-info">
+      <ion-chip color="medium" size="small">
+        <ion-icon name="location-outline"></ion-icon>
+        <ion-label>{{ libro.ubicacion }}</ion-label>
+      </ion-chip>
+      <ion-chip color="tertiary" size="small">
+        <ion-icon name="library-outline"></ion-icon>
+        <ion-label>{{ libro.cantidad_disponible }}/{{ libro.cantidad_total }}</ion-label>
+      </ion-chip>
+    </div>
+
+    <div class="book-actions" *ngIf="modo === 'catalogo'">
+      <ion-button *ngIf="puedePrestar" expand="block" fill="solid" color="success" (click)="onPrestar($event)">
+        <ion-icon name="send-outline" slot="start"></ion-icon>
+        Solicitar
+      </ion-button>
+      <ion-button *ngIf="puedeReservar" expand="block" fill="outline" color="warning" (click)="onReservar($event)">
+        <ion-icon name="bookmark-outline" slot="start"></ion-icon>
+        Reservar
+      </ion-button>
+      <ion-button *ngIf="usuario_tiene_prestamo" expand="block" fill="outline" color="warning" disabled>
+        <ion-icon name="time-outline" slot="start"></ion-icon>
+        Solicitud enviada
+      </ion-button>
+      <ion-button *ngIf="!puedePrestar && !puedeReservar && !usuario_tiene_prestamo" expand="block" fill="outline" color="medium" disabled>
+        <ion-icon name="ban-outline" slot="start"></ion-icon>
+        No disponible
+      </ion-button>
+    </div>
+
+    <div class="book-actions" *ngIf="modo === 'admin'">
+      <ion-button size="small" expand="block" color="primary" (click)="onEditar($event)">
+        <ion-icon name="create-outline" slot="start"></ion-icon>
+        EDITAR
+      </ion-button>
+      <ion-button size="small" expand="block" fill="outline" color="secondary" (click)="onVerDetalle($event)">
+        <ion-icon name="eye-outline" slot="start"></ion-icon>
+        VER
+      </ion-button>
+      <ion-button size="small" expand="block" fill="clear" color="danger" (click)="onEliminar($event)">
+        <ion-icon name="trash-outline" slot="start"></ion-icon>
+        ELIMINAR
+      </ion-button>
+    </div>
+  </ion-card-content>
+</ion-card>

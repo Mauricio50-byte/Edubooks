@@ -20,14 +20,25 @@
     <p><strong>Año:</strong> {{ anioLimpio }}</p>
     <p class="descripcion"><strong>Descripción:</strong> {{ descripcionLimpia }}</p>
 
-    <ion-item lines="none">
-      <ion-label>Cantidad</ion-label>
-      <ion-note>{{ cantidad_total }}</ion-note>
-    </ion-item>
-    <ion-item lines="none">
-      <ion-label>Ubicación</ion-label>
-      <ion-note>{{ ubicacion }}</ion-note>
-    </ion-item>
+    <ion-card class="registro-card">
+      <ion-card-header>
+        <ion-card-title>Detalles de registro</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list lines="none">
+          <ion-item>
+            <ion-icon name="cube-outline" slot="start"></ion-icon>
+            <ion-label><strong>Cantidad total</strong></ion-label>
+            <ion-chip color="primary">{{ cantidad_total }}</ion-chip>
+          </ion-item>
+          <ion-item>
+            <ion-icon name="location-outline" slot="start"></ion-icon>
+            <ion-label><strong>Ubicación</strong></ion-label>
+            <ion-chip color="medium" class="chip-ubicacion">{{ ubicacion }}</ion-chip>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
   </div>
 
   <div class="actions">

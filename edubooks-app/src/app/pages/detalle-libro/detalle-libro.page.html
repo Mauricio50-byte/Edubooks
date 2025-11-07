@@ -81,9 +81,9 @@
             <ion-icon name="business-outline"></ion-icon>
             <ion-label>{{ libro.editorial }}</ion-label>
           </ion-chip>
-          <ion-chip *ngIf="libro['anio_publicacion']" color="medium">
+          <ion-chip *ngIf="libro.anio_publicacion" color="medium">
             <ion-icon name="calendar-clear-outline"></ion-icon>
-            <ion-label>{{ libro['anio_publicacion'] }}</ion-label>
+            <ion-label>{{ libro.anio_publicacion }}</ion-label>
           </ion-chip>
         </div>
 
@@ -123,27 +123,27 @@
         
         <ion-card-content>
           <ion-list lines="none">
-            <ion-item *ngIf="libro.isbn">
+            <ion-item>
               <ion-icon name="barcode-outline" slot="start"></ion-icon>
               <ion-label>
                 <h3>ISBN</h3>
-                <p>{{ libro.isbn }}</p>
+                <p>{{ libro.isbn || 'N/A' }}</p>
               </ion-label>
             </ion-item>
             
-            <ion-item *ngIf="libro.editorial">
+            <ion-item>
               <ion-icon name="business-outline" slot="start"></ion-icon>
               <ion-label>
                 <h3>Editorial</h3>
-                <p>{{ libro.editorial }}</p>
+                <p>{{ libro.editorial || 'N/A' }}</p>
               </ion-label>
             </ion-item>
             
-            <ion-item *ngIf="libro['anio_publicacion']">
+            <ion-item>
               <ion-icon name="calendar" slot="start"></ion-icon>
               <ion-label>
                 <h3>Año de Publicación</h3>
-                <p>{{ libro['anio_publicacion'] }}</p>
+                <p>{{ libro.anio_publicacion || 'N/A' }}</p>
               </ion-label>
             </ion-item>
             
@@ -152,6 +152,41 @@
               <ion-label>
                 <h3>Categoría</h3>
                 <p>{{ libro.categoria }}</p>
+              </ion-label>
+            </ion-item>
+            <ion-item>
+              <ion-icon name="flag-outline" slot="start"></ion-icon>
+              <ion-label>
+                <h3>Estado</h3>
+                <p>{{ libro.estado }}</p>
+              </ion-label>
+            </ion-item>
+            <ion-item>
+              <ion-icon name="location-outline" slot="start"></ion-icon>
+              <ion-label>
+                <h3>Ubicación</h3>
+                <p>{{ libro.ubicacion }}</p>
+              </ion-label>
+            </ion-item>
+            <ion-item>
+              <ion-icon name="copy-outline" slot="start"></ion-icon>
+              <ion-label>
+                <h3>Cantidad Total</h3>
+                <p>{{ libro.cantidad_total }}</p>
+              </ion-label>
+            </ion-item>
+            <ion-item>
+              <ion-icon name="checkbox-outline" slot="start"></ion-icon>
+              <ion-label>
+                <h3>Cantidad Disponible</h3>
+                <p>{{ libro.cantidad_disponible }}</p>
+              </ion-label>
+            </ion-item>
+            <ion-item *ngIf="libro.usuario_tiene_prestamo">
+              <ion-icon name="person-outline" slot="start"></ion-icon>
+              <ion-label>
+                <h3>Tu Préstamo</h3>
+                <p>Actualmente lo tienes prestado</p>
               </ion-label>
             </ion-item>
             
@@ -168,7 +203,7 @@
     </div>
 
     <!-- Descripción -->
-    <div class="info-detallada" *ngIf="segmentValue === 'descripcion' && libro?.descripcion">
+    <div class="info-detallada" *ngIf="segmentValue === 'descripcion' && libro.descripcion">
       <ion-card>
         <ion-card-header>
           <ion-card-title>

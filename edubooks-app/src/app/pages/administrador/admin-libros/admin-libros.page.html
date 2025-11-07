@@ -109,97 +109,14 @@
 
   <!-- Lista de libros -->
   <div class="libros-container" *ngIf="!isLoading && !error && libros.length > 0">
-    <div *ngFor="let libro of libros" class="libro-card">
-      <div class="card-header">
-        <div class="libro-section">
-          <img [src]="libro.imagen_portada || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjY2NjY2NjIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzY2NjY2NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkxpYnJvPC90ZXh0Pjwvc3ZnPg=='"
-               [alt]="libro.titulo" 
-               class="libro-imagen"
-               onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjY2NjY2NjIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzY2NjY2NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkxpYnJvPC90ZXh0Pjwvc3ZnPg=='">
-          <div class="libro-info">
-            <h3 class="libro-titulo">{{ libro.titulo }}</h3>
-            <p class="libro-autor">{{ libro.autor }}</p>
-          </div>
-        </div>
-        <div class="status-section">
-          <ion-chip class="status-chip" [color]="getEstadoColor(libro.estado)">
-            <ion-label>{{ libro.estado }}</ion-label>
-          </ion-chip>
-          <ion-button fill="clear" size="small" (click)="mostrarOpcionesLibro(libro)">
-            <ion-icon name="ellipsis-vertical" slot="icon-only"></ion-icon>
-          </ion-button>
-        </div>
-      </div>
-
-      <div class="card-content">
-        <div class="categoria-section">
-          <ion-icon name="bookmark-outline"></ion-icon>
-          <span>{{ libro.categoria }}</span>
-        </div>
-
-        <div class="details-grid">
-          <div class="detail-item" *ngIf="libro.isbn">
-            <ion-icon name="barcode-outline"></ion-icon>
-            <span class="detail-label">ISBN:</span>
-            <span class="detail-value">{{ libro.isbn }}</span>
-          </div>
-          
-          <div class="detail-item" *ngIf="libro.editorial">
-            <ion-icon name="business-outline"></ion-icon>
-            <span class="detail-label">Editorial:</span>
-            <span class="detail-value">{{ libro.editorial }}</span>
-          </div>
-          
-          <div class="detail-item" *ngIf="libro.anio_publicacion">
-            <ion-icon name="calendar-outline"></ion-icon>
-            <span class="detail-label">Año:</span>
-            <span class="detail-value">{{ libro.anio_publicacion }}</span>
-          </div>
-          
-          <div class="detail-item">
-            <ion-icon name="library-outline"></ion-icon>
-            <span class="detail-label">Disponibles:</span>
-            <span class="detail-value">{{ libro.cantidad_disponible }} / {{ libro.cantidad_total }}</span>
-          </div>
-        </div>
-
-        <div class="descripcion-section" *ngIf="libro.descripcion">
-          <ion-icon name="document-text-outline"></ion-icon>
-          <span>{{ libro.descripcion }}</span>
-        </div>
-      </div>
-
-      <div class="card-actions">
-        <ion-button 
-          size="small"
-          fill="solid" 
-          color="primary"
-          (click)="editarLibro(libro)" 
-          *appHasPermission="{ action: 'update', resource: 'libro' }">
-          <ion-icon name="create-outline" slot="start"></ion-icon>
-          EDITAR
-        </ion-button>
-        
-        <ion-button 
-          size="small"
-          fill="outline" 
-          color="secondary"
-          (click)="router.navigate(['detalle-libro'], { queryParams: { id: libro.id } })">
-          <ion-icon name="eye-outline" slot="start"></ion-icon>
-          VER
-        </ion-button>
-        
-        <ion-button 
-          size="small"
-          fill="clear" 
-          color="danger"
-          (click)="confirmarEliminacion(libro)" 
-          *appHasPermission="{ action: 'delete', resource: 'libro' }">
-          <ion-icon name="trash-outline" slot="start"></ion-icon>
-          ELIMINAR
-        </ion-button>
-      </div>
-    </div>
+    <app-libro-card
+      *ngFor="let libro of libros"
+      [libro]="libro"
+      modo="admin"
+      (editar)="editarLibro(libro)"
+      (verDetalle)="router.navigate(['detalle-libro'], { queryParams: { id: libro.id } })"
+      (eliminar)="confirmarEliminacion(libro)">
+    </app-libro-card>
   </div>
 
   <!-- Infinite scroll -->

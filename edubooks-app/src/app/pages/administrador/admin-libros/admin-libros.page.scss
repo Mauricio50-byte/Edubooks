@@ -79,6 +79,9 @@
   padding: 16px;
   display: grid;
   gap: 12px;
+  grid-template-columns: repeat(2, 1fr);
+  align-items: stretch;
+  grid-auto-rows: 1fr;
 }
 
 .libro-card {
@@ -324,7 +327,7 @@
 
 @media (min-width: 769px) {
   .libros-container {
-    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
     max-width: 1200px;
     margin: 0 auto;
   }
