@@ -1,0 +1,24 @@
+.ajustes-container {
+  padding: 16px;
+}
+
+.perfil-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-item {
+  --background: var(--ion-color-dark);
+  --color: var(--ion-color-light);
+}
+
+ion-card-header {
+  background: var(--ion-color-dark);
+  color: var(--ion-color-light);
+  border-bottom: 1px solid var(--ion-color-medium-shade);
+}
+
+ion-card-title, ion-card-subtitle {
+  color: var(--ion-color-light);
+}

@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { Usuario } from '../../core/models/usuario.model';
-import { AlertController } from '@ionic/angular';
+import { AlertController, ActionSheetController, ToastController } from '@ionic/angular';
 
 @Component({
   selector: 'app-home',
@@ -16,7 +16,9 @@ export class HomePage implements OnInit {
   constructor(
     private authService: AuthService,
     private router: Router,
-    private alertController: AlertController
+    private alertController: AlertController,
+    private actionSheetController: ActionSheetController,
+    private toastController: ToastController
   ) {}
 
   ngOnInit() {
@@ -28,6 +30,44 @@ export class HomePage implements OnInit {
       this.router.navigate(['/login']);
     }
   }
+
+  async openSettings() {
+    const actionSheet = await this.actionSheetController.create({
+      header: 'Ajustes',
+      buttons: [
+        {
+          text: 'Editar mis datos',
+          icon: 'create-outline',
+          handler: () => this.navigateTo('/ajustes/editar-perfil')
+        },
+        {
+          text: 'Ayuda',
+          icon: 'help-circle-outline',
+          handler: () => this.navigateTo('/ajustes/ayuda')
+        },
+        {
+          text: 'Comentarios',
+          icon: 'chatbox-ellipses-outline',
+          handler: () => this.navigateTo('/ajustes/comentarios')
+        },
+        {
+          text: 'Cerrar sesión',
+          role: 'destructive',
+          icon: 'log-out-outline',
+          handler: () => this.logout()
+        },
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+          icon: 'close-outline'
+        }
+      ]
+    });
+
+    await actionSheet.present();
+  }
+
+  // Eliminado: showComingSoon – ahora navega a páginas reales
 
   async logout() {
     const alert = await this.alertController.create({

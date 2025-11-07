@@ -1,0 +1,38 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="dark">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home" text="Volver"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Comentarios</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="ajustes-container">
+    <ion-card class="card-accent">
+      <ion-card-header>
+        <ion-card-title>Cuéntanos tu experiencia</ion-card-title>
+        <ion-card-subtitle>Envíanos tus sugerencias</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <form [formGroup]="feedbackForm" (ngSubmit)="enviar()" class="feedback-form">
+          <ion-item class="form-item">
+            <ion-icon name="chatbubbles-outline" slot="start" color="tertiary"></ion-icon>
+            <ion-label position="stacked">Asunto</ion-label>
+            <ion-input formControlName="asunto" placeholder="Ej. Sugerencia de mejora"></ion-input>
+          </ion-item>
+
+          <ion-item class="form-item">
+            <ion-label position="stacked">Mensaje</ion-label>
+            <ion-textarea formControlName="mensaje" placeholder="Escribe tu comentario" rows="6"></ion-textarea>
+          </ion-item>
+
+          <ion-button type="submit" expand="block" class="gradient-primary" [disabled]="isSending || feedbackForm.invalid">
+            <ion-spinner *ngIf="isSending" name="lines-small"></ion-spinner>
+            <span *ngIf="!isSending">Enviar</span>
+          </ion-button>
+        </form>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

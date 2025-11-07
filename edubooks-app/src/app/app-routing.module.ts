@@ -118,6 +118,21 @@ const routes: Routes = [
     canActivate: [SystemInitGuard, AuthGuard] // Verificar inicialización y que esté autenticado
   },
   {
+    path: 'ajustes/editar-perfil',
+    loadChildren: () => import('./pages/ajustes/editar-perfil/editar-perfil.module').then(m => m.EditarPerfilPageModule),
+    canActivate: [SystemInitGuard, AuthGuard]
+  },
+  {
+    path: 'ajustes/ayuda',
+    loadChildren: () => import('./pages/ajustes/ayuda/ayuda.module').then(m => m.AyudaPageModule),
+    canActivate: [SystemInitGuard, AuthGuard]
+  },
+  {
+    path: 'ajustes/comentarios',
+    loadChildren: () => import('./pages/ajustes/comentarios/comentarios.module').then(m => m.ComentariosPageModule),
+    canActivate: [SystemInitGuard, AuthGuard]
+  },
+  {
     path: '**',
     redirectTo: 'login' // Ruta por defecto para páginas no encontradas
   }

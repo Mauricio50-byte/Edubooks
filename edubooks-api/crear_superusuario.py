@@ -6,6 +6,7 @@ import os
 import sys
 import django
 from datetime import date
+import argparse
 
 # Configurar Django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'edubooks.settings')
@@ -13,28 +14,26 @@ django.setup()
 
 from usuarios.models import Usuario, Administrador
 
-def crear_superusuario():
-    """Crea un superusuario administrador con todos los permisos"""
-    
+def crear_superusuario(email: str, username: str, password: str, force: bool = False):
+    """Crea un superusuario administrador con todos los permisos.
+
+    Args:
+        email: correo del usuario a crear.
+        username: nombre de usuario.
+        password: contraseña.
+        force: si existe, lo elimina y recrea sin pedir confirmación.
+    """
     print("=== Creación de Superusuario Administrador ===\n")
-    
-    # Datos del superusuario
-    email = "admin@edubooks.com"
-    username = "superadmin"
-    password = "Admin123!"
     
     try:
         # Verificar si ya existe
         if Usuario.objects.filter(email=email).exists():
-            print(f"⚠️  El usuario {email} ya existe. ¿Desea actualizarlo? (s/n): ", end="")
-            respuesta = input().lower()
-            if respuesta != 's':
-                print("❌ Operación cancelada")
+            if not force:
+                print(f"⚠️  El usuario {email} ya existe. Use --force para reemplazarlo.")
                 return False
-            
             # Eliminar usuario existente
             Usuario.objects.filter(email=email).delete()
-            print("✅ Usuario existente eliminado")
+            print("✅ Usuario existente eliminado (modo --force)")
         
         # Crear el usuario base
         usuario = Usuario.objects.create_user(
@@ -115,7 +114,14 @@ def mostrar_instrucciones():
     print("="*60)
 
 if __name__ == '__main__':
-    success = crear_superusuario()
+    parser = argparse.ArgumentParser(description='Crear superusuario administrador')
+    parser.add_argument('--email', default='admin@edubooks.com')
+    parser.add_argument('--username', default='superadmin')
+    parser.add_argument('--password', default='Admin123!')
+    parser.add_argument('--force', action='store_true', help='Reemplaza usuario existente sin preguntar')
+    args = parser.parse_args()
+
+    success = crear_superusuario(args.email, args.username, args.password, args.force)
     if success:
         mostrar_instrucciones()
     sys.exit(0 if success else 1)

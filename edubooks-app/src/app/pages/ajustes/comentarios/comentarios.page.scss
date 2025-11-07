@@ -1,0 +1,5 @@
+.ajustes-container { padding: 16px; }
+.feedback-form { display: flex; flex-direction: column; gap: 16px; }
+.form-item { --background: var(--ion-color-dark); --color: var(--ion-color-light); }
+ion-card-header { background: var(--ion-color-dark); color: var(--ion-color-light); }
+ion-card-title, ion-card-subtitle { color: var(--ion-color-light); }

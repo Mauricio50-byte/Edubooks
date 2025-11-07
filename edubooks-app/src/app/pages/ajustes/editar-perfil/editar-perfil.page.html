@@ -1,0 +1,39 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="dark">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home" text="Volver"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Editar Perfil</ion-title>
+  </ion-toolbar>
+  </ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="ajustes-container">
+    <ion-card class="card-accent">
+      <ion-card-header>
+        <ion-card-title>Tu Información</ion-card-title>
+        <ion-card-subtitle>Actualiza tus datos visibles</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <form [formGroup]="perfilForm" (ngSubmit)="guardarCambios()" class="perfil-form">
+          <ion-item class="form-item">
+            <ion-icon name="person-circle-outline" slot="start" color="tertiary"></ion-icon>
+            <ion-label position="stacked">Nombre</ion-label>
+            <ion-input formControlName="nombre" placeholder="Tu nombre"></ion-input>
+          </ion-item>
+
+          <ion-item class="form-item">
+            <ion-icon name="at-outline" slot="start" color="tertiary"></ion-icon>
+            <ion-label position="stacked">Usuario</ion-label>
+            <ion-input formControlName="username" placeholder="Tu usuario"></ion-input>
+          </ion-item>
+
+          <ion-button type="submit" expand="block" class="gradient-primary" [disabled]="isSaving || perfilForm.invalid">
+            <ion-spinner *ngIf="isSaving" name="lines-small"></ion-spinner>
+            <span *ngIf="!isSaving">Guardar cambios</span>
+          </ion-button>
+        </form>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>
