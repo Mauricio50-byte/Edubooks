@@ -34,32 +34,38 @@ export class HomePage implements OnInit {
   async openSettings() {
     const actionSheet = await this.actionSheetController.create({
       header: 'Ajustes',
+      cssClass: 'settings-action-sheet',
       buttons: [
         {
           text: 'Editar mis datos',
           icon: 'create-outline',
+          cssClass: 'settings-option',
           handler: () => this.navigateTo('/ajustes/editar-perfil')
         },
         {
           text: 'Ayuda',
           icon: 'help-circle-outline',
+          cssClass: 'settings-option',
           handler: () => this.navigateTo('/ajustes/ayuda')
         },
         {
           text: 'Comentarios',
           icon: 'chatbox-ellipses-outline',
+          cssClass: 'settings-option',
           handler: () => this.navigateTo('/ajustes/comentarios')
         },
         {
           text: 'Cerrar sesión',
           role: 'destructive',
           icon: 'log-out-outline',
+          cssClass: 'settings-destructive',
           handler: () => this.logout()
         },
         {
           text: 'Cancelar',
           role: 'cancel',
-          icon: 'close-outline'
+          icon: 'close-outline',
+          cssClass: 'settings-cancel'
         }
       ]
     });
@@ -73,13 +79,16 @@ export class HomePage implements OnInit {
     const alert = await this.alertController.create({
       header: 'Cerrar Sesión',
       message: '¿Estás seguro que deseas cerrar sesión?',
+      cssClass: 'logout-alert',
       buttons: [
         {
           text: 'Cancelar',
-          role: 'cancel'
+          role: 'cancel',
+          cssClass: 'alert-cancel'
         },
         {
           text: 'Sí, cerrar sesión',
+          cssClass: 'alert-destructive',
           handler: () => {
             this.authService.logout();
           }

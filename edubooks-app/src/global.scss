@@ -94,3 +94,55 @@ ion-action-sheet {
   --button-background-selected: var(--ion-color-primary);
   --header-color: var(--ion-color-light);
 }
+
+/* ===== Estilo específico para Action Sheet de Ajustes ===== */
+.settings-action-sheet {
+  /* Variables del overlay */
+  --background: #2A2A50; /* profundidad sobre fondo oscuro */
+  --header-color: var(--ion-color-light);
+  --button-color: var(--ion-color-light);
+  --button-background: #2A2A50;
+  --button-background-selected: rgba(75, 107, 255, 0.18); /* acento terciario */
+  --backdrop-opacity: 0.7;
+  --border-color: rgba(255, 255, 255, 0.08);
+
+  /* Afinamos el contenedor y los grupos (Ionic overlay fuera del Shadow DOM) */
+  .action-sheet-group {
+    border-radius: 16px;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+    overflow: hidden;
+    backdrop-filter: saturate(110%) blur(6px);
+  }
+
+  .action-sheet-title {
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+
+  /* Botones base */
+  .action-sheet-button {
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  /* Opciones estándar */
+  .settings-option {
+    color: var(--ion-color-light);
+  }
+  .settings-option ion-icon {
+    color: var(--ion-color-tertiary);
+  }
+
+  /* Opción destructiva */
+  .settings-destructive {
+    color: var(--ion-color-danger);
+    font-weight: 600;
+  }
+  .settings-destructive ion-icon {
+    color: var(--ion-color-danger);
+  }
+
+  /* Cancelar discreto */
+  .settings-cancel {
+    color: var(--ion-color-medium);
+  }
+}
