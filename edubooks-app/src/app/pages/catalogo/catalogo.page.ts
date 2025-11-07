@@ -239,7 +239,7 @@ export class CatalogoPage implements OnInit {
   }
 
   verDetalle(libro: Libro) {
-    this.router.navigate(['/detalle-libro'], {
+    this.router.navigate(['detalle-libro'], {
       queryParams: { id: libro.id }
     });
   }

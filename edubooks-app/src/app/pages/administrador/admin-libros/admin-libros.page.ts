@@ -1,6 +1,6 @@
 // src/app/pages/admin-libros/admin-libros.page.ts
 import { Component, OnInit } from '@angular/core';
-import { LoadingController, ToastController, AlertController, ActionSheetController } from '@ionic/angular';
+import { LoadingController, ToastController, AlertController, ActionSheetController, ModalController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { BibliotecaService } from '../../../core/services/biblioteca.service';
 import { AuthService } from '../../../core/services/auth.service';
@@ -33,6 +33,7 @@ export class AdminLibrosPage implements OnInit {
     private loadingController: LoadingController,
     private toastController: ToastController,
     private actionSheetController: ActionSheetController,
+    private modalController: ModalController,
     public router: Router
   ) {}
 
@@ -270,42 +271,29 @@ export class AdminLibrosPage implements OnInit {
    * Mostrar vista previa del libro encontrado
    */
   async mostrarVistaPrevia(libroInfo: any, datosAdicionales: any) {
-    const imagenMostrar = libroInfo.imagen_portada || this.obtenerImagenPorDefecto();
-    
-    const alert = await this.alertController.create({
-      header: 'Vista Previa del Libro',
-      message: `
-        <div style="text-align: center; margin-bottom: 15px;">
-          <img src="${imagenMostrar}" alt="Portada" style="max-width: 100px; max-height: 140px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.15);" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22400%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%23cccccc%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 font-family=%22Arial%22 font-size=%2218%22 fill=%22%23666666%22%3ELibro%3C/text%3E%3C/svg%3E'">
-        </div>
-        <div style="font-size: 13px; line-height: 1.4; color: #333;">
-          <div style="margin-bottom: 8px;"><strong style="color: #2196F3;">📖 Título:</strong> ${libroInfo.titulo}</div>
-          <div style="margin-bottom: 6px;"><strong style="color: #4CAF50;">✍️ Autor:</strong> ${libroInfo.autor}</div>
-          ${libroInfo.editorial ? `<div style="margin-bottom: 6px;"><strong style="color: #FF9800;">🏢 Editorial:</strong> ${libroInfo.editorial}</div>` : ''}
-          ${libroInfo.año_publicacion ? `<div style="margin-bottom: 6px;"><strong style="color: #9C27B0;">📅 Año:</strong> ${libroInfo.año_publicacion}</div>` : ''}
-          <div style="margin-bottom: 6px;"><strong style="color: #607D8B;">📂 Categoría:</strong> ${libroInfo.categorias?.[0] || 'General'}</div>
-          ${libroInfo.isbn ? `<div style="margin-bottom: 6px;"><strong style="color: #795548;">🔢 ISBN:</strong> ${libroInfo.isbn}</div>` : ''}
-          ${libroInfo.paginas ? `<div style="margin-bottom: 6px;"><strong style="color: #3F51B5;">📄 Páginas:</strong> ${libroInfo.paginas}</div>` : ''}
-          <div style="margin-top: 10px; padding: 8px; background: #f5f5f5; border-radius: 4px; font-size: 12px;">
-            <strong style="color: #666;">🖼️ Imagen:</strong> ${libroInfo.imagen_portada ? '<span style="color: #4CAF50;">✅ Google Books</span>' : '<span style="color: #FF9800;">⚠️ Placeholder</span>'}
-          </div>
-        </div>
-      `,
-      buttons: [
-        {
-          text: 'Cancelar',
-          role: 'cancel'
+    const { LibroPreviewPageComponent } = await import('./libro-form/libro-preview/libro-preview.page');
+    const modal = await this.modalController.create({
+      component: LibroPreviewPageComponent,
+      componentProps: {
+        libro: {
+          titulo: libroInfo.titulo || 'Sin título',
+          autor: libroInfo.autor || 'Desconocido',
+          isbn: libroInfo.isbn || 'N/A',
+          editorial: libroInfo.editorial || 'N/A',
+          anio_publicacion: libroInfo.año_publicacion || libroInfo.anio_publicacion || 'N/A',
+          descripcion: libroInfo.descripcion || '',
+          imagen_portada: libroInfo.imagen_portada || this.obtenerImagenPorDefecto()
         },
-        {
-          text: 'Registrar Libro',
-          handler: async () => {
-            await this.registrarLibroDesdeGoogleBooks(libroInfo, datosAdicionales);
-          }
-        }
-      ]
+        cantidad_total: datosAdicionales?.cantidad_total,
+        ubicacion: datosAdicionales?.ubicacion
+      }
     });
-    
-    await alert.present();
+
+    await modal.present();
+    const { role } = await modal.onWillDismiss();
+    if (role === 'confirm') {
+      await this.registrarLibroDesdeGoogleBooks(libroInfo, datosAdicionales);
+    }
   }
 
   /**
@@ -447,7 +435,7 @@ export class AdminLibrosPage implements OnInit {
           text: 'Ver Detalles',
           icon: 'eye-outline',
           handler: () => {
-            this.router.navigate(['/detalle-libro'], { queryParams: { id: libro.id } });
+            this.router.navigate(['detalle-libro'], { queryParams: { id: libro.id } });
           }
         },
         {
@@ -477,65 +465,18 @@ export class AdminLibrosPage implements OnInit {
   }
 
   /**
-   * Editar libro existente
+   * Editar libro existente (solo cantidad_total)
    */
   async editarLibro(libro: Libro) {
     const alert = await this.alertController.create({
-      header: 'Editar Libro',
+      header: 'Actualizar cantidad de ejemplares',
       inputs: [
-        {
-          name: 'titulo',
-          type: 'text',
-          placeholder: 'Título del libro',
-          value: libro.titulo
-        },
-        {
-          name: 'autor',
-          type: 'text',
-          placeholder: 'Autor',
-          value: libro.autor
-        },
-        {
-          name: 'isbn',
-          type: 'text',
-          placeholder: 'ISBN',
-          value: libro.isbn
-        },
-        {
-          name: 'categoria',
-          type: 'text',
-          placeholder: 'Categoría',
-          value: libro.categoria
-        },
-        {
-          name: 'editorial',
-          type: 'text',
-          placeholder: 'Editorial',
-          value: libro.editorial
-        },
-        {
-           name: 'anio_publicacion',
-           type: 'number',
-           placeholder: 'Año de publicación',
-           value: libro.anio_publicacion?.toString()
-         },
         {
           name: 'cantidad_total',
           type: 'number',
           placeholder: 'Cantidad total',
-          value: libro.cantidad_total.toString()
-        },
-        {
-          name: 'descripcion',
-          type: 'textarea',
-          placeholder: 'Descripción',
-          value: libro.descripcion
-        },
-        {
-          name: 'ubicacion',
-          type: 'text',
-          placeholder: 'Ubicación',
-          value: libro.ubicacion
+          value: String((libro.cantidad_total ?? libro.cantidad_disponible ?? 1)),
+          min: 1
         }
       ],
       buttons: [
@@ -546,13 +487,39 @@ export class AdminLibrosPage implements OnInit {
         {
           text: 'Guardar',
           handler: async (data) => {
-            await this.procesarEdicionLibro(libro.id, data);
+            const nuevaCantidad = parseInt(data.cantidad_total, 10);
+            if (isNaN(nuevaCantidad) || nuevaCantidad < 1) {
+              await this.mostrarToast('Cantidad inválida. Debe ser un número mayor a 0.', 'warning');
+              return false;
+            }
+            await this.actualizarCantidadLibro(libro.id, nuevaCantidad);
+            return true;
           }
         }
       ]
     });
 
     await alert.present();
+  }
+
+  /**
+   * Actualizar cantidad_total de un libro y refrescar listado
+   */
+  private async actualizarCantidadLibro(id: number, cantidad_total: number) {
+    const loading = await this.loadingController.create({
+      message: 'Actualizando cantidad...'
+    });
+    await loading.present();
+
+    try {
+      await this.bibliotecaService.actualizarLibro(id, { cantidad_total }).toPromise();
+      await loading.dismiss();
+      await this.mostrarToast('Cantidad actualizada exitosamente', 'success');
+      this.cargarLibros();
+    } catch (error: any) {
+      await loading.dismiss();
+      await this.mostrarToast(error.message || 'Error al actualizar la cantidad', 'danger');
+    }
   }
 
   /**

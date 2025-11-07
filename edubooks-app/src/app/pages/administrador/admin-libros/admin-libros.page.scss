@@ -84,8 +84,8 @@
 .libro-card {
   background: var(--card-bg);
   border: 1px solid var(--card-border);
-  border-radius: 16px;
-  padding: 16px;
+  border-radius: 12px;
+  padding: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   transition: all 0.3s ease;
 
@@ -112,8 +112,8 @@
 }
 
 .libro-imagen {
-  width: 48px;
-  height: 64px;
+  width: 40px;
+  height: 56px;
   object-fit: cover;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
@@ -125,7 +125,7 @@
   min-width: 0;
 
   .libro-titulo {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
     color: var(--text-primary);
     margin: 0 0 4px 0;
@@ -137,7 +137,7 @@
   }
 
   .libro-autor {
-    font-size: 12px;
+    font-size: 11px;
     color: var(--text-secondary);
     margin: 0;
     font-style: italic;
@@ -156,8 +156,8 @@
   .status-chip {
     --padding-start: 8px;
     --padding-end: 8px;
-    height: 28px;
-    font-size: 11px;
+    height: 24px;
+    font-size: 10px;
     font-weight: 600;
   }
 }
@@ -171,12 +171,12 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 12px;
+  padding: 6px 10px;
   background: rgba(156, 39, 176, 0.1);
   border: 1px solid rgba(156, 39, 176, 0.2);
   border-radius: 12px;
   margin-bottom: 12px;
-  font-size: 12px;
+  font-size: 11px;
   color: var(--accent-secondary);
 
   ion-icon {
@@ -194,14 +194,15 @@
   display: grid;
   gap: 8px;
   margin-bottom: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .detail-item {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 0;
-  font-size: 12px;
+  padding: 4px 0;
+  font-size: 11px;
 
   ion-icon {
     font-size: 14px;
@@ -229,9 +230,9 @@
   background: rgba(79, 195, 247, 0.1);
   border: 1px solid rgba(79, 195, 247, 0.2);
   border-radius: 8px;
-  padding: 8px 12px;
+  padding: 6px 10px;
   margin-top: 8px;
-  font-size: 12px;
+  font-size: 11px;
 
   ion-icon {
     font-size: 16px;

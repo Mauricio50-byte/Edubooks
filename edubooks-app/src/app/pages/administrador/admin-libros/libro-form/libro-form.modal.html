@@ -1,0 +1,34 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Registrar Libro (Google Books)</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cancelar()">Cancelar</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+ </ion-header>
+
+<ion-content class="ion-padding">
+  <form [formGroup]="form" (ngSubmit)="confirmar()">
+    <ion-item>
+      <ion-label position="floating">Búsqueda (ISBN o título)</ion-label>
+      <ion-input formControlName="busqueda" placeholder="9780307474278 o Cien años de soledad"></ion-input>
+    </ion-item>
+    <ion-note color="danger" *ngIf="form.get('busqueda')?.touched && form.get('busqueda')?.invalid">Ingresa al menos 2 caracteres.</ion-note>
+
+    <ion-item>
+      <ion-label position="floating">Cantidad total</ion-label>
+      <ion-input formControlName="cantidad_total" type="number" min="1"></ion-input>
+    </ion-item>
+    <ion-note color="danger" *ngIf="form.get('cantidad_total')?.touched && form.get('cantidad_total')?.invalid">La cantidad debe ser al menos 1.</ion-note>
+
+    <ion-item>
+      <ion-label position="floating">Ubicación (ej: A1-001)</ion-label>
+      <ion-input formControlName="ubicacion" placeholder="A1-001"></ion-input>
+    </ion-item>
+    <ion-note color="medium">Formato: Letra + dígito - 3 dígitos (A1-001)</ion-note>
+
+    <div class="actions">
+      <ion-button type="submit" expand="block" color="primary">Buscar y Registrar</ion-button>
+    </div>
+  </form>
+</ion-content>

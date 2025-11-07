@@ -337,6 +337,37 @@ export class BibliotecaService {
   }
 
   /**
+   * Actualizar libro (solo administradores)
+   */
+  actualizarLibro(id: number, data: Partial<Libro>): Observable<any> {
+    // Normalizar solo los campos permitidos y limpiar datos
+    const payload: any = {};
+    if (data.titulo !== undefined) payload.titulo = String(data.titulo).trim();
+    if (data.autor !== undefined) payload.autor = String(data.autor).trim();
+    if (data.isbn !== undefined) payload.isbn = String(data.isbn).trim();
+    if (data.categoria !== undefined) payload.categoria = String(data.categoria).trim();
+    if (data.editorial !== undefined) payload.editorial = String(data.editorial).trim();
+    if (data['anio_publicacion'] !== undefined) payload['anio_publicacion'] = data['anio_publicacion'];
+    if (data.ubicacion !== undefined) payload.ubicacion = String(data.ubicacion).trim();
+    if (data.cantidad_total !== undefined) payload.cantidad_total = Number(data.cantidad_total);
+    if (data.descripcion !== undefined) payload.descripcion = String(data.descripcion).trim();
+    if (data.imagen_portada !== undefined) payload.imagen_portada = data.imagen_portada;
+    if (data.estado !== undefined) payload.estado = String(data.estado).trim();
+
+    return this.apiService.put(`/libros/${id}/actualizar/`, payload).pipe(
+      map(response => {
+        // Refrescar datos desde backend para mantener coherencia
+        this.cargarLibros();
+        return response;
+      }),
+      catchError(error => {
+        console.error('Error actualizando libro:', error);
+        throw error;
+      })
+    );
+  }
+
+  /**
    * Registrar nuevo libro (solo administradores)
    */
   registrarLibro(libroData: any): Observable<any> {
