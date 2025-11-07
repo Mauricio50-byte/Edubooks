@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AlertController, ToastController, LoadingController } from '@ionic/angular';
-import { BibliotecaService } from '../../../core/services/biblioteca.service';
-import { AuthService } from '../../../core/services/auth.service';
-import { Libro } from '../../../core/models/libro.model';
+import { BibliotecaService } from '../../core/services/biblioteca.service';
+import { AuthService } from '../../core/services/auth.service';
+import { Libro } from '../../core/models/libro.model';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 

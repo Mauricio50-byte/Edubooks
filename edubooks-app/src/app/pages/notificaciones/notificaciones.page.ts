@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { AlertController, ActionSheetController } from '@ionic/angular';
-import { NotificacionesService, Notificacion } from '../../../core/services/notificaciones.service';
+import { NotificacionesService, Notificacion } from '../../core/services/notificaciones.service';
 import { Subscription } from 'rxjs';
 
 @Component({

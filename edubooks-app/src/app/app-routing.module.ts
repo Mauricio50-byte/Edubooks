@@ -48,12 +48,12 @@ const routes: Routes = [
   },
   {
     path: 'catalogo',
-    loadChildren: () => import('./pages/docente_y_estudiante/catalogo/catalogo.module').then( m => m.CatalogoPageModule),
+    loadChildren: () => import('./pages/catalogo/catalogo.module').then( m => m.CatalogoPageModule),
     canActivate: [SystemInitGuard, AuthGuard] // Verificar inicialización y que esté autenticado
   },
   {
     path: 'detalle-libro',
-    loadChildren: () => import('./pages/docente_y_estudiante/detalle-libro/detalle-libro.module').then( m => m.DetalleLibroPageModule),
+    loadChildren: () => import('./pages/detalle-libro/detalle-libro.module').then( m => m.DetalleLibroPageModule),
     canActivate: [SystemInitGuard, AuthGuard] // Verificar inicialización y que esté autenticado
   },
   {
@@ -79,7 +79,7 @@ const routes: Routes = [
   },
   {
     path: 'notificaciones',
-    loadChildren: () => import('./pages/docente_y_estudiante/notificaciones/notificaciones.module').then( m => m.NotificacionesPageModule),
+    loadChildren: () => import('./pages/notificaciones/notificaciones.module').then( m => m.NotificacionesPageModule),
     canActivate: [SystemInitGuard, AuthGuard] // Verificar inicialización y que esté autenticado
   },
   {
@@ -93,6 +93,12 @@ const routes: Routes = [
     loadChildren: () => import('./pages/administrador/admin-prestamos/admin-prestamos.module').then( m => m.AdminPrestamosPageModule),
     canActivate: [SystemInitGuard, AuthGuard, RoleGuard],
     data: { roles: ['administrador', 'docente'] }
+  },
+  {
+    path: 'admin-sanciones',
+    loadChildren: () => import('./pages/administrador/admin-sanciones/admin-sanciones.module').then( m => m.AdminSancionesPageModule),
+    canActivate: [SystemInitGuard, AuthGuard, RoleGuard],
+    data: { roles: ['administrador'] }
   },
   {
     path: 'sanciones',

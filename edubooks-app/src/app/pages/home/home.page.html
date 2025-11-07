@@ -138,6 +138,15 @@
             <ion-icon name="chevron-forward-outline" slot="end" color="medium"></ion-icon>
           </ion-item>
 
+          <ion-item button (click)="navigateTo('/admin-sanciones')" *appHasRole="'administrador'">
+            <ion-icon name="warning-outline" slot="start" color="tertiary"></ion-icon>
+            <ion-label>
+              <h3>Gestión de Sanciones</h3>
+              <p>Administrar sanciones y multas</p>
+            </ion-label>
+            <ion-icon name="chevron-forward-outline" slot="end" color="medium"></ion-icon>
+          </ion-item>
+
           <ion-item button (click)="navigateTo('/admin-solicitudes')" *appHasRole="['administrador', 'docente']">
             <ion-icon name="document-text-outline" slot="start" color="tertiary"></ion-icon>
             <ion-label>

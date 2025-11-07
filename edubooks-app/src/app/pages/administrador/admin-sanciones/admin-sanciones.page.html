@@ -1,0 +1,186 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Administrar Sanciones</ion-title>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-buttons slot="end">
+      <ion-button color="primary" (click)="crearSancion()">
+        <ion-icon name="add-circle-outline" slot="start"></ion-icon>
+        Crear Sanción
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar collapse="condense">
+    <ion-title size="large">Administrar Sanciones</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div *ngIf="isLoading" class="loading-container">
+    <ion-spinner name="dots"></ion-spinner>
+    <p>Cargando sanciones...</p>
+  </div>
+
+  <ion-card *ngIf="!isLoading && stats">
+    <ion-card-header>
+      <ion-card-title>Resumen</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <ion-icon name="list-outline" color="primary"></ion-icon>
+          <div>
+            <h3>Total</h3>
+            <p>{{ stats?.total || sanciones.length }}</p>
+          </div>
+        </div>
+        <div class="stat-item">
+          <ion-icon name="warning-outline" color="danger"></ion-icon>
+          <div>
+            <h3>Activas</h3>
+            <p>{{ stats?.activas !== undefined ? stats.activas : contarPorEstado('Activa') }}</p>
+          </div>
+        </div>
+        <div class="stat-item">
+          <ion-icon name="checkmark-done-outline" color="success"></ion-icon>
+          <div>
+            <h3>Pagadas</h3>
+            <p>{{ stats?.pagadas !== undefined ? stats.pagadas : contarPorEstado('Pagada') }}</p>
+          </div>
+        </div>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card *ngIf="!isLoading">
+    <ion-card-header>
+      <ion-card-title>Filtros</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <div class="filters">
+        <ion-item lines="none">
+          <ion-label>Estado</ion-label>
+          <ion-select [(ngModel)]="filtroEstado" interface="popover" placeholder="Todos">
+            <ion-select-option value="">Todos</ion-select-option>
+            <ion-select-option value="Activa">Activa</ion-select-option>
+            <ion-select-option value="Pagada">Pagada</ion-select-option>
+            <ion-select-option value="Completada">Completada</ion-select-option>
+          </ion-select>
+        </ion-item>
+        <ion-item lines="none">
+          <ion-label>Tipo</ion-label>
+          <ion-select [(ngModel)]="filtroTipo" interface="popover" placeholder="Todos">
+            <ion-select-option value="">Todos</ion-select-option>
+            <ion-select-option value="Multa">Multa</ion-select-option>
+            <ion-select-option value="Suspensión">Suspensión</ion-select-option>
+          </ion-select>
+        </ion-item>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Lista de sanciones -->
+  <ion-card *ngIf="!isLoading && sancionesFiltradas.length > 0">
+    <ion-card-header>
+      <ion-card-title>Listado de Sanciones</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-list>
+        <ion-item *ngFor="let sancion of sancionesFiltradas" class="sancion-item">
+          <ion-avatar slot="start">
+            <ion-icon name="person-circle-outline" size="large"></ion-icon>
+          </ion-avatar>
+          <ion-label>
+            <div class="sancion-header">
+              <div class="chips">
+                <ion-chip [color]="getTipoColor(sancion.tipo)" size="small">
+                  <ion-icon name="warning-outline"></ion-icon>
+                  <ion-label>{{ sancion.tipo }}</ion-label>
+                </ion-chip>
+                <ion-chip [color]="getEstadoColor(sancion.estado)" size="small">
+                  <ion-label>{{ sancion.estado }}</ion-label>
+                </ion-chip>
+              </div>
+              <div class="monto" *ngIf="sancion.monto">
+                <ion-badge color="warning">${{ sancion.monto.toLocaleString() }}</ion-badge>
+              </div>
+            </div>
+            <h3>{{ sancion.usuario.nombre }} {{ sancion.usuario.apellido }}</h3>
+            <p class="descripcion">{{ sancion.descripcion }}</p>
+            <div class="detalles">
+              <ion-item lines="none">
+                <ion-icon name="calendar-outline" slot="start"></ion-icon>
+                <ion-label>
+                  <h3>Inicio</h3>
+                  <p>{{ formatearFecha(sancion.fecha_inicio) }}</p>
+                </ion-label>
+              </ion-item>
+              <ion-item lines="none" *ngIf="sancion.fecha_fin">
+                <ion-icon name="calendar" slot="start"></ion-icon>
+                <ion-label>
+                  <h3>Fin</h3>
+                  <p>{{ formatearFecha(sancion.fecha_fin!) }}</p>
+                </ion-label>
+              </ion-item>
+              <ion-item lines="none" *ngIf="sancion.dias_suspension">
+                <ion-icon name="ban-outline" slot="start"></ion-icon>
+                <ion-label>
+                  <h3>Días de suspensión</h3>
+                  <p>{{ sancion.dias_suspension }}</p>
+                </ion-label>
+              </ion-item>
+            </div>
+            <div class="acciones">
+              <ion-button size="small" fill="outline" (click)="verDetallesSancion(sancion)">
+                <ion-icon name="information-circle-outline" slot="start"></ion-icon>
+                Detalles
+              </ion-button>
+              <ion-button size="small" color="success" *ngIf="sancion.tipo === 'Multa' && sancion.estado === 'Activa'" (click)="pagarMulta(sancion)">
+                <ion-icon name="cash-outline" slot="start"></ion-icon>
+                Marcar Pagada
+              </ion-button>
+            </div>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Estado vacío -->
+  <div *ngIf="!isLoading && sanciones.length === 0" class="empty-state">
+    <ion-icon name="warning-outline" class="empty-icon"></ion-icon>
+    <h3>No hay sanciones registradas</h3>
+    <p>Usa el botón "Crear Sanción" para agregar una nueva.</p>
+    <ion-button color="primary" (click)="crearSancion()">Crear Sanción</ion-button>
+  </div>
+
+  <!-- Sanciones pendientes -->
+  <ion-card *ngIf="!isLoading && sancionesPendientes.length > 0">
+    <ion-card-header>
+      <ion-card-title>Pendientes de Aprobación</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-list>
+        <ion-item *ngFor="let sancion of sancionesPendientes">
+          <ion-label>
+            <h3>{{ sancion.usuario.nombre }} {{ sancion.usuario.apellido }} — {{ sancion.tipo }}</h3>
+            <p>{{ sancion.descripcion }}</p>
+          </ion-label>
+          <ion-button color="success" (click)="aprobarSancion(sancion)">
+            <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
+            Aprobar
+          </ion-button>
+          <ion-button color="danger" fill="outline" (click)="rechazarSancion(sancion)">
+            <ion-icon name="close-circle-outline" slot="start"></ion-icon>
+            Rechazar
+          </ion-button>
+        </ion-item>
+      </ion-list>
+    </ion-card-content>
+  </ion-card>
+</ion-content>
