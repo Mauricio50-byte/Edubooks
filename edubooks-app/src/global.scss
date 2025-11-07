@@ -146,3 +146,45 @@ ion-action-sheet {
     color: var(--ion-color-medium);
   }
 }
+
+/* ===== Estilo específico para Alert de Cerrar Sesión ===== */
+.logout-alert {
+  /* Paleta basada en el prompt */
+  --background: #2A2A50; /* profundidad sobre fondo oscuro */
+  --color: var(--ion-color-light);
+  --header-color: var(--ion-color-light);
+  --message-color: var(--ion-color-medium);
+  --button-color: var(--ion-color-light);
+  --button-background: #2A2A50;
+  --backdrop-opacity: 0.7;
+  --border-color: rgba(255, 255, 255, 0.08);
+  --border-radius: 16px;
+  --box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+}
+
+/* Afinar tipografía del header y el mensaje dentro del alert */
+.logout-alert::part(header) {
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  color: var(--ion-color-light);
+}
+
+.logout-alert::part(message) {
+  color: var(--ion-color-medium);
+}
+
+/* Estilos base de los botones del alert */
+.logout-alert::part(button) {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Botón cancelar: discreto con color medio */
+.logout-alert::part(button).alert-cancel {
+  color: var(--ion-color-medium);
+}
+
+/* Botón destructivo: acento en rojo según paleta */
+.logout-alert::part(button).alert-destructive {
+  color: var(--ion-color-danger);
+  font-weight: 600;
+}
