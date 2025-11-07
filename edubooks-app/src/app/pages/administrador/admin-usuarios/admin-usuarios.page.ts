@@ -239,19 +239,6 @@ export class AdminUsuariosPage implements OnInit {
     return this.usuarios.filter(u => u && u.is_active === false).length;
   }
 
-  /**
-   * Manejar cambio en filtro de rol
-   */
-  onRolFilterChange(value: string | string[]) {
-    this.filtroRol = Array.isArray(value) ? value[0] || '' : value;
-  }
-
-  /**
-   * Manejar cambio en filtro de estado
-   */
-  onEstadoFilterChange(value: string | string[]) {
-    this.filtroEstado = Array.isArray(value) ? value[0] || '' : value;
-  }
 
   /**
    * Obtener icono del rol
@@ -317,16 +304,17 @@ export class AdminUsuariosPage implements OnInit {
     }
   }
 
-  // Nueva lógica: selección mediante chips
-  selectRol(value: string) {
-    this.filtroRol = (value || '').toLowerCase();
-  }
-
-  selectEstado(value: string) {
-    this.filtroEstado = value;
-  }
+  // Filtros de rol y estado ahora se actualizan vía two-way binding
 
   selectGenero(value: string) {
     this.filtroGenero = value;
+  }
+
+  // Nueva acción: limpiar filtros globales
+  onLimpiarFiltros() {
+    this.searchTerm = '';
+    this.filtroRol = '';
+    this.filtroEstado = '';
+    this.filtroGenero = '';
   }
 }

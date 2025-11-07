@@ -19,75 +19,40 @@
     <ion-refresher-content></ion-refresher-content>
   </ion-refresher>
 
-  <!-- Filtros y búsqueda -->
-  <ion-card *ngIf="!isLoading">
-    <ion-card-header>
-      <ion-card-title>
-        <ion-icon name="search-outline"></ion-icon>
-        Buscar y Filtrar Usuarios
-      </ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <ion-searchbar 
-        [(ngModel)]="searchTerm"
-        placeholder="Buscar por nombre, apellido o email"
-        show-clear-button="focus">
-      </ion-searchbar>
-      
-      <div class="filters-container">
-        <div class="filter-chips">
-          <div class="chip-group rol-chip-group">
-            <div class="group-label">
-              <ion-icon name="people-outline"></ion-icon>
-              Filtrar por Rol
-            </div>
-            <div class="chips">
-              <ion-chip color="primary" [outline]="filtroRol !== ''" (click)="selectRol('')">
-                <ion-icon name="people-outline" slot="start"></ion-icon>
-                <ion-label>Todos los roles</ion-label>
-              </ion-chip>
-              <ion-chip *ngFor="let opt of rolOptions | slice:1" [color]="opt.color || 'primary'" [outline]="filtroRol !== opt.value" (click)="selectRol(opt.value)">
-                <ion-icon [name]="opt.icon" slot="start"></ion-icon>
-                <ion-label>{{ opt.label }}</ion-label>
-              </ion-chip>
-            </div>
-          </div>
-          <div class="chip-group estado-chip-group">
-            <div class="group-label">
-              <ion-icon name="checkmark-circle-outline"></ion-icon>
-              Filtrar por Estado
-            </div>
-            <div class="chips">
-              <ion-chip color="success" [outline]="filtroEstado !== ''" (click)="selectEstado('')">
-                <ion-icon name="list-outline" slot="start"></ion-icon>
-                <ion-label>Todos los estados</ion-label>
-              </ion-chip>
-              <ion-chip *ngFor="let opt of estadoOptions | slice:1" [color]="opt.color || 'primary'" [outline]="filtroEstado !== opt.value" (click)="selectEstado(opt.value)">
-                <ion-icon [name]="opt.icon" slot="start"></ion-icon>
-                <ion-label>{{ opt.label }}</ion-label>
-              </ion-chip>
-            </div>
-          </div>
-          <div class="chip-group genero-chip-group">
-            <div class="group-label">
-              <ion-icon name="transgender-outline"></ion-icon>
-              Filtrar por Género
-            </div>
-            <div class="chips">
-              <ion-chip color="primary" [outline]="filtroGenero !== ''" (click)="selectGenero('')">
-                <ion-icon name="transgender-outline" slot="start"></ion-icon>
-                <ion-label>Todos los géneros</ion-label>
-              </ion-chip>
-              <ion-chip *ngFor="let opt of generoOptions | slice:1" [color]="opt.color || 'primary'" [outline]="filtroGenero !== opt.value" (click)="selectGenero(opt.value)">
-                <ion-icon [name]="opt.icon" slot="start"></ion-icon>
-                <ion-label>{{ opt.label }}</ion-label>
-              </ion-chip>
-            </div>
-          </div>
-        </div>
+  <!-- Filtros y búsqueda (componente reutilizable) -->
+  <app-filter-dropdown
+    *ngIf="!isLoading"
+    [title]="'Buscar y Filtrar Usuarios'"
+    [placeholderBusqueda]="'Buscar por nombre, apellido o email'"
+    [rolOptions]="rolOptions"
+    [estadoOptions]="estadoOptions"
+    [totalCount]="usuarios.length"
+    [filteredCount]="usuariosFiltrados.length"
+    [(filtroTexto)]="searchTerm"
+    [(filtroRol)]="filtroRol"
+    [(filtroEstado)]="filtroEstado"
+    (limpiarFiltros)="onLimpiarFiltros()"
+  ></app-filter-dropdown>
+
+  <!-- Filtro adicional: Género -->
+  <div class="genero-filter-container" *ngIf="!isLoading">
+    <div class="chip-group genero-chip-group">
+      <div class="group-label">
+        <ion-icon name="transgender-outline"></ion-icon>
+        Filtrar por Género
       </div>
-    </ion-card-content>
-  </ion-card>
+      <div class="chips">
+        <ion-chip color="primary" [outline]="filtroGenero !== ''" (click)="selectGenero('')">
+          <ion-icon name="transgender-outline" slot="start"></ion-icon>
+          <ion-label>Todos los géneros</ion-label>
+        </ion-chip>
+        <ion-chip *ngFor="let opt of generoOptions | slice:1" [color]="opt.color || 'primary'" [outline]="filtroGenero !== opt.value" (click)="selectGenero(opt.value)">
+          <ion-icon [name]="opt.icon" slot="start"></ion-icon>
+          <ion-label>{{ opt.label }}</ion-label>
+        </ion-chip>
+      </div>
+    </div>
+  </div>
 
   <!-- Estadísticas rápidas -->
   <ion-card *ngIf="!isLoading && usuarios.length > 0">
