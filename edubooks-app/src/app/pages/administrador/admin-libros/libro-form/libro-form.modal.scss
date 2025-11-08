@@ -10,11 +10,23 @@ ion-note {
 }
 
 .libro-form {
+  ion-content {
+    --background: var(--ion-color-dark);
+  }
+
+  ion-header, ion-toolbar {
+    --background: var(--ion-color-dark);
+    --color: var(--ion-color-light);
+  }
+
   ion-list {
     margin-bottom: 12px;
   }
 
   ion-item {
+    --background: rgba(var(--ion-color-primary-rgb), 0.06);
+    --color: var(--ion-color-light);
+    --border-color: rgba(var(--ion-color-primary-rgb), 0.18);
     --border-radius: 12px;
     --inner-padding-top: 10px;
     --inner-padding-bottom: 10px;
@@ -22,7 +34,7 @@ ion-note {
   }
 
   ion-item-divider {
-    --background: var(--ion-color-step-150);
+    --background: rgba(var(--ion-color-primary-rgb), 0.12);
     --color: var(--ion-color-light);
     margin: 8px 0 12px;
     border-radius: 10px;
@@ -32,11 +44,14 @@ ion-note {
   ion-input {
     --padding-top: 6px;
     --padding-bottom: 6px;
+    --color: var(--ion-color-light);
+    --placeholder-color: var(--ion-color-medium-tint);
+    --highlight-color-focused: var(--ion-color-primary);
   }
 
   .brand-select {
-    --background: var(--ion-color-light);
-    --color: var(--ion-color-dark);
+    --background: var(--ion-color-dark);
+    --color: var(--ion-color-light);
     --placeholder-color: var(--ion-color-medium);
     --border-radius: 10px;
   }
@@ -45,5 +60,15 @@ ion-note {
     --border-radius: 12px;
     text-transform: none;
     font-weight: 500;
+  }
+
+  // Afinar contraste del botón outline y el primario con gradiente
+  ion-button[fill="outline"] {
+    --color: var(--ion-color-light);
+    --border-color: rgba(var(--ion-color-light-rgb), 0.4);
+  }
+
+  ion-button.gradient-primary {
+    --color: var(--ion-color-light);
   }
 }

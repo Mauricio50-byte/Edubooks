@@ -5,7 +5,7 @@
       <ion-back-button defaultHref="/home"></ion-back-button>
     </ion-buttons>
     <ion-buttons slot="end">
-      <ion-button (click)="crearLibro()" *appHasPermission="{ action: 'create', resource: 'libro' }">
+      <ion-button (click)="crearLibro()" class="gradient-primary" *appHasPermission="{ action: 'create', resource: 'libro' }">
         <ion-icon name="add" slot="icon-only"></ion-icon>
       </ion-button>
     </ion-buttons>
@@ -91,7 +91,7 @@
     <ion-card-content>
       <ion-icon name="alert-circle" class="error-icon"></ion-icon>
       <p>{{ error }}</p>
-      <ion-button fill="clear" (click)="cargarLibros()">
+      <ion-button fill="clear" class="gradient-primary" (click)="cargarLibros()">
         <ion-icon name="refresh" slot="start"></ion-icon>
         Reintentar
       </ion-button>
@@ -103,7 +103,7 @@
     <ion-icon name="library-outline" class="empty-icon"></ion-icon>
     <h3>No hay libros registrados</h3>
     <p>Comienza registrando el primer libro en el catálogo.</p>
-    <ion-button (click)="crearLibro()" fill="outline">
+    <ion-button (click)="crearLibro()" fill="outline" class="gradient-primary">
       <ion-icon name="add" slot="start"></ion-icon>
       Registrar Primer Libro
     </ion-button>
@@ -133,7 +133,7 @@
 
   <!-- FAB para agregar libro -->
   <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-    <ion-fab-button (click)="crearLibro()">
+    <ion-fab-button (click)="crearLibro()" class="gradient-primary">
       <ion-icon name="add"></ion-icon>
     </ion-fab-button>
   </ion-fab>

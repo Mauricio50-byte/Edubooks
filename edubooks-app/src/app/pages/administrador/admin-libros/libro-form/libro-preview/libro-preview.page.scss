@@ -26,3 +26,24 @@
 .chip-ubicacion {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
+.dark-theme {
+  ion-content {
+    --background: var(--ion-color-dark);
+  }
+}
+
+.registro-card {
+  background: var(--ion-color-dark);
+  border: 1px solid var(--ion-color-dark-shade);
+}
+
+ion-item {
+  --background: var(--ion-color-dark);
+  --color: var(--ion-color-light);
+  --border-color: var(--ion-color-dark-shade);
+}
+
+.chip-ubicacion {
+  --background: var(--ion-color-dark-tint);
+  --color: var(--ion-color-light);
+}

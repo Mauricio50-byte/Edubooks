@@ -1,15 +1,16 @@
-// ===== VARIABLES DE TEMA OSCURO =====
-:root {
-  --card-bg: #2a2a2a;
-  --card-border: #404040;
-  --text-primary: #ffffff;
-  --text-secondary: #b0b0b0;
-  --text-muted: #888888;
-  --accent-primary: #4fc3f7;
-  --accent-success: #4caf50;
-  --accent-warning: #ffc107;
-  --accent-danger: #f44336;
-  --accent-secondary: #9c27b0;
+// ===== TEMA OSCURO (Variables de Ionic) =====
+ion-content {
+  --background: var(--ion-color-dark);
+}
+
+ion-header, ion-toolbar {
+  --background: var(--ion-color-dark);
+  --color: var(--ion-color-light);
+}
+
+ion-card {
+  background: var(--ion-color-dark);
+  border: 1px solid var(--ion-color-dark-shade);
 }
 
 .stats-container {
@@ -85,8 +86,8 @@
 }
 
 .libro-card {
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
+  background: var(--ion-color-dark-tint);
+  border: 1px solid var(--ion-color-dark-shade);
   border-radius: 12px;
   padding: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
@@ -130,7 +131,7 @@
   .libro-titulo {
     font-size: 13px;
     font-weight: 600;
-    color: var(--text-primary);
+    color: var(--ion-color-light);
     margin: 0 0 4px 0;
     line-height: 1.3;
     display: -webkit-box;
@@ -142,7 +143,7 @@
 
   .libro-autor {
     font-size: 11px;
-    color: var(--text-secondary);
+    color: var(--ion-color-medium);
     margin: 0;
     font-style: italic;
     display: -webkit-box;
@@ -177,16 +178,16 @@
   align-items: center;
   gap: 8px;
   padding: 6px 10px;
-  background: rgba(156, 39, 176, 0.1);
-  border: 1px solid rgba(156, 39, 176, 0.2);
+  background: rgba(var(--ion-color-primary-rgb), 0.08);
+  border: 1px solid rgba(var(--ion-color-primary-rgb), 0.15);
   border-radius: 12px;
   margin-bottom: 12px;
   font-size: 11px;
-  color: var(--accent-secondary);
+  color: var(--ion-color-primary);
 
   ion-icon {
     font-size: 16px;
-    color: var(--accent-secondary);
+    color: var(--ion-color-primary);
     flex-shrink: 0;
   }
 
@@ -211,19 +212,19 @@
 
   ion-icon {
     font-size: 14px;
-    color: var(--accent-primary);
+    color: var(--ion-color-primary);
     flex-shrink: 0;
     width: 16px;
   }
 
   .detail-label {
     font-weight: 500;
-    color: var(--text-secondary);
+    color: var(--ion-color-medium);
     min-width: 60px;
   }
 
   .detail-value {
-    color: var(--text-primary);
+    color: var(--ion-color-light);
     font-weight: 400;
   }
 }
@@ -232,8 +233,8 @@
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  background: rgba(79, 195, 247, 0.1);
-  border: 1px solid rgba(79, 195, 247, 0.2);
+  background: rgba(var(--ion-color-tertiary-rgb), 0.08);
+  border: 1px solid rgba(var(--ion-color-tertiary-rgb), 0.15);
   border-radius: 8px;
   padding: 6px 10px;
   margin-top: 8px;
@@ -241,14 +242,14 @@
 
   ion-icon {
     font-size: 16px;
-    color: var(--accent-primary);
+    color: var(--ion-color-tertiary);
     flex-shrink: 0;
     margin-top: 2px;
   }
 
   span {
     line-height: 1.4;
-    color: var(--text-secondary);
+    color: var(--ion-color-medium);
     font-style: italic;
   }
 }
@@ -267,28 +268,6 @@
     font-size: 10px;
     font-weight: 700;
     letter-spacing: 0.5px;
-    
-    &[color="primary"] {
-      --background: var(--accent-primary);
-      --background-hover: #29b6f6;
-    }
-    
-    &[color="secondary"] {
-      --color: var(--accent-secondary);
-      --border-color: var(--accent-secondary);
-      
-      &:hover {
-        --background: rgba(156, 39, 176, 0.1);
-      }
-    }
-    
-    &[color="danger"] {
-      --color: var(--accent-danger);
-      
-      &:hover {
-        --background: rgba(244, 67, 54, 0.1);
-      }
-    }
   }
 }
 
@@ -347,32 +326,32 @@
 
 // ===== ESTILOS DE FILTROS =====
 ion-searchbar {
-  --background: var(--card-bg);
-  --color: var(--text-primary);
-  --placeholder-color: var(--text-secondary);
-  --icon-color: var(--accent-primary);
+  --background: var(--ion-color-dark);
+  --color: var(--ion-color-light);
+  --placeholder-color: var(--ion-color-medium);
+  --icon-color: var(--ion-color-primary);
   --border-radius: 12px;
   --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  border: 1px solid var(--card-border);
+  border: 1px solid var(--ion-color-dark-shade);
   margin-bottom: 8px;
 }
 
 ion-item {
-  --background: var(--card-bg);
-  --color: var(--text-primary);
-  --border-color: var(--card-border);
+  --background: var(--ion-color-dark);
+  --color: var(--ion-color-light);
+  --border-color: var(--ion-color-dark-shade);
   --padding-start: 16px;
   --inner-padding-end: 16px;
 
   ion-label {
     font-weight: 500;
     min-width: 80px;
-    color: var(--text-primary);
+    color: var(--ion-color-light);
   }
 
   ion-select {
-    --color: var(--text-primary);
-    --placeholder-color: var(--text-secondary);
+    --color: var(--ion-color-light);
+    --placeholder-color: var(--ion-color-medium);
   }
 }
 
