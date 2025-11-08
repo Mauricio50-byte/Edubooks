@@ -1,11 +1,11 @@
 // src/app/pages/admin-libros/admin-libros.page.ts
 import { Component, OnInit } from '@angular/core';
-import { LoadingController, ToastController, AlertController, ActionSheetController, ModalController } from '@ionic/angular';
+import { LoadingController, ToastController, AlertController, ModalController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { BibliotecaService } from '../../../core/services/biblioteca.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { GoogleBooksService } from '../../../core/services/google-books.service';
-import { Libro, LibroRegistro } from '../../../core/models/libro.model';
+import { Libro } from '../../../core/models/libro.model';
 @Component({
   selector: 'app-admin-libros',
   templateUrl: './admin-libros.page.html',
@@ -23,7 +23,6 @@ export class AdminLibrosPage implements OnInit {
   currentPage = 1;
   totalPages = 1;
   hasMoreData = true;
-  imagenSeleccionada: string = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjY2NjY2NjIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzY2NjY2NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkxpYnJvPC90ZXh0Pjwvc3ZnPg==';
 
   constructor(
     private bibliotecaService: BibliotecaService,
@@ -32,7 +31,6 @@ export class AdminLibrosPage implements OnInit {
     private alertController: AlertController,
     private loadingController: LoadingController,
     private toastController: ToastController,
-    private actionSheetController: ActionSheetController,
     private modalController: ModalController,
     public router: Router
   ) {}
@@ -148,54 +146,19 @@ export class AdminLibrosPage implements OnInit {
   }
 
   /**
-   * Crear nuevo libro con Google Books API
+   * Crear nuevo libro (abre modal con formulario)
    */
   async crearLibro() {
-    const alert = await this.alertController.create({
-      header: 'Registrar Libro desde Google Books',
-      message: 'Ingresa el título o ISBN del libro. Los demás datos se completarán automáticamente.',
-      inputs: [
-        {
-          name: 'busqueda',
-          type: 'text',
-          placeholder: 'Título del libro o ISBN',
-          attributes: { required: true }
-        },
-        {
-          name: 'cantidad_total',
-          type: 'number',
-          placeholder: 'Cantidad de ejemplares',
-          min: 1,
-          value: 1
-        },
-        {
-          name: 'ubicacion',
-          type: 'text',
-          placeholder: 'Ubicación (ej: A1-001)',
-          value: 'A1-001'
-        }
-      ],
-      buttons: [
-        {
-          text: 'Cancelar',
-          role: 'cancel'
-        },
-        {
-          text: 'Buscar y Registrar',
-          handler: async (data) => {
-            if (data.busqueda?.trim()) {
-              await this.buscarYRegistrarLibro(data);
-              return true;
-            } else {
-              this.mostrarToast('Ingresa el título o ISBN del libro', 'warning');
-              return false;
-            }
-          }
-        }
-      ]
+    const { LibroFormModalComponent } = await import('./libro-form/libro-form.modal');
+    const modal = await this.modalController.create({
+      component: LibroFormModalComponent
     });
-
-    await alert.present();
+    await modal.present();
+    const { role } = await modal.onWillDismiss();
+    if (role === 'confirm') {
+      // Si el modal confirma, refrescar el listado
+      await this.cargarLibros();
+    }
   }
 
   /**
@@ -206,263 +169,8 @@ export class AdminLibrosPage implements OnInit {
      return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjY2NjY2NjIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzY2NjY2NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkxpYnJvPC90ZXh0Pjwvc3ZnPg==';
    }
 
-  /**
-   * Obtener icono para cada categoría
-   */
-  private obtenerIconoCategoria(categoria: string): string {
-    const iconos: { [key: string]: string } = {
-      'Literatura': '📖',
-      'Programación': '💻',
-      'Matemáticas': '📊',
-      'Ciencias': '🔬',
-      'Ingeniería': '⚙️',
-      'Negocios': '💼',
-      'Historia': '🏛️',
-      'Arte': '🎨',
-      'Psicología': '🧠',
-      'Filosofía': '🤔',
-      'Medicina': '⚕️',
-      'Derecho': '⚖️'
-    };
-    return iconos[categoria] || '📚';
-  }
 
-  /**
-   * Buscar libro en Google Books y registrarlo automáticamente
-   */
-  async buscarYRegistrarLibro(data: any) {
-    const loading = await this.loadingController.create({
-      message: 'Buscando libro en Google Books...'
-    });
-    await loading.present();
-
-    try {
-      const busqueda = data.busqueda.trim();
-      const esISBN = /^[0-9\-X]{10,17}$/.test(busqueda.replace(/[\s\-]/g, ''));
-      
-      let libroInfo;
-      
-      if (esISBN) {
-        // Buscar por ISBN
-        libroInfo = await this.googleBooksService.buscarLibroPorISBN(busqueda).toPromise();
-      } else {
-        // Buscar por título
-        libroInfo = await this.googleBooksService.buscarLibroPorTitulo(busqueda).toPromise();
-      }
-      
-      if (!libroInfo) {
-        await loading.dismiss();
-        await this.mostrarToast('No se encontró el libro en Google Books', 'warning');
-        return;
-      }
-      
-      // Mostrar vista previa y confirmar registro
-      await loading.dismiss();
-      await this.mostrarVistaPrevia(libroInfo, data);
-      
-    } catch (error) {
-      await loading.dismiss();
-      console.error('Error buscando libro en Google Books:', error);
-      await this.mostrarToast('Error al buscar el libro', 'danger');
-    }
-  }
-  
-  /**
-   * Mostrar vista previa del libro encontrado
-   */
-  async mostrarVistaPrevia(libroInfo: any, datosAdicionales: any) {
-    const { LibroPreviewPageComponent } = await import('./libro-form/libro-preview/libro-preview.page');
-    const modal = await this.modalController.create({
-      component: LibroPreviewPageComponent,
-      componentProps: {
-        libro: {
-          titulo: libroInfo.titulo || 'Sin título',
-          autor: libroInfo.autor || 'Desconocido',
-          isbn: libroInfo.isbn || 'N/A',
-          editorial: libroInfo.editorial || 'N/A',
-          anio_publicacion: libroInfo.año_publicacion || libroInfo.anio_publicacion || 'N/A',
-          descripcion: libroInfo.descripcion || '',
-          imagen_portada: libroInfo.imagen_portada || this.obtenerImagenPorDefecto()
-        },
-        cantidad_total: datosAdicionales?.cantidad_total,
-        ubicacion: datosAdicionales?.ubicacion
-      }
-    });
-
-    await modal.present();
-    const { role } = await modal.onWillDismiss();
-    if (role === 'confirm') {
-      await this.registrarLibroDesdeGoogleBooks(libroInfo, datosAdicionales);
-    }
-  }
-
-  /**
-   * Registrar libro desde datos de Google Books
-   */
-  async registrarLibroDesdeGoogleBooks(libroInfo: any, datosAdicionales: any) {
-    const loading = await this.loadingController.create({
-      message: 'Registrando libro...'
-    });
-    await loading.present();
-
-    try {
-      // Determinar la imagen a usar: Google Books > Placeholder genérico
-      let imagenFinal = libroInfo.imagen_portada;
-      if (!imagenFinal) {
-        imagenFinal = this.obtenerImagenPorDefecto();
-      }
-      
-      const libroData: any = {
-        titulo: libroInfo.titulo,
-        autor: libroInfo.autor,
-        isbn: libroInfo.isbn || '',
-        categoria: libroInfo.categorias?.[0] || 'General',
-        editorial: libroInfo.editorial || '',
-        año_publicacion: libroInfo.año_publicacion || null,
-        ubicacion: datosAdicionales.ubicacion?.trim() || 'A1-001',
-        cantidad_total: parseInt(datosAdicionales.cantidad_total) || 1,
-        cantidad_disponible: parseInt(datosAdicionales.cantidad_total) || 1,
-        descripcion: libroInfo.descripcion || '',
-        imagen_portada: imagenFinal,
-        estado: 'Disponible'
-      };
-      
-      console.log('Imagen seleccionada:', imagenFinal);
-      console.log('Imagen de Google Books:', libroInfo.imagen_portada);
-      
-      console.log('Datos del libro desde Google Books:', libroData);
-
-      // Llamar al servicio real para registrar el libro
-      await this.bibliotecaService.registrarLibro(libroData).toPromise();
-      
-      await loading.dismiss();
-      await this.mostrarToast('Libro registrado exitosamente desde Google Books', 'success');
-      this.imagenSeleccionada = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjY2NjY2NjIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzY2NjY2NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkxpYnJvPC90ZXh0Pjwvc3ZnPg=='; // Reiniciar
-      this.cargarLibros();
-
-    } catch (error: any) {
-      await loading.dismiss();
-      await this.mostrarToast(error.message || 'Error al registrar el libro', 'danger');
-    }
-  }
-
-  /**
-   * Validar datos del libro (método simplificado)
-   */
-  private validarDatosLibro(data: any): boolean {
-    if (!data.busqueda?.trim()) {
-      this.mostrarToast('Por favor ingresa el título o ISBN del libro', 'warning');
-      return false;
-    }
-    return true;
-  }
-
-  /**
-   * Procesar creación de libro (método legacy mantenido para compatibilidad)
-   */
-  private async procesarCreacionLibro(data: any) {
-    const loading = await this.loadingController.create({
-      message: 'Registrando libro...'
-    });
-    await loading.present();
-
-    try {
-      // Obtener imagen de Google Books API si no se seleccionó una manualmente
-      let imagenPortada = this.imagenSeleccionada;
-      
-      if (imagenPortada === 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjY2NjY2NjIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzY2NjY2NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkxpYnJvPC90ZXh0Pjwvc3ZnPg==') {
-        loading.message = 'Buscando imagen en Google Books...';
-        
-        try {
-          const imagenGoogleBooks = await this.googleBooksService.obtenerImagenConFallback(
-            data.titulo.trim(),
-            data.autor.trim(),
-            data.categoria.trim(),
-            this.obtenerImagenPorDefecto()
-          );
-          imagenPortada = imagenGoogleBooks;
-          
-          if (imagenGoogleBooks !== this.obtenerImagenPorDefecto()) {
-            await this.mostrarToast('Imagen obtenida de Google Books', 'success');
-          }
-        } catch (error) {
-          console.warn('Error obteniendo imagen de Google Books:', error);
-          imagenPortada = this.obtenerImagenPorDefecto();
-        }
-      }
-      
-      loading.message = 'Guardando libro...';
-      
-      const libroData: any = {
-        titulo: data.titulo.trim(),
-        autor: data.autor.trim(),
-        isbn: data.isbn.trim(),
-        categoria: data.categoria.trim(),
-        editorial: data.editorial?.trim() || '',
-        año_publicacion: data.anio_publicacion || null,
-        ubicacion: data.ubicacion?.trim() || 'A1-001',
-        cantidad_total: parseInt(data.cantidad_total) || 1,
-        descripcion: data.descripcion?.trim() || '',
-        imagen_portada: imagenPortada,
-        estado: 'Disponible'
-      };
-      
-      console.log('Datos del formulario:', data);
-      console.log('Datos procesados para enviar:', libroData);
-
-      // Llamar al servicio real para registrar el libro
-      await this.bibliotecaService.registrarLibro(libroData).toPromise();
-      
-      await loading.dismiss();
-      await this.mostrarToast('Libro registrado exitosamente', 'success');
-      this.imagenSeleccionada = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjY2NjY2NjIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzY2NjY2NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkxpYnJvPC90ZXh0Pjwvc3ZnPg=='; // Reiniciar
-       this.cargarLibros();
-
-    } catch (error: any) {
-      await loading.dismiss();
-      await this.mostrarToast(error.message || 'Error al registrar el libro', 'danger');
-    }
-  }
-
-  /**
-   * Mostrar opciones para un libro
-   */
-  async mostrarOpcionesLibro(libro: Libro) {
-    const actionSheet = await this.actionSheetController.create({
-      header: `Opciones para "${libro.titulo}"`,
-      buttons: [
-        {
-          text: 'Ver Detalles',
-          icon: 'eye-outline',
-          handler: () => {
-            this.router.navigate(['detalle-libro', libro.id]);
-          }
-        },
-        {
-          text: 'Editar',
-          icon: 'create-outline',
-          handler: () => {
-            this.editarLibro(libro);
-          }
-        },
-        {
-          text: 'Eliminar',
-          icon: 'trash-outline',
-          role: 'destructive',
-          handler: () => {
-            this.confirmarEliminacion(libro);
-          }
-        },
-        {
-          text: 'Cancelar',
-          icon: 'close-outline',
-          role: 'cancel'
-        }
-      ]
-    });
-
-    await actionSheet.present();
-  }
+  // La lógica de búsqueda, preview y registro ahora vive en LibroFormModalComponent
 
   /**
    * Editar libro existente (solo cantidad_total)
@@ -519,42 +227,6 @@ export class AdminLibrosPage implements OnInit {
     } catch (error: any) {
       await loading.dismiss();
       await this.mostrarToast(error.message || 'Error al actualizar la cantidad', 'danger');
-    }
-  }
-
-  /**
-   * Procesar edición de libro
-   */
-  private async procesarEdicionLibro(id: number, data: any) {
-    const loading = await this.loadingController.create({
-      message: 'Actualizando libro...'
-    });
-    await loading.present();
-
-    try {
-      const libroData: any = {
-        titulo: data.titulo.trim(),
-        autor: data.autor.trim(),
-        isbn: data.isbn.trim(),
-        categoria: data.categoria.trim(),
-        editorial: data.editorial?.trim() || '',
-        año_publicacion: data.anio_publicacion || null,
-        ubicacion: data.ubicacion?.trim() || 'A1-001',
-        cantidad_total: parseInt(data.cantidad_total) || 1,
-        descripcion: data.descripcion?.trim() || ''
-      };
-
-      // TODO: Implementar método actualizarLibro en BibliotecaService
-       // await this.bibliotecaService.actualizarLibro(id, libroData).toPromise();
-       console.log('Datos para actualizar:', libroData);
-      
-      await loading.dismiss();
-      await this.mostrarToast('Libro actualizado exitosamente', 'success');
-      this.cargarLibros();
-
-    } catch (error: any) {
-      await loading.dismiss();
-      await this.mostrarToast(error.message || 'Error al actualizar el libro', 'danger');
     }
   }
 
@@ -627,26 +299,6 @@ export class AdminLibrosPage implements OnInit {
   }
 
   /**
-   * Verificar si el usuario es administrador
-   */
-  get esAdministrador(): boolean {
-    return this.usuarioActual?.rol === 'administrador';
-  }
-
-  /**
-   * Obtener color según estado del libro
-   */
-  getEstadoColor(estado: string): string {
-    switch (estado) {
-      case 'Disponible': return 'success';
-      case 'Prestado': return 'warning';
-      case 'Reservado': return 'tertiary';
-      case 'Mantenimiento': return 'danger';
-      default: return 'medium';
-    }
-  }
-
-  /**
    * Obtener número de libros disponibles
    */
   getLibrosDisponibles(): number {
@@ -660,27 +312,4 @@ export class AdminLibrosPage implements OnInit {
     return this.libros.filter(libro => libro.estado === 'Prestado').length;
   }
 
-  /**
-   * Crear libro avanzado (método legacy)
-   */
-  async crearLibroAvanzado() {
-    // Implementación futura para formulario avanzado
-    await this.mostrarToast('Funcionalidad en desarrollo', 'warning');
-  }
-
-  /**
-   * Exportar catálogo
-   */
-  async exportarCatalogo() {
-    // Implementación futura para exportar
-    await this.mostrarToast('Funcionalidad en desarrollo', 'warning');
-  }
-
-  /**
-   * Importar libros
-   */
-  async importarLibros() {
-    // Implementación futura para importar
-    await this.mostrarToast('Funcionalidad en desarrollo', 'warning');
-  }
 }

@@ -47,19 +47,14 @@
   <ion-card>
     <ion-card-content>
       <div class="filtros-container">
-        <ion-item>
-          <ion-select 
-            [(ngModel)]="filtroTipo" 
-            placeholder="Filtrar por tipo"
-            (ionChange)="onFiltroTipoChange($event)">
-            <ion-select-option value="">Todos los tipos</ion-select-option>
-            <ion-select-option value="info">Información</ion-select-option>
-            <ion-select-option value="success">Éxito</ion-select-option>
-            <ion-select-option value="warning">Advertencia</ion-select-option>
-            <ion-select-option value="error">Error</ion-select-option>
-          </ion-select>
-          <ion-label slot="start">Tipo:</ion-label>
-        </ion-item>
+        <app-filter-select
+          label="Tipo"
+          placeholder="Filtrar por tipo"
+          [value]="filtroTipo"
+          [options]="tipoOptions"
+          [interface]="'action-sheet'"
+          (valueChange)="onTipoValueChange($event)">
+        </app-filter-select>
         
         <ion-item>
           <ion-checkbox 

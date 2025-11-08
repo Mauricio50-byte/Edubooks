@@ -38,8 +38,8 @@ export class RoleGuard implements CanActivate {
         const hasRequiredRole = requiredRoles.includes(user.rol);
         
         if (!hasRequiredRole) {
-          // Redirigir según el rol del usuario
-          this.redirectBasedOnRole(user.rol);
+          // Redirigir según el rol del usuario a una ruta segura
+          this.redirectBasedOnRole(user.rol, state.url);
           return false;
         }
 
@@ -48,19 +48,27 @@ export class RoleGuard implements CanActivate {
     );
   }
 
-  private redirectBasedOnRole(userRole: string) {
+  private redirectBasedOnRole(userRole: string, attemptedUrl: string) {
+    // Fallbacks más claros por rol para evitar "volver al Home" confuso
+    // y proporcionar una sección útil para cada perfil
+    const queryParams = { denied: attemptedUrl };
+
     switch (userRole) {
       case 'administrador':
-        this.router.navigate(['/home']);
+        // Admin: dashboard principal
+        this.router.navigate(['/home'], { queryParams });
         break;
       case 'docente':
-        this.router.navigate(['/home']);
+        // Docente: enviar a su bibliografía
+        this.router.navigate(['/bibliografia'], { queryParams });
         break;
       case 'estudiante':
-        this.router.navigate(['/home']);
+        // Estudiante: enviar a su bibliografía
+        this.router.navigate(['/bibliografia'], { queryParams });
         break;
       default:
-        this.router.navigate(['/home']);
+        // Rol desconocido: Home como fallback universal
+        this.router.navigate(['/home'], { queryParams });
     }
   }
 }

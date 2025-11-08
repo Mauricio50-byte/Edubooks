@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { Usuario } from '../../core/models/usuario.model';
 import { AlertController, ActionSheetController, ToastController } from '@ionic/angular';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-home',
@@ -10,25 +11,43 @@ import { AlertController, ActionSheetController, ToastController } from '@ionic/
   styleUrls: ['home.page.scss'],
   standalone: false,
 })
-export class HomePage implements OnInit {
+export class HomePage implements OnInit, OnDestroy {
   currentUser: Usuario | null = null;
+  private destroy$ = new Subject<void>();
 
   constructor(
     private authService: AuthService,
     private router: Router,
+    private route: ActivatedRoute,
     private alertController: AlertController,
     private actionSheetController: ActionSheetController,
     private toastController: ToastController
   ) {}
 
   ngOnInit() {
-    // Obtener el usuario actual
-    this.currentUser = this.authService.currentUserValue;
+    // Suscribirse al usuario actual para refrescar automáticamente
+    this.authService.currentUser$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(user => {
+        this.currentUser = user;
+      });
 
-    // Verificar autenticación
-    if (!this.authService.isAuthenticated) {
-      this.router.navigate(['/login']);
-    }
+    // Verificar autenticación de forma reactiva
+    this.authService.isAuthenticated$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(isAuth => {
+        if (!isAuth) {
+          this.router.navigate(['/login']);
+        }
+      });
+
+    // Mostrar aviso si fue redirigido por falta de permisos
+    this.route.queryParamMap.subscribe(params => {
+      const deniedUrl = params.get('denied');
+      if (deniedUrl) {
+        this.showDeniedToast(deniedUrl);
+      }
+    });
   }
 
   async openSettings() {
@@ -132,5 +151,20 @@ export class HomePage implements OnInit {
    */
   isDocente(): boolean {
     return this.currentUser?.rol === 'docente';
+  }
+
+  private async showDeniedToast(deniedUrl: string) {
+    const toast = await this.toastController.create({
+      message: `No tienes permisos para acceder a: ${deniedUrl}`,
+      duration: 2500,
+      color: 'warning',
+      position: 'bottom'
+    });
+    await toast.present();
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

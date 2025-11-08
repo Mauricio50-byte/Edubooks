@@ -1,7 +1,49 @@
 .actions {
   margin-top: 16px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
 }
 
 ion-note {
   margin: 4px 8px 12px;
+}
+
+.libro-form {
+  ion-list {
+    margin-bottom: 12px;
+  }
+
+  ion-item {
+    --border-radius: 12px;
+    --inner-padding-top: 10px;
+    --inner-padding-bottom: 10px;
+    --padding-start: 12px;
+  }
+
+  ion-item-divider {
+    --background: var(--ion-color-step-150);
+    --color: var(--ion-color-light);
+    margin: 8px 0 12px;
+    border-radius: 10px;
+    padding: 6px 12px;
+  }
+
+  ion-input {
+    --padding-top: 6px;
+    --padding-bottom: 6px;
+  }
+
+  .brand-select {
+    --background: var(--ion-color-light);
+    --color: var(--ion-color-dark);
+    --placeholder-color: var(--ion-color-medium);
+    --border-radius: 10px;
+  }
+
+  ion-button {
+    --border-radius: 12px;
+    text-transform: none;
+    font-weight: 500;
+  }
 }

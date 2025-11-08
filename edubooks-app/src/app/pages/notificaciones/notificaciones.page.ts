@@ -14,6 +14,13 @@ export class NotificacionesPage implements OnInit, OnDestroy {
   notificacionesNoLeidas = 0;
   filtroTipo: string = '';
   mostrarSoloNoLeidas = false;
+  tipoOptions = [
+    { label: 'Todos los tipos', value: '' },
+    { label: 'Información', value: 'info' },
+    { label: 'Éxito', value: 'success' },
+    { label: 'Advertencia', value: 'warning' },
+    { label: 'Error', value: 'error' }
+  ];
   private subscription: Subscription = new Subscription();
 
   constructor(
@@ -80,8 +87,8 @@ export class NotificacionesPage implements OnInit, OnDestroy {
   /**
    * Cambiar filtro de tipo
    */
-  onFiltroTipoChange(event: any) {
-    this.filtroTipo = event.detail.value;
+  onTipoValueChange(value: string) {
+    this.filtroTipo = value || '';
     this.cargarNotificaciones();
   }
 

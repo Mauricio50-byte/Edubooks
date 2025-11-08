@@ -38,7 +38,9 @@
         <ion-select 
           [(ngModel)]="selectedCategory" 
           placeholder="Filtrar por categoría"
-          (ionChange)="onCategoryChange($event)">
+          (ionChange)="onCategoryChange($event)"
+          interface="alert"
+          [interfaceOptions]="{ cssClass: 'logout-alert' }">
           <ion-select-option value="">Todas las categorías</ion-select-option>
           <ion-select-option *ngFor="let categoria of categorias" [value]="categoria">
             {{ categoria }}

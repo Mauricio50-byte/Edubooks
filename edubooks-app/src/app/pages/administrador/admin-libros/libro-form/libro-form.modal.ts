@@ -5,6 +5,7 @@ import { AlertController, IonicModule, LoadingController, ModalController, Toast
 import { GoogleBooksService } from '../../../../core/services/google-books.service';
 import { BibliotecaService } from '../../../../core/services/biblioteca.service';
 import { LibroPreviewPageComponent } from './libro-preview/libro-preview.page';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-libro-form-modal',
@@ -14,7 +15,6 @@ import { LibroPreviewPageComponent } from './libro-preview/libro-preview.page';
   styleUrls: ['./libro-form.modal.scss']
 })
 export class LibroFormModalComponent implements OnInit {
-  @Input() categorias: string[] = [];
 
   form!: FormGroup;
 
@@ -33,7 +33,7 @@ export class LibroFormModalComponent implements OnInit {
     this.form = this.fb.group({
       busqueda: ['', [Validators.required, Validators.minLength(2)]],
       cantidad_total: [1, [Validators.required, Validators.min(1)]],
-      ubicacion: ['A1-001', [Validators.required, Validators.pattern(/^[A-Z][0-9]-[0-9]{3}$/)]],
+      ubicacion: ['A1-001', [Validators.required, Validators.pattern(/^[A-Z][0-9]-[0-9]{3}$/)]]
     });
   }
 
@@ -60,9 +60,9 @@ export class LibroFormModalComponent implements OnInit {
       let libroInfo: any | null = null;
 
       if (esISBN) {
-        libroInfo = await this.googleBooksService.buscarLibroPorISBN(termino);
+        libroInfo = await firstValueFrom(this.googleBooksService.buscarLibroPorISBN(termino));
       } else {
-        libroInfo = await this.googleBooksService.buscarLibroPorTitulo(termino);
+        libroInfo = await firstValueFrom(this.googleBooksService.buscarLibroPorTitulo(termino));
       }
 
       await loading.dismiss();
@@ -124,7 +124,7 @@ export class LibroFormModalComponent implements OnInit {
         imagen_portada: imagen
       };
 
-      await this.bibliotecaService.registrarLibro(payload);
+      await firstValueFrom(this.bibliotecaService.registrarLibro(payload));
       await loading.dismiss();
       await this.presentToast('Libro registrado correctamente.', 'success');
       this.modalCtrl.dismiss(payload, 'confirm');

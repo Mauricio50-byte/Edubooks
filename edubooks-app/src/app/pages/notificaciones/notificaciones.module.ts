@@ -7,13 +7,15 @@ import { IonicModule } from '@ionic/angular';
 import { NotificacionesPageRoutingModule } from './notificaciones-routing.module';
 
 import { NotificacionesPage } from './notificaciones.page';
+import { FilterSelectComponent } from '../../shared/componentes/filter-select/filter-select.component';
 
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,
     IonicModule,
-    NotificacionesPageRoutingModule
+    NotificacionesPageRoutingModule,
+    FilterSelectComponent
   ],
   declarations: [NotificacionesPage]
 })
