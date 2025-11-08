@@ -1,14 +1,23 @@
 # Ignorar cachés y bytecode de Python
-_pycache_/
-*.pyc
+__pycache__/
+*.py[cod]
 *.pyo
-*.pyd
 
-# Entornos virtuales (opcional, por si existe)
+# Entornos virtuales
+env/
 venv/
 .venv/
 
-# Archivos temporales comunes
+# Archivos de entorno
+.env
+**/.env
+edubooks-api/.env
+
+# Logs y configuración local
 *.log
-*.tmp
-*.swp
+local_settings.py
+
+# IDE/SO
+.vscode/
+.DS_Store
+Thumbs.db
