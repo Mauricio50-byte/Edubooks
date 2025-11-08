@@ -1,3 +1,6 @@
+/* ====================
+   Contenedor de acciones
+   ==================== */
 .actions {
   margin-top: 16px;
   display: grid;
@@ -9,60 +12,92 @@ ion-note {
   margin: 4px 8px 12px;
 }
 
+/* ====================
+   Header del modal
+   ==================== */
+ion-header, ion-toolbar {
+  --background: var(--ion-color-dark);
+  --color: var(--ion-color-light);
+  border-bottom: 1px solid var(--ion-color-dark-shade);
+}
+
+/* Fondo del contenido principal */
+ion-content {
+  --background: #3A3A6A;
+  --color: var(--ion-color-light);
+}
+
+ion-toolbar ion-title {
+  color: var(--ion-color-light);
+  font-weight: 600;
+}
+
+/* ====================
+   Nota informativa
+   ==================== */
+ion-note[color="medium"] {
+  color: var(--ion-color-medium);
+}
+
+/* ====================
+   Formulario principal
+   ==================== */
 .libro-form {
   ion-content {
-    --background: var(--ion-color-dark);
-  }
-
-  ion-header, ion-toolbar {
-    --background: var(--ion-color-dark);
+    --background: #2A2A50;
     --color: var(--ion-color-light);
   }
 
-  ion-list {
-    margin-bottom: 12px;
-  }
-
+  /* Items del formulario con fondo de profundidad */
   ion-item {
-    --background: rgba(var(--ion-color-primary-rgb), 0.06);
+    --background: #2A2A50;
     --color: var(--ion-color-light);
-    --border-color: rgba(var(--ion-color-primary-rgb), 0.18);
+    --border-color: rgba(255, 255, 255, 0.12);
     --border-radius: 12px;
     --inner-padding-top: 10px;
     --inner-padding-bottom: 10px;
     --padding-start: 12px;
+    margin-bottom: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   }
 
+  /* Divider con fondo acorde al tema oscuro */
   ion-item-divider {
-    --background: rgba(var(--ion-color-primary-rgb), 0.12);
+    --background: #2A2A50;
     --color: var(--ion-color-light);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     margin: 8px 0 12px;
     border-radius: 10px;
     padding: 6px 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   }
 
+  /* Inputs y labels */
   ion-input {
     --padding-top: 6px;
     --padding-bottom: 6px;
     --color: var(--ion-color-light);
-    --placeholder-color: var(--ion-color-medium-tint);
+    --placeholder-color: var(--ion-color-medium);
     --highlight-color-focused: var(--ion-color-primary);
   }
 
-  .brand-select {
-    --background: var(--ion-color-dark);
-    --color: var(--ion-color-light);
-    --placeholder-color: var(--ion-color-medium);
-    --border-radius: 10px;
+  ion-item ion-label,
+  ion-item-divider ion-label {
+    color: var(--ion-color-light);
+    font-weight: 600;
   }
 
+  ion-item ion-icon {
+    color: var(--ion-color-tertiary);
+  }
+
+  /* Botonería */
   ion-button {
     --border-radius: 12px;
     text-transform: none;
-    font-weight: 500;
+    font-weight: 600;
   }
 
-  // Afinar contraste del botón outline y el primario con gradiente
   ion-button[fill="outline"] {
     --color: var(--ion-color-light);
     --border-color: rgba(var(--ion-color-light-rgb), 0.4);
@@ -70,5 +105,166 @@ ion-note {
 
   ion-button.gradient-primary {
     --color: var(--ion-color-light);
+  }
+}
+
+/* ====================
+   ESTILOS GLOBALES PARA ALERTAS, TOASTS Y LOADING
+   ==================== */
+
+/* Alertas personalizadas */
+.custom-alert {
+  --background: #2A2A50;
+  --backdrop-opacity: 0.6;
+
+  .alert-wrapper {
+    background: #2A2A50;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .alert-head {
+    background: transparent;
+    padding: 20px 20px 0;
+  }
+
+  .alert-title {
+    color: var(--ion-color-light);
+    font-weight: 700;
+    font-size: 1.3rem;
+  }
+
+  .alert-message {
+    color: var(--ion-color-medium);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    padding: 12px 20px 20px;
+  }
+
+  .alert-button-group {
+    padding: 0 8px 12px;
+  }
+
+  .alert-button {
+    background: transparent;
+    color: var(--ion-color-primary);
+    font-weight: 600;
+    border-radius: 10px;
+    text-transform: none;
+    
+    &:hover {
+      background: rgba(255, 75, 107, 0.1);
+    }
+  }
+
+  .alert-button-confirm {
+    background: linear-gradient(to right, #FF4B6B, #FF8C4B);
+    color: var(--ion-color-light);
+    
+    &:hover {
+      opacity: 0.9;
+    }
+  }
+}
+
+/* Variantes de alerta según tipo */
+.alert-success {
+  .alert-title::before {
+    content: "✓ ";
+    color: var(--ion-color-success);
+  }
+}
+
+.alert-warning {
+  .alert-title::before {
+    content: "⚠ ";
+    color: #FF8C4B;
+  }
+}
+
+.alert-danger {
+  .alert-title::before {
+    content: "✕ ";
+    color: var(--ion-color-danger);
+  }
+}
+
+/* Loading personalizado */
+.custom-loading {
+  --background: rgba(30, 30, 63, 0.95);
+  --spinner-color: var(--ion-color-primary);
+  
+  .loading-wrapper {
+    background: #2A2A50;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 75, 107, 0.2);
+    padding: 24px;
+  }
+
+  .loading-content {
+    color: var(--ion-color-light);
+    font-weight: 500;
+    margin-top: 16px;
+  }
+
+  .loading-spinner {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+/* Toast personalizado */
+.custom-toast {
+  --background: #2A2A50;
+  --color: var(--ion-color-light);
+  --border-radius: 12px;
+  --box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  --button-color: var(--ion-color-light);
+  --border-width: 1px;
+  --border-style: solid;
+  --border-color: rgba(255, 255, 255, 0.08);
+
+  &::part(message) {
+    font-weight: 500;
+    padding: 4px 0;
+  }
+
+  &::part(button) {
+    font-weight: 600;
+  }
+}
+
+/* Toast con color success */
+ion-toast.custom-toast[color="success"] {
+  --background: linear-gradient(135deg, #2A2A50 0%, rgba(76, 175, 80, 0.15) 100%);
+  --border-color: var(--ion-color-success);
+  --border-width: 2px;
+}
+
+/* Toast con color warning */
+ion-toast.custom-toast[color="warning"] {
+  --background: linear-gradient(135deg, #2A2A50 0%, rgba(255, 140, 75, 0.15) 100%);
+  --border-color: #FF8C4B;
+  --border-width: 2px;
+}
+
+/* Toast con color danger */
+ion-toast.custom-toast[color="danger"] {
+  --background: linear-gradient(135deg, #2A2A50 0%, rgba(244, 67, 54, 0.15) 100%);
+  --border-color: var(--ion-color-danger);
+  --border-width: 2px;
+}
+
+/* Modal personalizado */
+.custom-modal {
+  --background: var(--ion-color-dark);
+  --border-radius: 16px;
+  
+  .modal-wrapper {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.5);
   }
 }

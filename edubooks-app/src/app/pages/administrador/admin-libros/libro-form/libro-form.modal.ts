@@ -44,6 +44,11 @@ export class LibroFormModalComponent implements OnInit {
   async confirmar() {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      await this.presentAlert(
+        'Formulario incompleto',
+        'Por favor completa todos los campos correctamente antes de continuar.',
+        'warning'
+      );
       return;
     }
     const datos = this.form.value;
@@ -51,7 +56,11 @@ export class LibroFormModalComponent implements OnInit {
   }
 
   private async buscarYRegistrarLibro(datos: { busqueda: string; cantidad_total: number; ubicacion: string }) {
-    const loading = await this.loadingCtrl.create({ message: 'Buscando libro...' });
+    const loading = await this.loadingCtrl.create({ 
+      message: 'Buscando libro...',
+      spinner: 'crescent',
+      cssClass: 'custom-loading'
+    });
     await loading.present();
 
     try {
@@ -68,14 +77,22 @@ export class LibroFormModalComponent implements OnInit {
       await loading.dismiss();
 
       if (!libroInfo) {
-        await this.presentToast('No se encontró el libro. Intenta con otro término.', 'warning');
+        await this.presentAlert(
+          'Libro no encontrado',
+          'No se encontró el libro con el término de búsqueda proporcionado. Intenta con otro ISBN o título.',
+          'warning'
+        );
         return;
       }
 
       await this.mostrarVistaPrevia(libroInfo, datos);
     } catch (error) {
       await loading.dismiss();
-      await this.presentToast('Error al buscar libro. Revisa tu conexión.', 'danger');
+      await this.presentAlert(
+        'Error de conexión',
+        'No se pudo buscar el libro. Verifica tu conexión a internet e intenta nuevamente.',
+        'danger'
+      );
     }
   }
 
@@ -94,7 +111,8 @@ export class LibroFormModalComponent implements OnInit {
         },
         cantidad_total: datos.cantidad_total,
         ubicacion: datos.ubicacion,
-      }
+      },
+      cssClass: 'custom-modal'
     });
 
     await modal.present();
@@ -106,7 +124,11 @@ export class LibroFormModalComponent implements OnInit {
   }
 
   private async registrarLibroDesdeGoogleBooks(libroInfo: any, datos: { cantidad_total: number; ubicacion: string }) {
-    const loading = await this.loadingCtrl.create({ message: 'Registrando libro...' });
+    const loading = await this.loadingCtrl.create({ 
+      message: 'Registrando libro en la biblioteca...',
+      spinner: 'crescent',
+      cssClass: 'custom-loading'
+    });
     await loading.present();
 
     try {
@@ -126,11 +148,15 @@ export class LibroFormModalComponent implements OnInit {
 
       await firstValueFrom(this.bibliotecaService.registrarLibro(payload));
       await loading.dismiss();
-      await this.presentToast('Libro registrado correctamente.', 'success');
+      await this.presentToast('✓ Libro registrado correctamente en la biblioteca', 'success');
       this.modalCtrl.dismiss(payload, 'confirm');
     } catch (error) {
       await loading.dismiss();
-      await this.presentToast('No se pudo registrar el libro.', 'danger');
+      await this.presentAlert(
+        'Error al registrar',
+        'No se pudo registrar el libro en la biblioteca. Intenta nuevamente.',
+        'danger'
+      );
     }
   }
 
@@ -138,8 +164,36 @@ export class LibroFormModalComponent implements OnInit {
     return 'https://via.placeholder.com/400x600?text=Portada+No+Disponible';
   }
 
+  private async presentAlert(header: string, message: string, type: 'success' | 'warning' | 'danger') {
+    const alert = await this.alertCtrl.create({
+      header,
+      message,
+      buttons: [
+        {
+          text: 'Entendido',
+          role: 'confirm',
+          cssClass: 'alert-button-confirm'
+        }
+      ],
+      cssClass: `custom-alert alert-${type}`
+    });
+    await alert.present();
+  }
+
   private async presentToast(message: string, color: 'success' | 'warning' | 'danger') {
-    const toast = await this.toastCtrl.create({ message, duration: 2500, color, position: 'bottom' });
+    const toast = await this.toastCtrl.create({ 
+      message, 
+      duration: 3000, 
+      color, 
+      position: 'bottom',
+      cssClass: 'custom-toast',
+      buttons: [
+        {
+          icon: 'close',
+          role: 'cancel'
+        }
+      ]
+    });
     await toast.present();
   }
 }
