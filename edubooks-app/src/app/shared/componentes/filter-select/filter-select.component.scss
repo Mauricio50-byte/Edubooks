@@ -1,0 +1,23 @@
+.filter-select {
+  .filter-item {
+    --background: var(--ion-color-dark);
+    --color: var(--ion-color-light);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 6px 8px;
+  }
+
+  ion-label {
+    color: var(--ion-color-light);
+    font-weight: 600;
+    margin-right: 8px;
+  }
+
+  .filter-ion-select {
+    --background: var(--ion-color-dark);
+    --color: var(--ion-color-light);
+    --placeholder-color: var(--ion-color-medium);
+    --icon-color: var(--ion-color-tertiary);
+    --border-radius: 8px;
+  }
+}

@@ -95,6 +95,32 @@ ion-action-sheet {
   --header-color: var(--ion-color-light);
 }
 
+/* Overlay específico para filtros reutilizables */
+.filter-action-sheet {
+  --background: #2A2A50;
+  --header-color: var(--ion-color-light);
+  --button-color: var(--ion-color-light);
+  --button-background: #2A2A50;
+  --button-background-selected: rgba(255, 75, 107, 0.2);
+  --backdrop-opacity: 0.7;
+  --border-color: rgba(255, 255, 255, 0.08);
+
+  .action-sheet-group {
+    border-radius: 16px;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+    overflow: hidden;
+  }
+
+  .action-sheet-title {
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+
+  .action-sheet-button {
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+  }
+}
+
 /* ===== Estilo específico para Action Sheet de Ajustes ===== */
 .settings-action-sheet {
   /* Variables del overlay */

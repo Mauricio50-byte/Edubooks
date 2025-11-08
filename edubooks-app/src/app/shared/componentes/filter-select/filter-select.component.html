@@ -1,0 +1,17 @@
+<div class="filter-select">
+  <ion-item lines="none" class="filter-item">
+    <ion-label>{{ label }}</ion-label>
+    <ion-select
+      [value]="value"
+      (ionChange)="onChange($event)"
+      [placeholder]="placeholder"
+      [interface]="interface"
+      [interfaceOptions]="{ cssClass: 'filter-action-sheet' }"
+      class="filter-ion-select"
+      color="light">
+      <ion-select-option *ngFor="let opt of options" [value]="opt.value">
+        <span *ngIf="opt.icon">{{ opt.icon }}</span> {{ opt.label }}
+      </ion-select-option>
+    </ion-select>
+  </ion-item>
+</div>

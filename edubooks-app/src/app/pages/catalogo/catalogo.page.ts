@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AlertController, ToastController, LoadingController } from '@ionic/angular';
 import { BibliotecaService } from '../../core/services/biblioteca.service';
-import { AuthService } from '../../core/services/auth.service';
 import { Libro } from '../../core/models/libro.model';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -17,16 +16,23 @@ export class CatalogoPage implements OnInit {
   libros: Libro[] = [];
   librosFiltrados: Libro[] = [];
   categorias: string[] = [];
+  categoriaOptions: { value: string; label: string; icon?: string }[] = [];
   searchQuery: string = '';
   categoriaSeleccionada: string = 'Todas';
   estadoSeleccionado: string = 'Todos';
+  estadoOptions: { value: string; label: string; icon?: string }[] = [
+    { value: 'Todos', label: 'Todos los Estados', icon: '📋' },
+    { value: 'Disponible', label: 'Disponible', icon: '✅' },
+    { value: 'Prestado', label: 'Prestado', icon: '📤' },
+    { value: 'Reservado', label: 'Reservado', icon: '📝' },
+    { value: 'Mantenimiento', label: 'Mantenimiento', icon: '🔧' }
+  ];
   isLoading: boolean = false;
   
   private searchSubject = new Subject<string>();
 
   constructor(
     private bibliotecaService: BibliotecaService,
-    private authService: AuthService,
     private router: Router,
     private alertController: AlertController,
     private toastController: ToastController,
@@ -71,6 +77,11 @@ export class CatalogoPage implements OnInit {
       this.bibliotecaService.getCategorias().subscribe({
         next: (categorias) => {
           this.categorias = ['Todas', ...categorias];
+          this.categoriaOptions = this.categorias.map(cat => ({
+            value: cat,
+            label: cat,
+            icon: this.getCategoriaIcon(cat)
+          }));
         }
       });
     } catch (error) {
@@ -101,13 +112,14 @@ export class CatalogoPage implements OnInit {
     });
   }
 
-  onCategoriaChange(event: any) {
-    this.categoriaSeleccionada = event.detail.value;
+  // Handlers para componente compartido
+  onCategoriaSelected(value: string) {
+    this.categoriaSeleccionada = value;
     this.aplicarFiltros();
   }
 
-  onEstadoChange(event: any) {
-    this.estadoSeleccionado = event.detail.value;
+  onEstadoSelected(value: string) {
+    this.estadoSeleccionado = value;
     this.aplicarFiltros();
   }
 
