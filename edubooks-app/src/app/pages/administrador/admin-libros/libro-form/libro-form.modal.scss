@@ -1,19 +1,17 @@
 /* ====================
-   Contenedor de acciones
+   Paleta local del modal
    ==================== */
-.actions {
-  margin-top: 16px;
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 12px;
-}
-
-ion-note {
-  margin: 4px 8px 12px;
+:host {
+  --ion-color-dark: #1E1E3F;
+  --ion-color-primary: #FF4B6B;
+  --ion-color-secondary: #FF8C4B;
+  --ion-color-tertiary: #4B6BFF;
+  --ion-color-light: #FFFFFF;
+  --ion-color-medium: #AAAAAA;
 }
 
 /* ====================
-   Header del modal
+   Header y contenido
    ==================== */
 ion-header, ion-toolbar {
   --background: var(--ion-color-dark);
@@ -21,38 +19,39 @@ ion-header, ion-toolbar {
   border-bottom: 1px solid var(--ion-color-dark-shade);
 }
 
-/* Fondo del contenido principal */
-ion-content {
-  --background: #3A3A6A;
-  --color: var(--ion-color-light);
-}
-
 ion-toolbar ion-title {
   color: var(--ion-color-light);
   font-weight: 600;
 }
 
-/* ====================
-   Nota informativa
-   ==================== */
-ion-note[color="medium"] {
-  color: var(--ion-color-medium);
+ion-content {
+  --background: var(--ion-color-dark);
+  color: var(--ion-color-light);
 }
 
-/* ====================
-   Formulario principal
-   ==================== */
-.libro-form {
-  ion-content {
-    --background: #2A2A50;
-    --color: var(--ion-color-light);
-  }
+/* Nota informativa */
+ion-note {
+  margin: 4px 8px 12px;
+}
+ion-note[color="medium"] { color: var(--ion-color-medium); }
 
+/* ====================
+   Lista y formulario
+   ==================== */
+.form-list {
+  --background: var(--ion-color-dark);
+  background: var(--ion-color-dark);
+  border: 1px solid var(--ion-color-dark-shade);
+  border-radius: 12px;
+  padding: 8px;
+}
+
+.libro-form {
   /* Items del formulario con fondo de profundidad */
   ion-item {
     --background: #2A2A50;
     --color: var(--ion-color-light);
-    --border-color: rgba(255, 255, 255, 0.12);
+    --border-color: rgba(255, 255, 255, 0.08);
     --border-radius: 12px;
     --inner-padding-top: 10px;
     --inner-padding-bottom: 10px;
@@ -61,11 +60,11 @@ ion-note[color="medium"] {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   }
 
-  /* Divider con fondo acorde al tema oscuro */
+  /* Divider coherente con el tema */
   ion-item-divider {
     --background: #2A2A50;
     --color: var(--ion-color-light);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     margin: 8px 0 12px;
     border-radius: 10px;
     padding: 6px 12px;
@@ -87,9 +86,7 @@ ion-note[color="medium"] {
     font-weight: 600;
   }
 
-  ion-item ion-icon {
-    color: var(--ion-color-tertiary);
-  }
+  ion-item ion-icon { color: var(--ion-color-tertiary); }
 
   /* Botonería */
   ion-button {
@@ -97,22 +94,26 @@ ion-note[color="medium"] {
     text-transform: none;
     font-weight: 600;
   }
-
   ion-button[fill="outline"] {
     --color: var(--ion-color-light);
     --border-color: rgba(var(--ion-color-light-rgb), 0.4);
   }
-
-  ion-button.gradient-primary {
-    --color: var(--ion-color-light);
-  }
+  ion-button.gradient-primary { --color: var(--ion-color-light); }
 }
 
 /* ====================
-   ESTILOS GLOBALES PARA ALERTAS, TOASTS Y LOADING
+   Contenedor de acciones
    ==================== */
+.actions {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
 
-/* Alertas personalizadas */
+/* ====================
+   Utilidades para Alert, Loading, Toast y Modal
+   ==================== */
 .custom-alert {
   --background: #2A2A50;
   --backdrop-opacity: 0.6;
@@ -124,77 +125,28 @@ ion-note[color="medium"] {
     border: 1px solid rgba(255, 255, 255, 0.08);
   }
 
-  .alert-head {
-    background: transparent;
-    padding: 20px 20px 0;
-  }
+  .alert-head { background: transparent; padding: 20px 20px 0; }
+  .alert-title { color: var(--ion-color-light); font-weight: 700; font-size: 1.2rem; }
+  .alert-message { color: var(--ion-color-medium); font-size: 0.95rem; line-height: 1.5; padding: 12px 20px 20px; }
+  .alert-button-group { padding: 0 8px 12px; }
 
-  .alert-title {
-    color: var(--ion-color-light);
-    font-weight: 700;
-    font-size: 1.3rem;
-  }
-
-  .alert-message {
-    color: var(--ion-color-medium);
-    font-size: 0.95rem;
-    line-height: 1.5;
-    padding: 12px 20px 20px;
-  }
-
-  .alert-button-group {
-    padding: 0 8px 12px;
-  }
-
-  .alert-button {
-    background: transparent;
-    color: var(--ion-color-primary);
-    font-weight: 600;
-    border-radius: 10px;
-    text-transform: none;
-    
-    &:hover {
-      background: rgba(255, 75, 107, 0.1);
-    }
-  }
-
-  .alert-button-confirm {
-    background: linear-gradient(to right, #FF4B6B, #FF8C4B);
-    color: var(--ion-color-light);
-    
-    &:hover {
-      opacity: 0.9;
-    }
-  }
+  .alert-button { background: transparent; color: var(--ion-color-primary); font-weight: 600; border-radius: 10px; text-transform: none; }
+  .alert-button:hover { background: rgba(255, 75, 107, 0.1); }
 }
 
-/* Variantes de alerta según tipo */
-.alert-success {
-  .alert-title::before {
-    content: "✓ ";
-    color: var(--ion-color-success);
-  }
-}
+/* Variante de botón para confirmar */
+.alert-button-confirm { background: linear-gradient(to right, #FF4B6B, #FF8C4B); color: var(--ion-color-light); }
 
-.alert-warning {
-  .alert-title::before {
-    content: "⚠ ";
-    color: #FF8C4B;
-  }
-}
+/* Variantes semánticas del alert */
+.alert-success .alert-title::before { content: "✓ "; color: var(--ion-color-success); }
+.alert-warning .alert-title::before { content: "⚠ "; color: #FF8C4B; }
+.alert-danger .alert-title::before { content: "✕ "; color: var(--ion-color-danger); }
 
-.alert-danger {
-  .alert-title::before {
-    content: "✕ ";
-    color: var(--ion-color-danger);
-  }
-}
-
-/* Loading personalizado */
+/* Loading */
 .custom-loading {
   --background: rgba(30, 30, 63, 0.95);
   --spinner-color: var(--ion-color-primary);
-  
+
   .loading-wrapper {
     background: #2A2A50;
     border-radius: 16px;
@@ -203,68 +155,26 @@ ion-note[color="medium"] {
     padding: 24px;
   }
 
-  .loading-content {
-    color: var(--ion-color-light);
-    font-weight: 500;
-    margin-top: 16px;
-  }
-
-  .loading-spinner {
-    width: 40px;
-    height: 40px;
-  }
+  .loading-content { color: var(--ion-color-light); font-weight: 500; margin-top: 16px; }
 }
 
-/* Toast personalizado */
+/* Toast */
 .custom-toast {
   --background: #2A2A50;
   --color: var(--ion-color-light);
   --border-radius: 12px;
   --box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
   --button-color: var(--ion-color-light);
-  --border-width: 1px;
-  --border-style: solid;
-  --border-color: rgba(255, 255, 255, 0.08);
+  --border-width: 1px; --border-style: solid; --border-color: rgba(255, 255, 255, 0.08);
 
-  &::part(message) {
-    font-weight: 500;
-    padding: 4px 0;
-  }
-
-  &::part(button) {
-    font-weight: 600;
-  }
+  &::part(message) { font-weight: 500; padding: 4px 0; }
+  &::part(button) { font-weight: 600; }
 }
 
-/* Toast con color success */
-ion-toast.custom-toast[color="success"] {
-  --background: linear-gradient(135deg, #2A2A50 0%, rgba(76, 175, 80, 0.15) 100%);
-  --border-color: var(--ion-color-success);
-  --border-width: 2px;
-}
+ion-toast.custom-toast[color="success"] { --background: linear-gradient(135deg, #2A2A50 0%, rgba(76, 175, 80, 0.15) 100%); --border-color: var(--ion-color-success); --border-width: 2px; }
+ion-toast.custom-toast[color="warning"] { --background: linear-gradient(135deg, #2A2A50 0%, rgba(255, 140, 75, 0.15) 100%); --border-color: #FF8C4B; --border-width: 2px; }
+ion-toast.custom-toast[color="danger"] { --background: linear-gradient(135deg, #2A2A50 0%, rgba(244, 67, 54, 0.15) 100%); --border-color: var(--ion-color-danger); --border-width: 2px; }
 
-/* Toast con color warning */
-ion-toast.custom-toast[color="warning"] {
-  --background: linear-gradient(135deg, #2A2A50 0%, rgba(255, 140, 75, 0.15) 100%);
-  --border-color: #FF8C4B;
-  --border-width: 2px;
-}
-
-/* Toast con color danger */
-ion-toast.custom-toast[color="danger"] {
-  --background: linear-gradient(135deg, #2A2A50 0%, rgba(244, 67, 54, 0.15) 100%);
-  --border-color: var(--ion-color-danger);
-  --border-width: 2px;
-}
-
-/* Modal personalizado */
-.custom-modal {
-  --background: var(--ion-color-dark);
-  --border-radius: 16px;
-  
-  .modal-wrapper {
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.5);
-  }
-}
+/* Modal wrapper */
+.custom-modal { --background: var(--ion-color-dark); --border-radius: 16px; }
+.custom-modal .modal-wrapper { border-radius: 16px; overflow: hidden; box-shadow: 0 12px 48px rgba(0, 0, 0, 0.5); }
