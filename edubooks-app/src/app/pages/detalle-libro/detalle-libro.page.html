@@ -56,7 +56,7 @@
       <div class="imagen-container">
         <ion-img 
           [src]="libro.imagen_portada || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjY2NjY2NjIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzY2NjY2NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkxpYnJvPC90ZXh0Pjwvc3ZnPg=='" 
-          [alt]="libro.titulo"
+          [alt]="libro.titulo || 'Sin título'"
           class="libro-imagen">
         </ion-img>
         
@@ -69,11 +69,11 @@
       </div>
 
       <div class="info-principal">
-        <h1 class="titulo">{{ libro.titulo }}</h1>
-        <p class="autor">por {{ libro.autor }}</p>
+        <h1 class="titulo">{{ libro.titulo || 'Sin título' }}</h1>
+        <p class="autor">por {{ libro.autor || 'Autor desconocido' }}</p>
         <!-- Chips de metadatos -->
         <div class="chips">
-          <ion-chip color="tertiary">
+          <ion-chip *ngIf="libro.categoria" color="tertiary">
             <ion-icon name="bookmark-outline"></ion-icon>
             <ion-label>{{ libro.categoria }}</ion-label>
           </ion-chip>
@@ -87,7 +87,7 @@
           </ion-chip>
         </div>
 
-        <div class="disponibilidad">
+          <div class="disponibilidad">
           <div class="disponibilidad-item">
             <ion-icon name="copy-outline"></ion-icon>
             <span>{{ libro.cantidad_disponible }}/{{ libro.cantidad_total }} disponibles</span>
@@ -95,7 +95,7 @@
           
           <div class="disponibilidad-item">
             <ion-icon name="location-outline"></ion-icon>
-            <span>{{ libro.ubicacion }}</span>
+            <span>{{ libro.ubicacion || 'Sin ubicación' }}</span>
           </div>
         </div>
       </div>
@@ -151,7 +151,7 @@
               <ion-icon name="bookmark-outline" slot="start"></ion-icon>
               <ion-label>
                 <h3>Categoría</h3>
-                <p>{{ libro.categoria }}</p>
+                <p>{{ libro.categoria || 'N/A' }}</p>
               </ion-label>
             </ion-item>
             <ion-item>
@@ -165,7 +165,7 @@
               <ion-icon name="location-outline" slot="start"></ion-icon>
               <ion-label>
                 <h3>Ubicación</h3>
-                <p>{{ libro.ubicacion }}</p>
+                <p>{{ libro.ubicacion || 'N/A' }}</p>
               </ion-label>
             </ion-item>
             <ion-item>
@@ -194,7 +194,7 @@
               <ion-icon name="time-outline" slot="start"></ion-icon>
               <ion-label>
                 <h3>Fecha de Registro</h3>
-                <p>{{ libro.fecha_registro | date:'dd/MM/yyyy' }}</p>
+                <p>{{ libro.fecha_registro ? (libro.fecha_registro | date:'dd/MM/yyyy') : 'N/A' }}</p>
               </ion-label>
             </ion-item>
           </ion-list>
@@ -213,7 +213,19 @@
         </ion-card-header>
         
         <ion-card-content>
-          <p class="descripcion">{{ libro.descripcion }}</p>
+          <div class="descripcion-contenedor">
+            <div class="descripcion-texto" [class.expandida]="descripcionExpandida">
+              {{ libro.descripcion }}
+            </div>
+            <ion-button
+              *ngIf="(libro?.descripcion?.length ?? 0) > 220"
+              fill="clear"
+              size="small"
+              class="toggle-descripcion"
+              (click)="toggleDescripcion()">
+              {{ descripcionExpandida ? 'Ver menos' : 'Ver más' }}
+            </ion-button>
+          </div>
         </ion-card-content>
       </ion-card>
     </div>

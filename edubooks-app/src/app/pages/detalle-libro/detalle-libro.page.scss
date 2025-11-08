@@ -140,9 +140,38 @@ ion-toolbar {
   color: var(--ion-color-medium);
 }
 
-.descripcion {
-  line-height: 1.6;
+.descripcion-contenedor {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.descripcion-texto {
   color: var(--ion-color-light);
+  line-height: 1.8;
+  font-size: 15px;
+  text-align: justify;
+  white-space: pre-line; /* respetar saltos de línea */
+  letter-spacing: 0.2px;
+  word-break: break-word;
+  hyphens: auto;
+
+  /* clamp por defecto para organizar textos largos */
+  display: -webkit-box;
+  -webkit-line-clamp: 8;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.descripcion-texto.expandida {
+  display: block; /* sin clamp */
+}
+
+.toggle-descripcion {
+  align-self: flex-start;
+  --color: var(--ion-color-tertiary);
+  font-weight: 600;
+  padding: 0;
 }
 
 // Acciones principales/admin

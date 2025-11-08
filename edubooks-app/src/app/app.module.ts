@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { LocationStrategy, HashLocationStrategy } from '@angular/common';
+import { LocationStrategy } from '@angular/common';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouteReuseStrategy } from '@angular/router';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
@@ -27,7 +27,7 @@ import { AuthInterceptor } from './core/interceptors/auth.interceptor';
   ],
   providers: [
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
-    { provide: LocationStrategy, useClass: HashLocationStrategy },
+    // Usar PathLocationStrategy por defecto para URLs limpias sin hash
     {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,

@@ -19,6 +19,7 @@ export class DetalleLibroPage implements OnInit {
   libroId: number = 0;
   segmentValue: string = 'detalles';
   esFavorito = false;
+  descripcionExpandida = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -270,6 +271,10 @@ export class DetalleLibroPage implements OnInit {
     } catch (err) {
       await this.mostrarToast('No se pudo compartir', 'danger');
     }
+  }
+
+  toggleDescripcion() {
+    this.descripcionExpandida = !this.descripcionExpandida;
   }
 
   private async mostrarToast(message: string, color: string = 'primary') {

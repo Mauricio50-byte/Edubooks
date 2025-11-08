@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, BehaviorSubject, of, throwError } from 'rxjs';
+import { Observable, BehaviorSubject, of, throwError, concat } from 'rxjs';
 import { map, delay, catchError } from 'rxjs/operators';
 
 import { Libro, Prestamo, Reserva } from '../models/libro.model';
@@ -49,7 +49,7 @@ export class BibliotecaService {
           autor: libro.autor,
           isbn: libro.isbn,
           editorial: libro.editorial,
-          anio_publicacion: libro.año_publicacion,
+          anio_publicacion: libro.año_publicacion ?? libro.anio_publicacion ?? undefined,
           categoria: libro.categoria,
           ubicacion: libro.ubicacion,
           estado: libro.estado,
@@ -74,12 +74,21 @@ export class BibliotecaService {
 
   getLibroById(id: number): Observable<Libro | undefined> {
     const cached = this.libros.find(l => l.id === id);
-    if (cached) {
-      return of(cached).pipe(delay(150));
-    }
 
-    // Fallback: obtener del backend si no está en caché
-    return this.apiService.get(`/libros/${id}/`).pipe(
+    // Helper para detectar si el objeto en caché está incompleto (campos de detalle faltantes)
+    const isDetalleIncompleto = (libro: Libro): boolean => {
+      return (
+        libro.fecha_registro === undefined ||
+        libro.editorial === undefined ||
+        libro.isbn === undefined ||
+        libro.cantidad_total === undefined ||
+        libro.ubicacion === undefined ||
+        libro.descripcion === undefined ||
+        libro.anio_publicacion === undefined
+      );
+    };
+
+    const api$ = this.apiService.get(`/libros/${id}/`).pipe(
       map((libro: any) => {
         if (!libro) return undefined;
 
@@ -89,7 +98,7 @@ export class BibliotecaService {
           autor: libro.autor,
           isbn: libro.isbn,
           editorial: libro.editorial,
-          anio_publicacion: libro.año_publicacion,
+          anio_publicacion: libro.año_publicacion ?? libro.anio_publicacion ?? undefined,
           categoria: libro.categoria,
           ubicacion: libro.ubicacion,
           estado: libro.estado,
@@ -114,6 +123,21 @@ export class BibliotecaService {
         return of(undefined);
       })
     );
+
+    // Política de emisión: evitar estados intermedios incompletos
+    // - Si hay caché completo: emitirlo (una sola vez)
+    // - Si hay caché incompleto: NO emitirlo; obtener detalle del backend y emitir una sola vez
+    // - Si no hay caché: obtener del backend y emitir una sola vez
+    if (cached) {
+      if (!isDetalleIncompleto(cached)) {
+        return of(cached).pipe(delay(100));
+      }
+      // Caché incompleto: forzar detalle del backend
+      return api$;
+    }
+
+    // Sin caché: obtener del backend
+    return api$;
   }
 
   searchLibros(termino: string): Observable<Libro[]> {
@@ -386,7 +410,8 @@ export class BibliotecaService {
     if (data.isbn !== undefined) payload.isbn = String(data.isbn).trim();
     if (data.categoria !== undefined) payload.categoria = String(data.categoria).trim();
     if (data.editorial !== undefined) payload.editorial = String(data.editorial).trim();
-    if (data['anio_publicacion'] !== undefined) payload['anio_publicacion'] = data['anio_publicacion'];
+    // El backend usa "año_publicacion"; el modelo usa "anio_publicacion"
+    if (data['anio_publicacion'] !== undefined) payload['año_publicacion'] = data['anio_publicacion'];
     if (data.ubicacion !== undefined) payload.ubicacion = String(data.ubicacion).trim();
     if (data.cantidad_total !== undefined) payload.cantidad_total = Number(data.cantidad_total);
     if (data.descripcion !== undefined) payload.descripcion = String(data.descripcion).trim();
@@ -425,9 +450,10 @@ export class BibliotecaService {
       estado: 'Disponible'
     };
     
-    // Solo agregar año_publicacion si tiene valor válido
-    if (libroData.año_publicacion && libroData.año_publicacion >= 1000 && libroData.año_publicacion <= 2030) {
-      datosLimpios['año_publicacion'] = parseInt(libroData.año_publicacion);
+    // Solo agregar año_publicacion si tiene valor válido (acepta "anio_publicacion" o "año_publicacion")
+    const yearValue = libroData.anio_publicacion ?? libroData.año_publicacion;
+    if (yearValue && yearValue >= 1000 && yearValue <= 2030) {
+      datosLimpios['año_publicacion'] = parseInt(yearValue);
     }
     
     console.log('Datos enviados al backend:', datosLimpios);
@@ -462,7 +488,7 @@ export class BibliotecaService {
           autor: libro.autor,
           isbn: libro.isbn,
           editorial: libro.editorial,
-          año_publicacion: libro.año_publicacion,
+          anio_publicacion: libro.año_publicacion,
           categoria: libro.categoria,
           ubicacion: libro.ubicacion,
           estado: libro.estado,
