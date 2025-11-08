@@ -435,7 +435,7 @@ export class AdminLibrosPage implements OnInit {
           text: 'Ver Detalles',
           icon: 'eye-outline',
           handler: () => {
-            this.router.navigate(['detalle-libro'], { queryParams: { id: libro.id } });
+            this.router.navigate(['detalle-libro', libro.id]);
           }
         },
         {

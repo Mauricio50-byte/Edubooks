@@ -31,12 +31,30 @@ export class DetalleLibroPage implements OnInit {
   ) {}
 
   ngOnInit() {
-    // Obtener ID del libro desde query params
+    // Obtener ID del libro desde route params o query params
+    const idFromParam = this.route.snapshot.paramMap.get('id')
+      || this.route.parent?.snapshot.paramMap.get('id');
+
+    if (idFromParam) {
+      this.libroId = +idFromParam;
+      this.cargarLibro();
+      return;
+    }
+
+    // Fallback: observar cambios en params y queryParams
+    this.route.paramMap.subscribe(pm => {
+      const id = pm.get('id') || this.route.parent?.snapshot.paramMap.get('id');
+      if (id) {
+        this.libroId = +id;
+        this.cargarLibro();
+      }
+    });
+
     this.route.queryParams.subscribe(params => {
       if (params['id']) {
         this.libroId = +params['id'];
         this.cargarLibro();
-      } else {
+      } else if (!idFromParam) {
         this.error = 'ID de libro no válido';
         this.isLoading = false;
       }
@@ -161,9 +179,7 @@ export class DetalleLibroPage implements OnInit {
   }
 
   verLibroRelacionado(libro: Libro) {
-    this.router.navigate(['detalle-libro'], {
-      queryParams: { id: libro.id }
-    });
+    this.router.navigate(['detalle-libro', libro.id]);
   }
 
   volverAlCatalogo() {

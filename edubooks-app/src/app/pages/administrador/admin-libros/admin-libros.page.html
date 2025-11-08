@@ -114,7 +114,7 @@
       [libro]="libro"
       modo="admin"
       (editar)="editarLibro(libro)"
-      (verDetalle)="router.navigate(['detalle-libro'], { queryParams: { id: libro.id } })"
+      (verDetalle)="router.navigate(['detalle-libro', libro.id])"
       (eliminar)="confirmarEliminacion(libro)">
     </app-libro-card>
   </div>

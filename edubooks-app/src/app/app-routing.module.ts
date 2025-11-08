@@ -52,7 +52,7 @@ const routes: Routes = [
     canActivate: [SystemInitGuard, AuthGuard] // Verificar inicialización y que esté autenticado
   },
   {
-    path: 'detalle-libro',
+    path: 'detalle-libro/:id',
     loadChildren: () => import('./pages/detalle-libro/detalle-libro.module').then( m => m.DetalleLibroPageModule),
     canActivate: [SystemInitGuard, AuthGuard] // Verificar inicialización y que esté autenticado
   },

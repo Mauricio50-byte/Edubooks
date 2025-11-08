@@ -239,9 +239,7 @@ export class CatalogoPage implements OnInit {
   }
 
   verDetalle(libro: Libro) {
-    this.router.navigate(['detalle-libro'], {
-      queryParams: { id: libro.id }
-    });
+    this.router.navigate(['detalle-libro', libro.id]);
   }
 
   getEstadoColor(estado: string): string {
