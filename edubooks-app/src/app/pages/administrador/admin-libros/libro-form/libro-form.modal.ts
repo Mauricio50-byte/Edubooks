@@ -97,6 +97,25 @@ export class LibroFormModalComponent implements OnInit {
   }
 
   private async mostrarVistaPrevia(libroInfo: any, datos: { cantidad_total: number; ubicacion: string }) {
+    // Resolver categoría (Google Books retorna array "categorias")
+    const categoriaResuelta: string = Array.isArray(libroInfo.categorias) && libroInfo.categorias.length > 0
+      ? libroInfo.categorias[0]
+      : (libroInfo.categoria || 'General');
+
+    // Resolver año de publicación (puede venir como "año_publicacion" o "anio_publicacion")
+    const anioPublicacionResuelto: number | string = (libroInfo['año_publicacion'] ?? libroInfo['anio_publicacion'] ?? 'N/A');
+
+    // Resolver imagen (si no hay, intentar obtener desde backend con fallback)
+    let imagenFinal: string = libroInfo.imagen_portada || '';
+    if (!imagenFinal) {
+      imagenFinal = await this.googleBooksService.obtenerImagenConFallback(
+        libroInfo.titulo || '',
+        libroInfo.autor || '',
+        categoriaResuelta || 'General',
+        this.obtenerImagenPorDefecto()
+      );
+    }
+
     const modal = await this.modalCtrl.create({
       component: LibroPreviewPageComponent,
       componentProps: {
@@ -105,9 +124,10 @@ export class LibroFormModalComponent implements OnInit {
           autor: libroInfo.autor || 'Desconocido',
           isbn: libroInfo.isbn || 'N/A',
           editorial: libroInfo.editorial || 'N/A',
-          anio_publicacion: libroInfo.anio_publicacion || 'N/A',
+          anio_publicacion: anioPublicacionResuelto,
           descripcion: libroInfo.descripcion || '',
-          imagen_portada: libroInfo.imagen_portada || this.obtenerImagenPorDefecto(),
+          imagen_portada: imagenFinal,
+          categoria: categoriaResuelta
         },
         cantidad_total: datos.cantidad_total,
         ubicacion: datos.ubicacion,
@@ -119,7 +139,7 @@ export class LibroFormModalComponent implements OnInit {
     const { role } = await modal.onWillDismiss();
 
     if (role === 'confirm') {
-      await this.registrarLibroDesdeGoogleBooks(libroInfo, datos);
+      await this.registrarLibroDesdeGoogleBooks({...libroInfo, categoria: categoriaResuelta, imagen_portada: imagenFinal, anio_publicacion: anioPublicacionResuelto}, datos);
     }
   }
 
@@ -133,13 +153,17 @@ export class LibroFormModalComponent implements OnInit {
 
     try {
       const imagen = libroInfo.imagen_portada || this.obtenerImagenPorDefecto();
+      // Usar categoría resuelta y asegurar envío del año con la clave correcta
+      const categoriaResuelta: string = Array.isArray(libroInfo.categorias) && libroInfo.categorias.length > 0
+        ? libroInfo.categorias[0]
+        : (libroInfo.categoria || 'General');
       const payload = {
         titulo: libroInfo.titulo || 'Sin título',
         autor: libroInfo.autor || 'Desconocido',
         isbn: libroInfo.isbn || '',
-        categoria: libroInfo.categoria || 'General',
+        categoria: categoriaResuelta,
         editorial: libroInfo.editorial || '',
-        anio_publicacion: libroInfo.anio_publicacion || null,
+        anio_publicacion: (libroInfo['anio_publicacion'] ?? libroInfo['año_publicacion'] ?? null),
         ubicacion: datos.ubicacion,
         cantidad_total: datos.cantidad_total,
         descripcion: libroInfo.descripcion || '',

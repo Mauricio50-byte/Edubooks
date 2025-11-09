@@ -4,6 +4,19 @@
   margin-bottom: 12px;
 }
 
+/* Header y contenido con paleta oscura */
+ion-header, ion-toolbar {
+  --background: var(--ion-color-dark);
+  --color: var(--ion-color-light);
+  border-bottom: 1px solid var(--ion-color-dark-shade);
+}
+
+ion-content {
+  --background: var(--ion-color-dark);
+  color: var(--ion-color-light);
+}
+
+/* Info y tipografía */
 .info {
   margin-bottom: 16px;
 }
@@ -12,6 +25,30 @@
   margin-top: 8px;
 }
 
+/* Tarjeta de registro y elementos */
+.registro-card {
+  margin-top: 12px;
+  background: var(--ion-color-dark);
+  border: 1px solid var(--ion-color-dark-shade);
+}
+
+ion-item {
+  --background: #2A2A50; /* profundidad visual sobre fondo oscuro */
+  --color: var(--ion-color-light);
+  --border-color: rgba(255, 255, 255, 0.08);
+}
+
+ion-icon {
+  color: var(--ion-color-tertiary);
+}
+
+.chip-ubicacion {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --background: var(--ion-color-dark-tint);
+  --color: var(--ion-color-light);
+}
+
+/* Acciones */
 .actions {
   display: grid;
   grid-template-columns: 1fr;
@@ -19,31 +56,29 @@
   margin-top: 16px;
 }
 
-.registro-card {
-  margin-top: 12px;
-}
+/* Alertas coherentes con el prompt de colorimetría */
+.custom-alert {
+  --background: #2A2A50;
+  --backdrop-opacity: 0.6;
 
-.chip-ubicacion {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-}
-.dark-theme {
-  ion-content {
-    --background: var(--ion-color-dark);
+  .alert-wrapper {
+    background: #2A2A50;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
   }
+
+  .alert-head { background: transparent; padding: 20px 20px 0; }
+  .alert-title { color: var(--ion-color-light); font-weight: 700; font-size: 1.2rem; }
+  .alert-message { color: var(--ion-color-medium); font-size: 0.95rem; line-height: 1.5; padding: 12px 20px 20px; }
+  .alert-button-group { padding: 0 8px 12px; }
+
+  .alert-button { background: transparent; color: var(--ion-color-primary); font-weight: 600; border-radius: 10px; text-transform: none; }
+  .alert-button:hover { background: rgba(255, 75, 107, 0.1); }
 }
 
-.registro-card {
-  background: var(--ion-color-dark);
-  border: 1px solid var(--ion-color-dark-shade);
-}
+.alert-button-confirm { background: linear-gradient(to right, #FF4B6B, #FF8C4B); color: var(--ion-color-light); }
 
-ion-item {
-  --background: var(--ion-color-dark);
-  --color: var(--ion-color-light);
-  --border-color: var(--ion-color-dark-shade);
-}
-
-.chip-ubicacion {
-  --background: var(--ion-color-dark-tint);
-  --color: var(--ion-color-light);
-}
+/* Variantes semánticas del alert */
+.alert-success .alert-title::before { content: "✓ "; color: var(--ion-color-success); }
+.alert-warning .alert-title::before { content: "⚠ "; color: #FF8C4B; }
+.alert-danger .alert-title::before { content: "✕ "; color: var(--ion-color-danger); }
