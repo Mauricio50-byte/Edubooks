@@ -1,3 +1,8 @@
+.sanciones-page,
+ion-content {
+  --background: var(--ion-color-dark);
+}
+
 .loading-container {
   display: flex;
   flex-direction: column;
@@ -22,10 +27,11 @@
   gap: 0.75rem;
   padding: 0.5rem;
   border-radius: 8px;
-  background: var(--ion-color-light);
+  background: #2A2A50;
 
   ion-icon {
     font-size: 1.5rem;
+    color: var(--ion-color-tertiary);
   }
 
   div {
@@ -33,7 +39,7 @@
       margin: 0;
       font-size: 1.25rem;
       font-weight: bold;
-      color: var(--ion-color-dark);
+      color: var(--ion-color-light);
     }
 
     p {
@@ -47,7 +53,9 @@
 .sancion-card {
   margin: 0.5rem;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: #2A2A50;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
 
   .sancion-header {
     display: flex;
@@ -68,16 +76,24 @@
         margin: 0;
         font-size: 1.5rem;
         font-weight: bold;
-        color: var(--ion-color-warning);
+        color: var(--ion-color-light);
       }
     }
   }
 
   .sancion-descripcion {
     font-size: 0.95rem;
-    line-height: 1.4;
+    line-height: 1.5;
     margin-bottom: 1rem;
-    color: var(--ion-color-dark);
+    color: var(--ion-color-light);
+    background: rgba(var(--ion-color-medium-rgb, 128,128,128), 0.08);
+    padding: 0.75rem;
+    border-radius: 8px;
+
+    strong {
+      font-weight: 600;
+      color: var(--ion-color-light);
+    }
   }
 
   .sancion-detalles {
@@ -91,7 +107,7 @@
 
       ion-icon {
         margin-right: 0.75rem;
-        color: var(--ion-color-medium);
+        color: var(--ion-color-tertiary);
       }
 
       ion-label {
@@ -99,7 +115,7 @@
           font-size: 0.875rem;
           font-weight: 600;
           margin: 0 0 0.25rem 0;
-          color: var(--ion-color-dark);
+          color: var(--ion-color-light);
         }
 
         p {
@@ -117,7 +133,7 @@
     justify-content: flex-end;
     margin-top: 1rem;
     padding-top: 1rem;
-    border-top: 1px solid var(--ion-color-light);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
 
     ion-button {
       --border-radius: 8px;
@@ -144,7 +160,7 @@
   h3 {
     margin: 0 0 0.5rem 0;
     font-size: 1.25rem;
-    color: var(--ion-color-dark);
+    color: var(--ion-color-light);
   }
 
   p {
