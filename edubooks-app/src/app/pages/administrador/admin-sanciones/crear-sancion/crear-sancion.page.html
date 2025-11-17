@@ -1,0 +1,98 @@
+<ion-header [translucent]="true">
+  <ion-toolbar class="gradient-primary">
+    <ion-title>Crear Sanción</ion-title>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/admin-sanciones"></ion-back-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Seleccionar Usuario</ion-card-title>
+      <ion-card-subtitle>Busca por nombre, usuario o email</ion-card-subtitle>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-searchbar placeholder="Buscar usuario" (ionInput)="buscarUsuarios($event.detail.value || '')"></ion-searchbar>
+
+      <div *ngIf="isLoadingUsuarios" class="loading-usuarios">
+        <ion-spinner name="dots"></ion-spinner>
+        <span>Cargando usuarios...</span>
+      </div>
+
+      <ion-list *ngIf="!isLoadingUsuarios">
+        <ion-item *ngFor="let u of usuarios" (click)="seleccionarUsuario(u)" [class.selected]="selectedUsuario?.id === u.id">
+          <ion-icon name="person-circle-outline" slot="start"></ion-icon>
+          <ion-label>
+            <h3>{{ u.nombre }} {{ u.apellido }} <span class="rol">• {{ u.rol }}</span></h3>
+            <p>{{ u.email }} — @{{ u.username }}</p>
+          </ion-label>
+          <ion-chip *ngIf="selectedUsuario?.id === u.id" color="primary">
+            <ion-icon name="checkmark-outline"></ion-icon>
+            <ion-label>Seleccionado</ion-label>
+          </ion-chip>
+        </ion-item>
+      </ion-list>
+
+      <ion-item *ngIf="selectedUsuario" lines="none" class="usuario-seleccionado">
+        <ion-icon name="person" slot="start" color="tertiary"></ion-icon>
+        <ion-label>
+          <h3>Usuario seleccionado</h3>
+          <p>{{ selectedUsuario!.nombre }} {{ selectedUsuario!.apellido }} — {{ selectedUsuario!.email }}</p>
+        </ion-label>
+      </ion-item>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Detalles de la Sanción</ion-card-title>
+      <ion-card-subtitle>Configura el tipo y la descripción</ion-card-subtitle>
+    </ion-card-header>
+    <ion-card-content>
+      <form [formGroup]="form" (ngSubmit)="crear()">
+        <input type="hidden" formControlName="usuario_id" />
+
+        <ion-list>
+          <ion-radio-group formControlName="tipo" (ionChange)="onTipoChange($event.detail.value)">
+            <ion-item>
+              <ion-label>Multa</ion-label>
+              <ion-radio value="Multa"></ion-radio>
+            </ion-item>
+            <ion-item>
+              <ion-label>Suspensión</ion-label>
+              <ion-radio value="Suspensión"></ion-radio>
+            </ion-item>
+          </ion-radio-group>
+
+          <ion-item *ngIf="form.get('tipo')?.value === 'Multa'">
+            <ion-label position="stacked">Monto</ion-label>
+            <ion-input type="number" placeholder="Ingrese el monto" formControlName="monto"></ion-input>
+          </ion-item>
+
+          <ion-item *ngIf="form.get('tipo')?.value === 'Suspensión'">
+            <ion-label position="stacked">Días de Suspensión</ion-label>
+            <ion-input type="number" placeholder="Ingrese los días" formControlName="dias_suspension"></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Descripción</ion-label>
+            <ion-textarea placeholder="Describe la sanción" formControlName="descripcion" rows="5"></ion-textarea>
+          </ion-item>
+        </ion-list>
+
+        <div class="acciones">
+          <ion-button fill="clear" color="medium" (click)="cancelar()">
+            <ion-icon name="close-outline" slot="start"></ion-icon>
+            Cancelar
+          </ion-button>
+          <ion-button type="submit" class="gradient-primary">
+            <ion-icon name="save-outline" slot="start"></ion-icon>
+            Crear Sanción
+          </ion-button>
+        </div>
+      </form>
+    </ion-card-content>
+  </ion-card>
+</ion-content>
