@@ -80,46 +80,8 @@ export class AdminSancionesPage implements OnInit {
   }
 
   async crearSancion() {
-    const alert = await this.alertController.create({
-      header: 'Crear Sanción',
-      inputs: [
-        { name: 'usuario_id', type: 'number', placeholder: 'ID de usuario' },
-        { name: 'tipo', type: 'radio', label: 'Multa', value: 'Multa', checked: true },
-        { name: 'tipo', type: 'radio', label: 'Suspensión', value: 'Suspensión' },
-        { name: 'monto', type: 'number', placeholder: 'Monto (solo Multa)' },
-        { name: 'dias_suspension', type: 'number', placeholder: 'Días de suspensión' },
-        { name: 'descripcion', type: 'textarea', placeholder: 'Descripción' }
-      ],
-      buttons: [
-        { text: 'Cancelar', role: 'cancel' },
-        { text: 'Crear', handler: async (data) => {
-          await this.procesarCrearSancion(data);
-        }}
-      ]
-    });
-    await alert.present();
-  }
-
-  private async procesarCrearSancion(data: any) {
-    const loading = await this.loadingController.create({ message: 'Creando sanción...' });
-    await loading.present();
-    try {
-      const payload: any = {
-        usuario_id: data.usuario_id ? Number(data.usuario_id) : undefined,
-        tipo: data.tipo,
-        monto: data.monto ? Number(data.monto) : undefined,
-        dias_suspension: data.dias_suspension ? Number(data.dias_suspension) : undefined,
-        descripcion: data.descripcion
-      };
-      await this.sancionService.crearSancion(payload).toPromise();
-      await this.mostrarToast('Sanción creada', 'success');
-      await this.cargarDatos();
-    } catch (error: any) {
-      console.error('Error creando sanción:', error);
-      await this.mostrarToast(error.message || 'Error al crear sanción', 'danger');
-    } finally {
-      await loading.dismiss();
-    }
+    // Navegar a la nueva página profesional de creación de sanciones
+    this.router.navigate(['/admin-sanciones/crear']);
   }
 
   async pagarMulta(sancion: Sancion) {
