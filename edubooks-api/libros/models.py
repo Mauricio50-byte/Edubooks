@@ -284,8 +284,8 @@ class Prestamo(models.Model, SupabaseModelMixin):
         
         # Validación de aprobador
         if self.aprobado_por:
-            if not hasattr(self.aprobado_por, 'rol') or self.aprobado_por.rol not in ['Administrador', 'Bibliotecario']:
-                errors['aprobado_por'] = 'Solo administradores y bibliotecarios pueden aprobar préstamos.'
+            if not hasattr(self.aprobado_por, 'rol') or self.aprobado_por.rol not in ['administrador']:
+                errors['aprobado_por'] = 'Solo administradores pueden aprobar préstamos.'
         
         if errors:
             raise ValidationError(errors)
