@@ -103,7 +103,7 @@ class PrestamoListView(generics.ListAPIView):
     def get_queryset(self):
         user = self.request.user
         
-        if user.rol == 'Administrador':
+        if user.rol == 'administrador':
             queryset = Prestamo.objects.all()
         else:
             queryset = Prestamo.objects.filter(usuario=user)
@@ -154,7 +154,7 @@ class PrestamoDetailView(generics.RetrieveAPIView):
     
     def get_queryset(self):
         user = self.request.user
-        if user.rol == 'Administrador':
+        if user.rol == 'administrador':
             return Prestamo.objects.all()
         else:
             return Prestamo.objects.filter(usuario=user)
@@ -357,7 +357,7 @@ class ReservaListView(generics.ListAPIView):
     def get_queryset(self):
         user = self.request.user
         
-        if user.rol == 'Administrador':
+        if user.rol == 'administrador':
             queryset = Reserva.objects.all()
         else:
             queryset = Reserva.objects.filter(usuario=user)
@@ -411,17 +411,17 @@ class BibliografiaListView(generics.ListAPIView):
         user = self.request.user
         queryset = Bibliografia.objects.none()
         
-        if user.rol == 'Docente':
+        if user.rol == 'docente':
             queryset = Bibliografia.objects.filter(docente=user)
-        elif user.rol == 'Estudiante':
+        elif user.rol == 'estudiante':
             # Filtrar por programa del estudiante
-            if user.carrera:
+            if getattr(user, 'carrera', None):
                 queryset = Bibliografia.objects.filter(
                     es_publica=True,
                     activa=True,
                     programa=user.carrera
                 )
-        elif user.rol == 'Administrador':
+        elif user.rol == 'administrador':
             queryset = Bibliografia.objects.all()
         
         # Filtros adicionales
@@ -459,18 +459,18 @@ class BibliografiaDetailView(generics.RetrieveAPIView):
     
     def get_queryset(self):
         user = self.request.user
-        if user.rol == 'Docente':
+        if user.rol == 'docente':
             return Bibliografia.objects.filter(docente=user)
-        elif user.rol == 'Estudiante':
+        elif user.rol == 'estudiante':
             # Solo bibliografías públicas y activas de su programa
-            if user.carrera:
+            if getattr(user, 'carrera', None):
                 return Bibliografia.objects.filter(
                     es_publica=True,
                     activa=True,
                     programa=user.carrera
                 )
             return Bibliografia.objects.none()
-        elif user.rol == 'Administrador':
+        elif user.rol == 'administrador':
             return Bibliografia.objects.all()
         return Bibliografia.objects.none()
 
@@ -571,7 +571,7 @@ def bibliografias_por_programa(request, programa):
     """Obtener bibliografías de un programa específico"""
     user = request.user
     
-    if user.rol == 'Estudiante':
+    if user.rol == 'estudiante':
         # Solo bibliografías públicas y activas
         bibliografias = Bibliografia.objects.filter(
             programa=programa,
@@ -598,7 +598,7 @@ class SancionListView(generics.ListAPIView):
     def get_queryset(self):
         user = self.request.user
         
-        if user.rol == 'Administrador':
+        if user.rol == 'administrador':
             queryset = Sancion.objects.all()
         else:
             queryset = Sancion.objects.filter(usuario=user)
