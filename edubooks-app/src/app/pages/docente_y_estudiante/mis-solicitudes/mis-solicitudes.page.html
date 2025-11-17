@@ -89,16 +89,16 @@
             <p>{{ solicitud.motivo_rechazo }}</p>
           </div>
 
-          <div class="estado-info" [ngSwitch]="solicitud.estado">
-            <div *ngSwitchCase="'Pendiente'" class="estado-pendiente">
-              <ion-icon name="time-outline" color="warning"></ion-icon>
-              <span>Tu solicitud está siendo revisada por un administrador</span>
-            </div>
-            <div *ngSwitchCase="'Rechazado'" class="estado-rechazado">
-              <ion-icon name="close-circle-outline" color="danger"></ion-icon>
-              <span>Tu solicitud fue rechazada</span>
-            </div>
-          </div>
+  <div [ngSwitch]="solicitud.estado">
+    <div *ngSwitchCase="'Pendiente'" class="estado-info estado-pendiente">
+      <ion-icon name="time-outline" color="warning"></ion-icon>
+      <span>Tu solicitud está siendo revisada por un administrador</span>
+    </div>
+    <div *ngSwitchCase="'Rechazado'" class="estado-info estado-rechazado">
+      <ion-icon name="close-circle-outline" color="danger"></ion-icon>
+      <span>Tu solicitud fue rechazada</span>
+    </div>
+  </div>
         </ion-card-content>
       </ion-card>
     </div>
