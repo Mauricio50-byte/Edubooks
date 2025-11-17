@@ -1,0 +1,43 @@
+.loading-usuarios {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--ion-color-medium);
+}
+
+ion-item.selected {
+  border-left: 3px solid var(--ion-color-primary);
+  background: rgba(255, 75, 107, 0.08);
+}
+
+.usuario-seleccionado {
+  margin-top: 0.5rem;
+  background: #2A2A50;
+  border-radius: 8px;
+}
+
+.rol {
+  color: var(--ion-color-tertiary);
+  font-weight: 600;
+}
+
+.acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+ion-card {
+  background: var(--ion-color-dark);
+  border-radius: 12px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+}
+
+ion-card-title {
+  color: var(--ion-color-light);
+}
+
+ion-card-subtitle {
+  color: var(--ion-color-medium);
+}
