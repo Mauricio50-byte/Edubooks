@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AlertController, LoadingController, ToastController } from '@ionic/angular';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { AuthService } from '../../../core/services/auth.service';
 import { SancionService } from '../../../core/services/sancion.service';
 import { Sancion } from '../../../core/models/libro.model';
@@ -26,12 +27,21 @@ export class SancionesPage implements OnInit {
     private alertController: AlertController,
     private loadingController: LoadingController,
     private toastController: ToastController,
-    private router: Router
+    private router: Router,
+    private sanitizer: DomSanitizer
   ) {}
 
   ngOnInit() {
     this.usuarioActual = this.authService.currentUserValue;
     this.cargarSanciones();
+  }
+
+  /**
+   * Renderizar descripción/comunicado con HTML seguro
+   */
+  renderDescripcion(desc: string | null | undefined): SafeHtml {
+    const html = (desc || '').replace(/\n/g, '<br/>');
+    return this.sanitizer.bypassSecurityTrustHtml(html);
   }
 
   /**
