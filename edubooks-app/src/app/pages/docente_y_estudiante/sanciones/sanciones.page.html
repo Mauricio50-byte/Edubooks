@@ -122,7 +122,7 @@
       </ion-card-header>
       
       <ion-card-content>
-        <p class="sancion-descripcion">{{ sancion.descripcion }}</p>
+        <div class="sancion-descripcion" [innerHTML]="renderDescripcion(sancion.descripcion)"></div>
         
         <div class="sancion-detalles">
           <ion-item lines="none">
@@ -169,8 +169,9 @@
           
           <ion-button 
             *ngIf="sancion.tipo === 'Multa' && sancion.estado === 'Activa'"
-            color="success" 
-            size="small" 
+            class="gradient-primary"
+            fill="solid"
+            size="small"
             (click)="pagarMulta(sancion)">
             <ion-icon name="card-outline" slot="start"></ion-icon>
             Pagar Multa
@@ -185,7 +186,7 @@
     <ion-icon name="checkmark-circle-outline" color="success"></ion-icon>
     <h3>¡Excelente!</h3>
     <p>No tienes sanciones activas</p>
-    <ion-button fill="outline" routerLink="/catalogo">
+    <ion-button class="gradient-primary" fill="solid" routerLink="/catalogo">
       <ion-icon name="library-outline" slot="start"></ion-icon>
       Explorar Catálogo
     </ion-button>
