@@ -29,7 +29,7 @@ const routes: Routes = [
   },
   {
     path: 'register-invitation/:token',
-    loadChildren: () => import('./pages/register/register-invitation.module').then( m => m.RegisterInvitationPageModule),
+    loadChildren: () => import('./pages/register/register-invitacion/register-invitation.module').then( m => m.RegisterInvitationPageModule),
     canActivate: [SystemInitGuard, NoAuthGuard] // Verificar inicialización y que NO esté autenticado
   },
   {

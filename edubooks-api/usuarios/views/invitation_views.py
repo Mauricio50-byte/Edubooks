@@ -46,8 +46,7 @@ class InvitacionCreateView(generics.CreateAPIView):
     def _enviar_email_invitacion(self, invitacion):
         """Enviar email de invitación al usuario."""
         try:
-            # URL de registro con token
-            registro_url = f"{settings.FRONTEND_URL}/registro?token={invitacion.token}"
+            registro_url = f"{settings.FRONTEND_URL}/register-invitation/{invitacion.token}"
             
             # Contexto para el template
             context = {
@@ -139,15 +138,21 @@ def validar_token_invitacion(request):
             invitacion.incrementar_intento(ip_address)
             
             if invitacion.es_valida:
+                rol_display = dict(Usuario.ROLES_CHOICES)[invitacion.rol_asignado]
                 return Response({
                     'valido': True,
-                    'email_invitado': invitacion.email_invitado,
-                    'rol_asignado': invitacion.rol_asignado,
-                    'rol_display': dict(Usuario.ROLES_CHOICES)[invitacion.rol_asignado],
-                    'mensaje_personalizado': invitacion.mensaje_personalizado,
-                    'datos_adicionales': invitacion.datos_adicionales,
-                    'dias_para_expirar': invitacion.dias_para_expirar,
-                    'creado_por': invitacion.creado_por.nombre_completo
+                    'invitacion': {
+                        'token': str(invitacion.token),
+                        'email_invitado': invitacion.email_invitado,
+                        'rol': rol_display,
+                        'datos_adicionales': invitacion.datos_adicionales,
+                        'fecha_expiracion': invitacion.fecha_expiracion,
+                        'invitado_por': {
+                            'nombre': invitacion.creado_por.nombre,
+                            'apellido': invitacion.creado_por.apellido,
+                            'email': invitacion.creado_por.email
+                        }
+                    }
                 })
             else:
                 return Response({

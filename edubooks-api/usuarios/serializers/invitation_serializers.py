@@ -157,6 +157,7 @@ class RegistroConInvitacionSerializer(serializers.ModelSerializer):
         invitacion = validated_data.pop('_invitacion')
         password = validated_data.pop('password')
         validated_data.pop('password_confirm')
+        validated_data.pop('token_invitacion', None)
         
         # Extraer datos específicos del rol
         datos_estudiante = validated_data.pop('datos_estudiante', None)
