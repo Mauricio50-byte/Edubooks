@@ -16,8 +16,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.http import JsonResponse
 
 urlpatterns = [
+    path('', lambda request: JsonResponse({
+        'service': 'edubooks-api',
+        'status': 'ok'
+    })),
     path('admin/', admin.site.urls),
     path('api/auth/', include('usuarios.urls')),
     path('api/setup/', include('usuarios.urls.setup_urls')),  # URLs para inicialización del sistema
