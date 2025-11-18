@@ -4,7 +4,7 @@ Permite crear el primer administrador del sistema de forma segura.
 """
 
 from rest_framework import status
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@authentication_classes([])
 def inicializar_sistema(request):
     """
     Endpoint para inicializar el sistema creando el primer superusuario.
@@ -218,6 +219,7 @@ def inicializar_sistema(request):
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
+@authentication_classes([])
 def verificar_inicializacion(request):
     """
     Endpoint para verificar si el sistema ya ha sido inicializado.
@@ -249,6 +251,7 @@ def verificar_inicializacion(request):
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
+@authentication_classes([])
 def estado_sistema(request):
     """
     Endpoint para obtener información general del estado del sistema.

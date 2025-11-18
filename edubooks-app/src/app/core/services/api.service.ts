@@ -13,17 +13,18 @@ export class ApiService {
 
   constructor(private http: HttpClient) {}
 
-  private getHeaders(): HttpHeaders {
+  private getHeaders(includeAuth: boolean = true): HttpHeaders {
     const headers: any = {
       'Content-Type': 'application/json'
     };
-    
-    // Agregar token de autorización si existe
-    const token = localStorage.getItem('access_token');
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
+
+    if (includeAuth) {
+      const token = localStorage.getItem('access_token');
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
     }
-    
+
     return new HttpHeaders(headers);
   }
 
@@ -57,16 +58,18 @@ export class ApiService {
 
   // Métodos HTTP genéricos
   get<T>(endpoint: string): Observable<T> {
+    const isSetupEndpoint = endpoint.startsWith('/setup/');
     return this.http.get<T>(`${this.baseUrl}${endpoint}`, {
-      headers: this.getHeaders()
+      headers: this.getHeaders(!isSetupEndpoint)
     }).pipe(
       catchError(this.handleError)
     );
   }
 
   post<T>(endpoint: string, data: any): Observable<T> {
+    const isSetupEndpoint = endpoint.startsWith('/setup/');
     return this.http.post<T>(`${this.baseUrl}${endpoint}`, data, {
-      headers: this.getHeaders()
+      headers: this.getHeaders(!isSetupEndpoint)
     }).pipe(
       catchError(this.handleError)
     );

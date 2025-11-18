@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { AlertController, LoadingController, ToastController, ModalController, IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
@@ -64,7 +64,7 @@ interface Invitacion {
     ])
   ]
 })
-export class AdminInvitacionesPage implements OnInit {
+export class AdminInvitacionesPage implements OnInit, OnDestroy {
   invitaciones: Invitacion[] = [];
   invitacionesOriginales: Invitacion[] = []; // Nueva propiedad para almacenar datos originales
   invitacionesFiltradas: Invitacion[] = []; // Nueva propiedad para datos filtrados

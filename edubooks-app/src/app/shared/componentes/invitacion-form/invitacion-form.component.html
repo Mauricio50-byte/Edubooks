@@ -2,7 +2,7 @@
 <div class="invitation-header">
   <div class="header-content">
     <div class="header-left">
-      <ion-button fill="clear" (click)="close.emit()" class="back-btn">
+      <ion-button fill="clear" (click)="cerrar.emit()" class="back-btn">
         <ion-icon name="arrow-back-outline"></ion-icon>
       </ion-button>
       <div class="header-title">
@@ -188,7 +188,7 @@
         <span *ngIf="isCreating">Enviando...</span>
       </ion-button>
       
-      <ion-button fill="clear" (click)="close.emit()" class="secondary-button">
+      <ion-button fill="clear" (click)="cerrar.emit()" class="secondary-button">
         Cancelar
       </ion-button>
     </div>

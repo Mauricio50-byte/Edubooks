@@ -15,7 +15,7 @@ export class InvitacionFormComponent {
 
   @Output() submitForm = new EventEmitter<void>();
   @Output() rolChange = new EventEmitter<any>();
-  @Output() close = new EventEmitter<void>();
+  @Output() cerrar = new EventEmitter<void>();
 
   private rolIconMap: Record<string, string> = {
     estudiante: 'school-outline',
