@@ -11,7 +11,7 @@ import { Http as CapacitorHttp } from '@capacitor/http';
   providedIn: 'root'
 })
 export class ApiService {
-  private baseUrl = environment.apiUrl || 'http://localhost:8000/api';
+  private baseUrl = (localStorage.getItem('api_url') || environment.apiUrl || 'http://localhost:8000/api');
 
   constructor(private http: HttpClient) {}
 

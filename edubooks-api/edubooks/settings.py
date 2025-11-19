@@ -91,6 +91,12 @@ CORS_ALLOW_CREDENTIALS = True
 # Solo para desarrollo - debe ser False en producción
 CORS_ALLOW_ALL_ORIGINS = config('CORS_ALLOW_ALL_ORIGINS', default=True, cast=bool)
 
+CORS_ALLOWED_ORIGIN_REGEXES = config(
+    'CORS_ALLOWED_ORIGIN_REGEXES',
+    default='^http://localhost:\\d+$,^http://127\\.0\\.0\\.1:\\d+$,^https://localhost:\\d+$,^https://127\\.0\\.0\\.1:\\d+$',
+    cast=lambda v: [s.strip() for s in v.split(',')]
+)
+
 CORS_ALLOW_HEADERS = [
     'accept',
     'accept-encoding',
