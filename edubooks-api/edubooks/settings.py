@@ -93,7 +93,7 @@ CORS_ALLOW_ALL_ORIGINS = config('CORS_ALLOW_ALL_ORIGINS', default=True, cast=boo
 
 CORS_ALLOWED_ORIGIN_REGEXES = config(
     'CORS_ALLOWED_ORIGIN_REGEXES',
-    default='^http://localhost:\\d+$,^http://127\\.0\\.0\\.1:\\d+$,^https://localhost:\\d+$,^https://127\\.0\\.0\\.1:\\d+$',
+    default='^https?://localhost(?::\\d+)?$,^https?://127\\.0\\.0\\.1(?::\\d+)?$',
     cast=lambda v: [s.strip() for s in v.split(',')]
 )
 
