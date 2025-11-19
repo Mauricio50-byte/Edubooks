@@ -108,9 +108,26 @@ export class AuthService {
   }
 
   // Sincronización con Django usando Supabase
-  private syncWithDjango(supabaseUser: any): void {
+  private async syncWithDjango(supabaseUser: any): Promise<void> {
     try {
-      const token = supabaseUser?.id ? null : null; // Placeholder no usado
+      const supabaseToken = await this.supabaseService.getAccessToken();
+      if (!supabaseToken) {
+        return;
+      }
+      const payload = {
+        supabase_token: supabaseToken,
+        user_data: {
+          username: supabaseUser?.email?.split('@')[0] || '',
+          nombre: supabaseUser?.user_metadata?.nombre || '',
+          apellido: supabaseUser?.user_metadata?.apellido || ''
+        }
+      };
+      this.apiService.post<AuthResponse>('/auth/supabase-sync/', payload)
+        .pipe(
+          tap(response => this.handleAuthSuccess(response)),
+          catchError(error => { throw error; })
+        )
+        .subscribe();
     } catch (error) {
       console.error('Error al sincronizar con Django:', error);
     }

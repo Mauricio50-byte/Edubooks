@@ -22,6 +22,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+            <!-- Deep link para manejar el callback de OAuth (Supabase, PKCE) -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="io.ionic.starter" android:host="auth" android:path="/callback" />
+            </intent-filter>
+
         </activity>
 
         <provider

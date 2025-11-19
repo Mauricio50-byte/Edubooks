@@ -3,6 +3,7 @@ import { createClient, SupabaseClient, Session, User, AuthError } from '@supabas
 import { environment } from '../../../environments/environment';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { LockManagerService } from './lock-manager.service';
+import { Capacitor } from '@capacitor/core';
 
 export interface SupabaseAuthResult {
   success: boolean;
@@ -144,11 +145,13 @@ export class SupabaseService {
     try {
       // Limpiar cualquier sesión anterior
       await this.supabase.auth.signOut();
-      
+      const redirectUrl = Capacitor.getPlatform() === 'web'
+        ? `${window.location.origin}/auth/callback`
+        : 'io.ionic.starter://auth/callback';
       const { data, error } = await this.supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: redirectUrl,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
@@ -159,7 +162,45 @@ export class SupabaseService {
       if (error) {
         return { success: false, error: error.message };
       }
-
+      // Entornos nativos: abrir navegador y escuchar deep link (sin Browser plugin)
+      if (Capacitor.getPlatform() !== 'web' && data?.url) {
+        try {
+          const { App } = await import('@capacitor/app');
+          window.location.href = data.url;
+          const listener = await App.addListener('appUrlOpen', async ({ url }) => {
+            try {
+              const parsed = new URL(url);
+              const code = parsed.searchParams.get('code');
+              const errorDescription = parsed.searchParams.get('error_description');
+              if (errorDescription) {
+                console.error('OAuth error:', errorDescription);
+                return;
+              }
+              if (code) {
+                const { data: sessionData, error: exchangeError } = await this.supabase.auth.exchangeCodeForSession(code);
+                if (exchangeError) {
+                  console.error('Error exchanging code for session:', exchangeError);
+                  return;
+                }
+                if (sessionData?.session) {
+                  this.sessionSubject.next(sessionData.session);
+                  this.userSubject.next(sessionData.session.user);
+                }
+              }
+            } catch (e) {
+              console.error('Error procesando appUrlOpen:', e);
+            } finally {
+              listener.remove();
+            }
+          });
+          return { success: true };
+        } catch (e) {
+          // Si el plugin Browser no está disponible, redirigir directamente
+          window.location.href = data.url;
+          return { success: true };
+        }
+      }
+      // En web, Supabase gestionará el redireccionamiento
       return { success: true, data };
     } catch (error) {
       console.error('Error en signInWithGoogle:', error);
@@ -308,45 +349,33 @@ export class SupabaseService {
     await this.waitForInitialization();
     
     try {
-      // Procesar los parámetros de la URL del callback
-      const { data, error } = await this.supabase.auth.getSession();
-      
-      if (error) {
-        console.error('Error en callback de auth:', error);
-        throw error;
+      // Con flujo PKCE, el callback contiene el código de autorización
+      const url = new URL(window.location.href);
+      const code = url.searchParams.get('code');
+      if (code) {
+      const { data, error } = await this.supabase.auth.exchangeCodeForSession(code);
+        if (error) {
+          console.error('Error intercambiando código por sesión:', error);
+          throw error;
+        }
+        if (data?.session) {
+          this.sessionSubject.next(data.session);
+          this.userSubject.next(data.session.user);
+          return;
+        }
       }
-      
-      if (data.session) {
-        console.log('Sesión establecida exitosamente en callback');
-        this.userSubject.next(data.session.user);
+      // Fallback: intentar obtener sesión actual si ya fue procesada por Supabase
+      const { data: sessionData, error: getError } = await this.supabase.auth.getSession();
+      if (getError) {
+        console.error('Error obteniendo sesión en callback:', getError);
+        throw getError;
+      }
+      if (sessionData.session) {
+        this.sessionSubject.next(sessionData.session);
+        this.userSubject.next(sessionData.session.user);
         return;
       }
-
-      // Si no hay sesión, intentar procesar el hash de la URL
-      const hashParams = new URLSearchParams(window.location.hash.substring(1));
-      const accessToken = hashParams.get('access_token');
-      const refreshToken = hashParams.get('refresh_token');
-      
-      if (accessToken) {
-        console.log('Procesando tokens del callback OAuth');
-        // Establecer la sesión con los tokens obtenidos
-        const { data: sessionData, error: sessionError } = await this.supabase.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken || ''
-        });
-        
-        if (sessionError) {
-          console.error('Error estableciendo sesión:', sessionError);
-          throw sessionError;
-        }
-        
-        if (sessionData.session) {
-          console.log('Sesión establecida con tokens del callback');
-          this.userSubject.next(sessionData.session.user);
-        }
-      } else {
-        console.warn('No se encontraron tokens en el callback');
-      }
+      console.warn('Callback de autenticación sin sesión ni código');
     } catch (error) {
       console.error('Error manejando callback de auth:', error);
       throw error;
