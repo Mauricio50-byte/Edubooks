@@ -92,6 +92,16 @@
           <ion-button 
             *ngIf="invitacion.estado === 'pendiente'" 
             fill="solid" 
+            color="tertiary"
+            size="small"
+            (click)="onCopiarLinkInvitacion(invitacion)"
+            class="action-btn">
+            <ion-icon name="link-outline"></ion-icon>
+          </ion-button>
+
+          <ion-button 
+            *ngIf="invitacion.estado === 'pendiente'" 
+            fill="solid" 
             color="warning"
             size="small"
             (click)="onExtenderInvitacion(invitacion)"

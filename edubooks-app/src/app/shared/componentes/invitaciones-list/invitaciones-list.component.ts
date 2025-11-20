@@ -31,6 +31,7 @@ export class InvitacionesListComponent {
   @Output() extenderInvitacion = new EventEmitter<Invitacion>();
   @Output() cancelarInvitacion = new EventEmitter<Invitacion>();
   @Output() eliminarInvitacion = new EventEmitter<Invitacion>();
+  @Output() copiarLinkInvitacion = new EventEmitter<Invitacion>();
 
   // Exponer Object para el template
   Object = Object;
@@ -120,5 +121,9 @@ export class InvitacionesListComponent {
 
   onEliminarInvitacion(invitacion: Invitacion): void {
     this.eliminarInvitacion.emit(invitacion);
+  }
+
+  onCopiarLinkInvitacion(invitacion: Invitacion): void {
+    this.copiarLinkInvitacion.emit(invitacion);
   }
 }

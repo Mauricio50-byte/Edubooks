@@ -685,6 +685,41 @@ export class AdminInvitacionesPage implements OnInit, OnDestroy {
     }
   }
 
+  async copiarLinkInvitacion(invitacion: Invitacion) {
+    const base = (typeof window !== 'undefined' && window.location && window.location.origin)
+      ? window.location.origin
+      : 'http://localhost:8100';
+    const url = `${base}/register-invitacion/${invitacion.token}`;
+
+    try {
+      if (navigator && navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(url);
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = url;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      }
+      const toast = await this.toastController.create({
+        message: 'Enlace de invitación copiado',
+        duration: 2500,
+        color: 'success',
+        position: 'top'
+      });
+      await toast.present();
+    } catch (error) {
+      const toast = await this.toastController.create({
+        message: 'No se pudo copiar el enlace',
+        duration: 2500,
+        color: 'danger',
+        position: 'top'
+      });
+      await toast.present();
+    }
+  }
+
   // Getters para validaciones del formulario
   get email_invitado() { return this.crearInvitacionForm.get('email_invitado'); }
   get rol_asignado() { return this.crearInvitacionForm.get('rol_asignado'); }

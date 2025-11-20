@@ -46,7 +46,8 @@ class InvitacionCreateView(generics.CreateAPIView):
     def _enviar_email_invitacion(self, invitacion):
         """Enviar email de invitación al usuario."""
         try:
-            registro_url = f"{settings.FRONTEND_URL}/register-invitation/{invitacion.token}"
+            base_url = getattr(settings, 'FRONTEND_PUBLIC_URL', None) or getattr(settings, 'FRONTEND_URL', '')
+            registro_url = f"{base_url}/register-invitacion/{invitacion.token}"
             
             # Contexto para el template
             context = {

@@ -304,3 +304,4 @@ DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@edubooks.com')
 
 # URL del frontend para enlaces en emails
 FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:8100')
+FRONTEND_PUBLIC_URL = os.getenv('FRONTEND_PUBLIC_URL', FRONTEND_URL)
