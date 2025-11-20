@@ -21,7 +21,6 @@
     "@angular/platform-browser": "^20.0.0",
     "@angular/platform-browser-dynamic": "^20.0.0",
     "@angular/router": "^20.0.0",
-    "@capacitor-community/http": "^1.4.1",
     "@capacitor/android": "^7.4.4",
     "@capacitor/app": "7.1.0",
     "@capacitor/core": "7.4.3",
