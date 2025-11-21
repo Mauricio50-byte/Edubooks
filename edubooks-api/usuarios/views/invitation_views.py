@@ -54,7 +54,6 @@ class InvitacionCreateView(generics.CreateAPIView):
         logger.info(f"Invitación creada por {self.request.user.email} para {invitacion.email_invitado}")
     
     def _enviar_email_invitacion(self, invitacion):
-        """Enviar email de invitación al usuario."""
         try:
             base_url = getattr(settings, 'FRONTEND_PUBLIC_URL', None) or getattr(settings, 'FRONTEND_URL', '')
             registro_url = f"{base_url}/register-invitacion/{invitacion.token}"
@@ -90,9 +89,10 @@ class InvitacionCreateView(generics.CreateAPIView):
             connection.send_messages([email])
             
             logger.info(f"Email de invitación enviado a {invitacion.email_invitado}")
-            
+            return True
         except Exception as e:
             logger.error(f"Error enviando email de invitación: {str(e)}")
+            return False
 
 
 class InvitacionListView(generics.ListAPIView):
@@ -350,22 +350,18 @@ def reenviar_invitacion(request, token):
             'error': 'No se puede reenviar una invitación expirada. Extienda la fecha primero.'
         }, status=status.HTTP_400_BAD_REQUEST)
     
-    try:
-        # Usar el mismo método de envío de email
-        view_instance = InvitacionCreateView()
-        view_instance._enviar_email_invitacion(invitacion)
-        
+    view_instance = InvitacionCreateView()
+    enviado = view_instance._enviar_email_invitacion(invitacion)
+    if enviado:
         return Response({
             'mensaje': 'Invitación reenviada exitosamente',
             'email_invitado': invitacion.email_invitado,
             'token': str(invitacion.token)
         })
-        
-    except Exception as e:
-        logger.error(f"Error reenviando invitación {token}: {str(e)}")
+    else:
         return Response({
-            'error': 'Error enviando el email de invitación'
-        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            'error': 'No fue posible enviar el email de invitación'
+        }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
 
 @api_view(['GET'])
