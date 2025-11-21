@@ -11,6 +11,8 @@ from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from django.core.mail import get_connection
+from django.conf import settings
 from usuarios.models.user_models import Administrador
 from usuarios.serializers.user_serializers import UsuarioRegistroSerializer
 import re
@@ -310,6 +312,38 @@ def estado_sistema(request):
             'code': 'SYSTEM_ERROR'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+@authentication_classes([])
+def probar_smtp_conexion(request):
+    """
+    Verifica la conectividad SMTP según la configuración actual.
+    GET /api/setup/probar-smtp/
+    """
+    try:
+        timeout = int(getattr(settings, 'EMAIL_TIMEOUT', 15))
+        conn = get_connection(timeout=timeout)
+        conn.open()
+        conn.close()
+        return Response({
+            'status': 'OK',
+            'email_mode': getattr(settings, 'EMAIL_MODE', 'console'),
+            'host': getattr(settings, 'EMAIL_HOST', None),
+            'port': getattr(settings, 'EMAIL_PORT', None),
+            'use_tls': getattr(settings, 'EMAIL_USE_TLS', False),
+            'use_ssl': getattr(settings, 'EMAIL_USE_SSL', False)
+        }, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({
+            'status': 'ERROR',
+            'error': str(e),
+            'email_mode': getattr(settings, 'EMAIL_MODE', 'console'),
+            'host': getattr(settings, 'EMAIL_HOST', None),
+            'port': getattr(settings, 'EMAIL_PORT', None),
+            'use_tls': getattr(settings, 'EMAIL_USE_TLS', False),
+            'use_ssl': getattr(settings, 'EMAIL_USE_SSL', False)
+        }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
 # Funciones de validación auxiliares
 def _validar_email(email):

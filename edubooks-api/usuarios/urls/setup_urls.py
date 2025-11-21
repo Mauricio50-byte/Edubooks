@@ -6,7 +6,8 @@ from django.urls import path
 from usuarios.views.setup_views import (
     inicializar_sistema,
     verificar_inicializacion,
-    estado_sistema
+    estado_sistema,
+    probar_smtp_conexion
 )
 
 urlpatterns = [
@@ -18,4 +19,7 @@ urlpatterns = [
     
     # Endpoint para obtener el estado general del sistema
     path('estado/', estado_sistema, name='estado_sistema'),
+
+    # Probar conectividad SMTP
+    path('probar-smtp/', probar_smtp_conexion, name='probar_smtp_conexion'),
 ]
