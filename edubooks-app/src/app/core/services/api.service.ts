@@ -5,7 +5,7 @@ import { Observable, throwError, from } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { Capacitor } from '@capacitor/core';
-import { Http as CapacitorHttp } from '@capacitor/http';
+import { Http as CapacitorHttp } from '@capacitor-community/http';
 
 @Injectable({
   providedIn: 'root'
