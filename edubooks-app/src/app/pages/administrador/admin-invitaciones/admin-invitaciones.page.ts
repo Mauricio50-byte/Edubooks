@@ -458,16 +458,73 @@ export class AdminInvitacionesPage implements OnInit, OnDestroy {
         console.error('Error creando invitación:', error);
         let errorMessage = 'Error al crear la invitación';
         
-        if (error.error?.message) {
-          errorMessage = error.error.message;
-        } else if (error.message) {
-          errorMessage = error.message;
-        } else if (error.status === 400) {
-          errorMessage = 'Datos de invitación inválidos. Verifica los campos requeridos.';
-        } else if (error.status === 409) {
-          errorMessage = 'Ya existe una invitación pendiente para este email.';
-        } else if (error.status === 500) {
-          errorMessage = 'Error interno del servidor. Intenta nuevamente.';
+        const messageFromApi = error.error?.message || error.message || '';
+        if (messageFromApi.includes('Ya existe una invitación pendiente')) {
+          try {
+            const formValues = this.crearInvitacionForm.value;
+            const rolSel = formValues.rol_asignado;
+
+            const datosAdicionales: any = {};
+            if (rolSel === 'docente') {
+              if (formValues.especialidad) datosAdicionales.especialidad = formValues.especialidad;
+              if (formValues.departamento) datosAdicionales.departamento = formValues.departamento;
+              if (formValues.fecha_contratacion) datosAdicionales.fecha_contratacion = formValues.fecha_contratacion;
+              if (formValues.numero_empleado) datosAdicionales.numero_empleado = formValues.numero_empleado;
+            } else if (rolSel === 'administrador') {
+              if (formValues.cargo) datosAdicionales.cargo = formValues.cargo;
+              if (formValues.area) datosAdicionales.area = formValues.area;
+              if (formValues.nivel_acceso) datosAdicionales.nivel_acceso = formValues.nivel_acceso;
+              if (formValues.fecha_nombramiento) datosAdicionales.fecha_nombramiento = formValues.fecha_nombramiento;
+            }
+
+            let diasExp = 7;
+            if (formValues.fecha_expiracion) {
+              const ahora = new Date();
+              const fechaSel = new Date(formValues.fecha_expiracion);
+              const diffMs = fechaSel.getTime() - ahora.getTime();
+              const diffDias = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+              diasExp = isNaN(diffDias) ? 7 : Math.max(1, diffDias);
+            }
+
+            const pendientesResp: any = await this.authService.listarInvitaciones().toPromise();
+            const lista = pendientesResp?.results || pendientesResp;
+            const existente = Array.isArray(lista) ? lista.find((i: any) => i.email_invitado === formValues.email_invitado && i.estado === 'pendiente') : null;
+            if (existente && existente.token) {
+              await this.authService.cancelarInvitacion(existente.token).toPromise();
+              await this.authService.crearInvitacion({
+                email_invitado: formValues.email_invitado,
+                rol_asignado: rolSel,
+                dias_expiracion: diasExp,
+                datos_adicionales: datosAdicionales
+              }).toPromise();
+              const toast = await this.toastController.create({
+                message: 'Invitación duplicada cancelada y creada nuevamente',
+                duration: 3000,
+                color: 'success'
+              });
+              await toast.present();
+              this.crearInvitacionForm.reset();
+              this.showCrearForm = false;
+              await this.cargarDatos();
+              return;
+            } else {
+              errorMessage = 'Existe una invitación pendiente pero no se pudo localizar.';
+            }
+          } catch (innerErr) {
+            errorMessage = 'No se pudo cancelar la invitación existente.';
+          }
+        } else {
+          if (error.error?.message) {
+            errorMessage = error.error.message;
+          } else if (error.message) {
+            errorMessage = error.message;
+          } else if (error.status === 400) {
+            errorMessage = 'Datos de invitación inválidos. Verifica los campos requeridos.';
+          } else if (error.status === 409) {
+            errorMessage = 'Ya existe una invitación pendiente para este email.';
+          } else if (error.status === 500) {
+            errorMessage = 'Error interno del servidor. Intenta nuevamente.';
+          }
         }
         
         const toast = await this.toastController.create({

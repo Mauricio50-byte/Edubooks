@@ -9,6 +9,7 @@ from django.db import transaction
 import threading
 from django.conf import settings
 from django.template.loader import render_to_string
+from django.core.exceptions import ValidationError
 from django.utils.html import strip_tags
 import logging
 
@@ -32,6 +33,16 @@ class InvitacionCreateView(generics.CreateAPIView):
     serializer_class = InvitacionCrearSerializer
     permission_classes = [IsAuthenticated]
     
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            self.perform_create(serializer)
+        except ValidationError as e:
+            return Response({'message': 'Ya existe una invitación pendiente para este email', 'errors': e.message_dict}, status=status.HTTP_409_CONFLICT)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
     def perform_create(self, serializer):
         # Verificar que el usuario sea administrador
         if self.request.user.rol != 'administrador':

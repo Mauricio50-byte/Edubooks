@@ -21,6 +21,9 @@ class InvitacionCrearSerializer(serializers.ModelSerializer):
         """Validar que el email no esté ya registrado."""
         if Usuario.objects.filter(email=value).exists():
             raise serializers.ValidationError("Ya existe un usuario con este email.")
+        from ..models import InvitacionRegistro
+        if InvitacionRegistro.objects.filter(email_invitado=value, estado='pendiente').exists():
+            raise serializers.ValidationError("Ya existe una invitación pendiente para este email.")
         return value
     
     def validate_rol_asignado(self, value):
