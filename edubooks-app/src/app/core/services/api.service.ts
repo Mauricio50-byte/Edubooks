@@ -1,11 +1,10 @@
 // src/app/core/services/api.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError, from } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { Capacitor } from '@capacitor/core';
-import { Http as CapacitorHttp } from '@capacitor-community/http';
 
 @Injectable({
   providedIn: 'root'
@@ -43,9 +42,7 @@ export class ApiService {
     return headers;
   }
 
-  private isNative(): boolean {
-    return Capacitor.getPlatform() !== 'web';
-  }
+  private isNative(): boolean { return Capacitor.getPlatform() !== 'web'; }
 
   private handleError(error: HttpErrorResponse) {
     let errorMessage = 'Ocurrió un error desconocido';
@@ -75,98 +72,28 @@ export class ApiService {
     return throwError(() => ({ message: errorMessage }));
   }
 
-  private handleCapacitorError(endpoint: string, error: any) {
-    let errorMessage = 'Ocurrió un error desconocido';
-    const status = error?.status ?? 0;
-    const detail = error?.data?.detail || error?.data?.message || error?.error || error?.message;
-    if (detail) {
-      errorMessage = detail;
-    } else if (status === 0) {
-      errorMessage = 'No se pudo conectar con el servidor. Verifica que esté ejecutándose.';
-    } else if (status === 400 && endpoint.includes('/auth/login/')) {
-      errorMessage = 'Credenciales inválidas. Por favor verifica tu email y contraseña.';
-    } else if (status === 401) {
-      errorMessage = 'Credenciales inválidas. Por favor verifica tu email y contraseña.';
-    } else if (status) {
-      errorMessage = `Error ${status}: ${error?.message || 'Error de solicitud'}`;
-    }
-    return throwError(() => ({ message: errorMessage }));
-  }
+  private handleCapacitorError(endpoint: string, error: any) { return this.handleError(error as any); }
 
   // Métodos HTTP genéricos
   get<T>(endpoint: string): Observable<T> {
     const isSetupEndpoint = endpoint.startsWith('/setup/');
-    if (this.isNative()) {
-      return from(CapacitorHttp.request({
-        method: 'GET',
-        url: `${this.baseUrl}${endpoint}`,
-        headers: this.getHeadersObject(!isSetupEndpoint)
-      })).pipe(
-        map((res: any) => res?.data as T),
-        catchError(err => this.handleCapacitorError(endpoint, err))
-      );
-    }
-    return this.http.get<T>(`${this.baseUrl}${endpoint}`, {
-      headers: this.getHeaders(!isSetupEndpoint)
-    }).pipe(
-      catchError(this.handleError)
-    );
+    return this.http.get<T>(`${this.baseUrl}${endpoint}`, { headers: this.getHeaders(!isSetupEndpoint) })
+      .pipe(catchError(this.handleError));
   }
 
   post<T>(endpoint: string, data: any): Observable<T> {
     const isSetupEndpoint = endpoint.startsWith('/setup/');
-    if (this.isNative()) {
-      return from(CapacitorHttp.request({
-        method: 'POST',
-        url: `${this.baseUrl}${endpoint}`,
-        headers: this.getHeadersObject(!isSetupEndpoint),
-        data
-      })).pipe(
-        map((res: any) => res?.data as T),
-        catchError(err => this.handleCapacitorError(endpoint, err))
-      );
-    }
-    return this.http.post<T>(`${this.baseUrl}${endpoint}`, data, {
-      headers: this.getHeaders(!isSetupEndpoint)
-    }).pipe(
-      catchError(this.handleError)
-    );
+    return this.http.post<T>(`${this.baseUrl}${endpoint}`, data, { headers: this.getHeaders(!isSetupEndpoint) })
+      .pipe(catchError(this.handleError));
   }
 
   put<T>(endpoint: string, data: any): Observable<T> {
-    if (this.isNative()) {
-      return from(CapacitorHttp.request({
-        method: 'PUT',
-        url: `${this.baseUrl}${endpoint}`,
-        headers: this.getHeadersObject(true),
-        data
-      })).pipe(
-        map((res: any) => res?.data as T),
-        catchError(err => this.handleCapacitorError(endpoint, err))
-      );
-    }
-    return this.http.put<T>(`${this.baseUrl}${endpoint}`, data, {
-      headers: this.getHeaders()
-    }).pipe(
-      catchError(this.handleError)
-    );
+    return this.http.put<T>(`${this.baseUrl}${endpoint}`, data, { headers: this.getHeaders() })
+      .pipe(catchError(this.handleError));
   }
 
   delete<T>(endpoint: string): Observable<T> {
-    if (this.isNative()) {
-      return from(CapacitorHttp.request({
-        method: 'DELETE',
-        url: `${this.baseUrl}${endpoint}`,
-        headers: this.getHeadersObject(true)
-      })).pipe(
-        map((res: any) => res?.data as T),
-        catchError(err => this.handleCapacitorError(endpoint, err))
-      );
-    }
-    return this.http.delete<T>(`${this.baseUrl}${endpoint}`, {
-      headers: this.getHeaders()
-    }).pipe(
-      catchError(this.handleError)
-    );
+    return this.http.delete<T>(`${this.baseUrl}${endpoint}`, { headers: this.getHeaders() })
+      .pipe(catchError(this.handleError));
   }
 }
