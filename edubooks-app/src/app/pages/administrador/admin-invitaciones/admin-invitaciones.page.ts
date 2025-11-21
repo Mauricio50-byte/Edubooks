@@ -171,6 +171,14 @@ export class AdminInvitacionesPage implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    const isAuth = this.authService.isAuthenticated;
+    const isAdmin = this.authService.isAdministrador();
+    if (!isAuth || !isAdmin) {
+      this.error = !isAuth
+        ? 'Debes iniciar sesión como administrador para gestionar invitaciones'
+        : 'Acceso restringido: esta sección es solo para administradores';
+      return;
+    }
     this.cargarDatos();
     this.startTimeAgoTimer();
   }
@@ -404,10 +412,30 @@ export class AdminInvitacionesPage implements OnInit, OnDestroy {
           if (formData.fecha_nombramiento) datosAdicionales.fecha_nombramiento = formData.fecha_nombramiento;
         }
 
+        if (rol === 'estudiante') {
+          const toast = await this.toastController.create({
+            message: 'Las invitaciones solo están disponibles para Docente o Administrador',
+            duration: 3000,
+            color: 'warning'
+          });
+          await toast.present();
+          await loading.dismiss();
+          return;
+        }
+
+        let diasExpiracion = 7;
+        if (formData.fecha_expiracion) {
+          const ahora = new Date();
+          const fechaSel = new Date(formData.fecha_expiracion);
+          const diffMs = fechaSel.getTime() - ahora.getTime();
+          const diffDias = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+          diasExpiracion = isNaN(diffDias) ? 7 : Math.max(1, diffDias);
+        }
+
         const invitacionData = {
           email_invitado: formData.email_invitado,
           rol_asignado: rol,
-          fecha_expiracion: formData.fecha_expiracion,
+          dias_expiracion: diasExpiracion,
           datos_adicionales: datosAdicionales
         };
 

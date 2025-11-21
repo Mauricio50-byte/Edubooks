@@ -4,7 +4,9 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from django.core.mail import send_mail
+from django.core.mail import EmailMultiAlternatives, get_connection
+from django.db import transaction
+import threading
 from django.conf import settings
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
@@ -35,11 +37,8 @@ class InvitacionCreateView(generics.CreateAPIView):
         if self.request.user.rol != 'administrador':
             raise permissions.PermissionDenied("Solo los administradores pueden crear invitaciones.")
         
-        # Crear la invitación
         invitacion = serializer.save()
-        
-        # Enviar email de invitación
-        self._enviar_email_invitacion(invitacion)
+        threading.Thread(target=self._enviar_email_invitacion, args=(invitacion,), daemon=True).start()
         
         logger.info(f"Invitación creada por {self.request.user.email} para {invitacion.email_invitado}")
     
@@ -58,7 +57,6 @@ class InvitacionCreateView(generics.CreateAPIView):
                 'rol_display': dict(Usuario.ROLES_CHOICES)[invitacion.rol_asignado]
             }
             
-            # Renderizar template HTML
             try:
                 html_message = render_to_string('emails/invitacion_registro.html', context)
                 plain_message = strip_tags(html_message)
@@ -69,16 +67,16 @@ class InvitacionCreateView(generics.CreateAPIView):
                     f"Usa este enlace para completar tu registro: {context['registro_url']}\n\n"
                     f"La invitación expira en {context['dias_expiracion']} día(s)."
                 )
-            
-            # Enviar email
-            send_mail(
-                subject=f'Invitación para registrarse en EduBooks como {context["rol_display"]}',
-                message=plain_message,
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[invitacion.email_invitado],
-                html_message=html_message,
-                fail_silently=False
-            )
+
+            timeout = getattr(settings, 'EMAIL_TIMEOUT', 15)
+            connection = get_connection(timeout=timeout)
+            subject = f"Invitación para registrarse en EduBooks como {context['rol_display']}"
+            from_email = settings.DEFAULT_FROM_EMAIL
+            to = [invitacion.email_invitado]
+            email = EmailMultiAlternatives(subject, plain_message, from_email, to, connection=connection)
+            if html_message:
+                email.attach_alternative(html_message, "text/html")
+            connection.send_messages([email])
             
             logger.info(f"Email de invitación enviado a {invitacion.email_invitado}")
             
