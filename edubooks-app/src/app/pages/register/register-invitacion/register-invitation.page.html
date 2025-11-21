@@ -4,7 +4,7 @@
       <ion-back-button (click)="goToLogin()"></ion-back-button>
     </ion-buttons>
     <ion-title class="ion-text-center">
-      <ion-icon name="mail-outline" style="margin-right: 8px;"></ion-icon>
+      <ion-icon name="key-outline" style="margin-right: 8px;"></ion-icon>
       Registro por Invitación
     </ion-title>
   </ion-toolbar>
@@ -30,9 +30,10 @@
         <ion-item class="form-item">
           <ion-label position="stacked">Token de invitación</ion-label>
           <ion-input formControlName="token_invitacion" placeholder="Ej: 123e4567-e89b-12d3-a456-426614174000"></ion-input>
+          <ion-note slot="error" *ngIf="registerForm.get('token_invitacion')?.errors?.['uuidFormat'] && registerForm.get('token_invitacion')?.touched">Formato de token inválido</ion-note>
         </ion-item>
         <div class="form-actions">
-          <ion-button expand="block" (click)="onValidateTokenInput()" class="gradient-primary">
+          <ion-button expand="block" (click)="onValidateTokenInput()" class="gradient-primary" [disabled]="registerForm.get('token_invitacion')?.invalid">
             <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
             Validar Token
           </ion-button>
@@ -48,7 +49,7 @@
       <ion-card>
         <ion-card-header>
           <ion-card-title>
-            <ion-icon name="mail-open-outline"></ion-icon>
+            <ion-icon name="key-outline"></ion-icon>
             Invitación Recibida
           </ion-card-title>
         </ion-card-header>

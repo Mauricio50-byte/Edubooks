@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AlertController, LoadingController, ToastController } from '@ionic/angular';
 import { AuthService } from '../../../core/services/auth.service';
@@ -122,9 +122,9 @@ export class RegisterInvitationPage implements OnInit {
       genero: [''],
       
       // Token de invitación
-      token_invitacion: [this.token || '']
-    }, { 
-      validators: this.passwordMatchValidator 
+      token_invitacion: [this.token || '', [Validators.required, this.uuidValidator]]
+    }, {
+      validators: this.passwordMatchValidator
     });
   }
 
@@ -147,18 +147,27 @@ export class RegisterInvitationPage implements OnInit {
     return null;
   }
 
+  private uuidValidator(control: AbstractControl) {
+    const v = String(control.value || '').trim();
+    const re = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/;
+    return v && re.test(v) ? null : { uuidFormat: true };
+  }
+
   async validateToken() {
     this.validatingToken = true;
     
     try {
-      const tokenValue = this.token || this.registerForm.get('token_invitacion')?.value;
-      const response = await this.authService.validarTokenInvitacion(String(tokenValue)).toPromise();
+      const raw = this.token || this.registerForm.get('token_invitacion')?.value;
+      const tokenValue = String(raw || '').trim();
+      this.registerForm.get('token_invitacion')?.setValue(tokenValue);
+      const response = await this.authService.validarTokenInvitacion(tokenValue).toPromise();
       this.invitacionInfo = response.invitacion;
       this.setupDynamicFields();
       this.validatingToken = false;
     } catch (error: any) {
       this.validatingToken = false;
       this.invitacionInfo = null;
+      await this.showError('Token de invitación no válido. Verifica y vuelve a intentar.');
     }
   }
 
@@ -168,7 +177,13 @@ export class RegisterInvitationPage implements OnInit {
       await this.showError('Ingresa un token de invitación');
       return;
     }
-    this.token = String(tokenCtrl.value);
+    if (tokenCtrl.invalid) {
+      await this.showError('Formato de token inválido');
+      tokenCtrl.markAsTouched();
+      return;
+    }
+    this.token = String(tokenCtrl.value).trim();
+    this.registerForm.get('token_invitacion')?.setValue(this.token);
     await this.validateToken();
   }
 
@@ -290,7 +305,7 @@ export class RegisterInvitationPage implements OnInit {
       await loading.present();
 
       // Preparar datos para envío
-      const formData = { ...this.registerForm.value };
+      const formData = { ...this.registerForm.value, token_invitacion: String(this.registerForm.get('token_invitacion')?.value || '').trim() };
       
       // Separar datos específicos del rol
       const roleFields = this.getRoleFields();

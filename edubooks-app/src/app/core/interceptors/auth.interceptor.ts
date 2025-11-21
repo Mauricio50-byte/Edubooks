@@ -4,11 +4,12 @@ import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent, HttpErrorResponse
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Router } from '@angular/router';
+import { AuthService } from '../services/auth.service';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private authService: AuthService) {}
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     // Solo agregar token para requests a nuestra API
@@ -36,10 +37,14 @@ export class AuthInterceptor implements HttpInterceptor {
   }
 
   private logout(): void {
-    // Limpiar tokens y redirigir
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
-    localStorage.removeItem('user_data');
-    this.router.navigate(['/login']);
+    try {
+      this.authService.logout();
+    } catch (_) {
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      localStorage.removeItem('current_user');
+      localStorage.removeItem('is_authenticated');
+      this.router.navigate(['/login']);
+    }
   }
 }

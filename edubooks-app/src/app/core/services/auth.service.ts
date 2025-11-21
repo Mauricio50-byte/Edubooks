@@ -135,11 +135,13 @@ export class AuthService {
 
   // Métodos para el sistema de invitaciones
   validarTokenInvitacion(token: string): Observable<any> {
-    return this.apiService.post('/auth/invitaciones/validar-token/', { token });
+    const normalized = (token || '').toString().trim();
+    return this.apiService.post('/auth/invitaciones/validar-token/', { token: normalized });
   }
 
   registroConInvitacion(userData: any): Observable<any> {
-    return this.apiService.post('/auth/invitaciones/registro/', userData)
+    const payload = { ...userData, token_invitacion: (userData?.token_invitacion || '').toString().trim() };
+    return this.apiService.post('/auth/invitaciones/registro/', payload)
       .pipe(
         tap((response: any) => {
           if (response.user && response.tokens) {
