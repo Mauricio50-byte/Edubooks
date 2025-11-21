@@ -59,8 +59,16 @@ class InvitacionCreateView(generics.CreateAPIView):
             }
             
             # Renderizar template HTML
-            html_message = render_to_string('emails/invitacion_registro.html', context)
-            plain_message = strip_tags(html_message)
+            try:
+                html_message = render_to_string('emails/invitacion_registro.html', context)
+                plain_message = strip_tags(html_message)
+            except Exception:
+                html_message = None
+                plain_message = (
+                    f"Has sido invitado a registrarte en EduBooks como {context['rol_display']}\n\n"
+                    f"Usa este enlace para completar tu registro: {context['registro_url']}\n\n"
+                    f"La invitación expira en {context['dias_expiracion']} día(s)."
+                )
             
             # Enviar email
             send_mail(
