@@ -27,7 +27,6 @@ export class InvitacionesListComponent {
   @Input() isLoading = false;
   @Input() error: string | null = null;
 
-  @Output() reenviarInvitacion = new EventEmitter<Invitacion>();
   @Output() extenderInvitacion = new EventEmitter<Invitacion>();
   @Output() cancelarInvitacion = new EventEmitter<Invitacion>();
   @Output() eliminarInvitacion = new EventEmitter<Invitacion>();
@@ -105,10 +104,6 @@ export class InvitacionesListComponent {
 
   private formatKey(key: string): string {
     return key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-  }
-
-  onReenviarInvitacion(invitacion: Invitacion): void {
-    this.reenviarInvitacion.emit(invitacion);
   }
 
   onExtenderInvitacion(invitacion: Invitacion): void {

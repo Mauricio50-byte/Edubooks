@@ -4,13 +4,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from django.core.mail import EmailMultiAlternatives, get_connection
-from django.db import transaction
-import threading
-from django.conf import settings
-from django.template.loader import render_to_string
 from django.core.exceptions import ValidationError
-from django.utils.html import strip_tags
 import logging
 
 from ..models import InvitacionRegistro, Usuario
@@ -47,52 +41,9 @@ class InvitacionCreateView(generics.CreateAPIView):
         # Verificar que el usuario sea administrador
         if self.request.user.rol != 'administrador':
             raise permissions.PermissionDenied("Solo los administradores pueden crear invitaciones.")
-        
-        invitacion = serializer.save()
-        threading.Thread(target=self._enviar_email_invitacion, args=(invitacion,), daemon=True).start()
-        
-        logger.info(f"Invitación creada por {self.request.user.email} para {invitacion.email_invitado}")
-    
-    def _enviar_email_invitacion(self, invitacion):
-        try:
-            base_url = getattr(settings, 'FRONTEND_PUBLIC_URL', None) or getattr(settings, 'FRONTEND_URL', '')
-            registro_url = f"{base_url}/register-invitacion/{invitacion.token}"
-            
-            # Contexto para el template
-            context = {
-                'invitacion': invitacion,
-                'registro_url': registro_url,
-                'creado_por': invitacion.creado_por,
-                'dias_expiracion': invitacion.dias_para_expirar,
-                'rol_display': dict(Usuario.ROLES_CHOICES)[invitacion.rol_asignado]
-            }
-            
-            try:
-                html_message = render_to_string('emails/invitacion_registro.html', context)
-                plain_message = strip_tags(html_message)
-            except Exception:
-                html_message = None
-                plain_message = (
-                    f"Has sido invitado a registrarte en EduBooks como {context['rol_display']}\n\n"
-                    f"Usa este enlace para completar tu registro: {context['registro_url']}\n\n"
-                    f"La invitación expira en {context['dias_expiracion']} día(s)."
-                )
 
-            timeout = getattr(settings, 'EMAIL_TIMEOUT', 15)
-            connection = get_connection(timeout=timeout)
-            subject = f"Invitación para registrarse en EduBooks como {context['rol_display']}"
-            from_email = settings.DEFAULT_FROM_EMAIL
-            to = [invitacion.email_invitado]
-            email = EmailMultiAlternatives(subject, plain_message, from_email, to, connection=connection)
-            if html_message:
-                email.attach_alternative(html_message, "text/html")
-            connection.send_messages([email])
-            
-            logger.info(f"Email de invitación enviado a {invitacion.email_invitado}")
-            return True
-        except Exception as e:
-            logger.error(f"Error enviando email de invitación: {str(e)}")
-            return False
+        invitacion = serializer.save()
+        logger.info(f"Invitación creada por {self.request.user.email} para {invitacion.email_invitado}")
 
 
 class InvitacionListView(generics.ListAPIView):
@@ -324,44 +275,6 @@ def extender_invitacion(request, token):
         return Response({
             'error': 'Error interno del servidor'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def reenviar_invitacion(request, token):
-    """
-    Endpoint para reenviar el email de una invitación.
-    Solo administradores pueden reenviar invitaciones.
-    """
-    if request.user.rol != 'administrador':
-        return Response({
-            'error': 'Solo los administradores pueden reenviar invitaciones.'
-        }, status=status.HTTP_403_FORBIDDEN)
-    
-    invitacion = get_object_or_404(InvitacionRegistro, token=token)
-    
-    if invitacion.estado != 'pendiente':
-        return Response({
-            'error': 'Solo se pueden reenviar invitaciones pendientes.'
-        }, status=status.HTTP_400_BAD_REQUEST)
-    
-    if invitacion.esta_expirada:
-        return Response({
-            'error': 'No se puede reenviar una invitación expirada. Extienda la fecha primero.'
-        }, status=status.HTTP_400_BAD_REQUEST)
-    
-    view_instance = InvitacionCreateView()
-    enviado = view_instance._enviar_email_invitacion(invitacion)
-    if enviado:
-        return Response({
-            'mensaje': 'Invitación reenviada exitosamente',
-            'email_invitado': invitacion.email_invitado,
-            'token': str(invitacion.token)
-        })
-    else:
-        return Response({
-            'error': 'No fue posible enviar el email de invitación'
-        }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
 
 @api_view(['GET'])

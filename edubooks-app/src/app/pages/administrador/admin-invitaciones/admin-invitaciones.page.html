@@ -103,7 +103,6 @@
       [invitaciones]="invitaciones"
       [isLoading]="isLoading"
       [error]="error"
-      (reenviarInvitacion)="reenviarInvitacion($event)"
       (extenderInvitacion)="extenderInvitacion($event)"
       (cancelarInvitacion)="cancelarInvitacion($event)"
       (eliminarInvitacion)="eliminarInvitacion($event)"
@@ -124,7 +123,7 @@
     <div class="empty-state dark-state" *ngIf="!isLoading && !error && invitacionesOriginales.length === 0">
       <div class="state-content">
         <div class="empty-icon-container">
-          <ion-icon name="mail-outline" class="empty-icon"></ion-icon>
+          <ion-icon name="key-outline" class="empty-icon"></ion-icon>
         </div>
         <h3 class="state-title">No hay invitaciones</h3>
         <p class="state-message">Aún no se han creado invitaciones en el sistema</p>

@@ -10,7 +10,6 @@ urlpatterns = [
     path('detalle/<uuid:token>/', views_invitaciones.InvitacionDetailView.as_view(), name='detalle_invitacion'),
     path('cancelar/<uuid:token>/', views_invitaciones.cancelar_invitacion, name='cancelar_invitacion'),
     path('extender/<uuid:token>/', views_invitaciones.extender_invitacion, name='extender_invitacion'),
-    path('reenviar/<uuid:token>/', views_invitaciones.reenviar_invitacion, name='reenviar_invitacion'),
     path('eliminar/<uuid:token>/', views_invitaciones.eliminar_invitacion, name='eliminar_invitacion'),
     path('estadisticas/', views_invitaciones.estadisticas_invitaciones, name='estadisticas_invitaciones'),
     

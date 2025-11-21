@@ -100,12 +100,11 @@ export class RegisterInvitationPage implements OnInit {
     // Obtener token de la URL (parámetro de ruta)
     this.token = this.route.snapshot.paramMap.get('token');
     
-    if (!this.token) {
-      this.showError('Token de invitación no válido');
-      return;
+    if (this.token) {
+      this.validateToken();
+    } else {
+      this.validatingToken = false;
     }
-
-    this.validateToken();
   }
 
   private createBaseForm(): FormGroup {
@@ -152,14 +151,25 @@ export class RegisterInvitationPage implements OnInit {
     this.validatingToken = true;
     
     try {
-      const response = await this.authService.validarTokenInvitacion(this.token!).toPromise();
+      const tokenValue = this.token || this.registerForm.get('token_invitacion')?.value;
+      const response = await this.authService.validarTokenInvitacion(String(tokenValue)).toPromise();
       this.invitacionInfo = response.invitacion;
       this.setupDynamicFields();
       this.validatingToken = false;
     } catch (error: any) {
       this.validatingToken = false;
-      this.showError(error.message || 'Token de invitación no válido o expirado');
+      this.invitacionInfo = null;
     }
+  }
+
+  async onValidateTokenInput() {
+    const tokenCtrl = this.registerForm.get('token_invitacion');
+    if (!tokenCtrl || !tokenCtrl.value) {
+      await this.showError('Ingresa un token de invitación');
+      return;
+    }
+    this.token = String(tokenCtrl.value);
+    await this.validateToken();
   }
 
   private setupDynamicFields() {

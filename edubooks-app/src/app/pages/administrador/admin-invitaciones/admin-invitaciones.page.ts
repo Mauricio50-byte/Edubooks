@@ -441,14 +441,40 @@ export class AdminInvitacionesPage implements OnInit, OnDestroy {
 
         console.log('Datos de invitación a enviar:', invitacionData);
 
-        await this.authService.crearInvitacion(invitacionData).toPromise();
-        
-        const toast = await this.toastController.create({
-          message: 'Invitación creada exitosamente',
-          duration: 3000,
-          color: 'success'
+        const creada = await this.authService.crearInvitacion(invitacionData).toPromise();
+
+        const alertaToken = await this.alertController.create({
+          header: 'Invitación creada',
+          message: `Token: <strong>${creada.token}</strong><br><small>Copia y comparte este token manualmente.</small>`,
+          buttons: [
+            {
+              text: 'Copiar Token',
+              handler: async () => {
+                try {
+                  const texto = String(creada.token);
+                  if (navigator && navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(texto);
+                  } else {
+                    const textarea = document.createElement('textarea');
+                    textarea.value = texto;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                  }
+                  const toastOk = await this.toastController.create({
+                    message: 'Token copiado',
+                    duration: 2000,
+                    color: 'success'
+                  });
+                  await toastOk.present();
+                } catch (_) {}
+              }
+            },
+            { text: 'Cerrar', role: 'cancel' }
+          ]
         });
-        await toast.present();
+        await alertaToken.present();
 
         this.crearInvitacionForm.reset();
         this.showCrearForm = false;
@@ -741,54 +767,22 @@ export class AdminInvitacionesPage implements OnInit, OnDestroy {
     await alert.present();
   }
 
-  async reenviarInvitacion(invitacion: Invitacion) {
-    const loading = await this.loadingController.create({
-      message: 'Reenviando invitación...'
-    });
-    await loading.present();
-
-    try {
-      await this.authService.reenviarInvitacion(invitacion.token).toPromise();
-      
-      const toast = await this.toastController.create({
-        message: 'Invitación reenviada exitosamente',
-        duration: 3000,
-        color: 'success'
-      });
-      await toast.present();
-
-    } catch (error: any) {
-      console.error('Error reenviando invitación:', error);
-      const toast = await this.toastController.create({
-        message: error.error?.message || 'Error al reenviar la invitación',
-        duration: 3000,
-        color: 'danger'
-      });
-      await toast.present();
-    } finally {
-      await loading.dismiss();
-    }
-  }
 
   async copiarLinkInvitacion(invitacion: Invitacion) {
-    const base = (typeof window !== 'undefined' && window.location && window.location.origin)
-      ? window.location.origin
-      : 'http://localhost:8100';
-    const url = `${base}/register-invitacion/${invitacion.token}`;
-
+    const texto = String(invitacion.token);
     try {
       if (navigator && navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(url);
+        await navigator.clipboard.writeText(texto);
       } else {
         const textarea = document.createElement('textarea');
-        textarea.value = url;
+        textarea.value = texto;
         document.body.appendChild(textarea);
         textarea.select();
         document.execCommand('copy');
         document.body.removeChild(textarea);
       }
       const toast = await this.toastController.create({
-        message: 'Enlace de invitación copiado',
+        message: 'Token de invitación copiado',
         duration: 2500,
         color: 'success',
         position: 'top'
@@ -796,7 +790,7 @@ export class AdminInvitacionesPage implements OnInit, OnDestroy {
       await toast.present();
     } catch (error) {
       const toast = await this.toastController.create({
-        message: 'No se pudo copiar el enlace',
+        message: 'No se pudo copiar el token',
         duration: 2500,
         color: 'danger',
         position: 'top'

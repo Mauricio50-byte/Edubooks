@@ -66,6 +66,16 @@
               </div>
             </div>
           </div>
+
+          <div class="detail-row">
+            <div class="detail-item compact full-width">
+              <ion-icon name="key-outline" class="detail-icon"></ion-icon>
+              <div class="detail-content">
+                <span class="detail-label">Token</span>
+                <span class="detail-value">{{ invitacion.token }}</span>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Additional Data -->
@@ -84,19 +94,11 @@
             fill="solid" 
             color="primary"
             size="small"
-            (click)="onReenviarInvitacion(invitacion)"
-            class="action-btn">
-            <ion-icon name="mail-outline"></ion-icon>
-          </ion-button>
-
-          <ion-button 
-            *ngIf="invitacion.estado === 'pendiente'" 
-            fill="solid" 
-            color="tertiary"
-            size="small"
             (click)="onCopiarLinkInvitacion(invitacion)"
+            title="Copiar token"
+            aria-label="Copiar token"
             class="action-btn">
-            <ion-icon name="link-outline"></ion-icon>
+            <ion-icon name="copy-outline"></ion-icon>
           </ion-button>
 
           <ion-button 
@@ -135,7 +137,7 @@
   <!-- Empty State -->
   <div class="empty-state" *ngIf="invitaciones.length === 0">
     <div class="empty-icon-container">
-      <ion-icon name="mail-outline" class="empty-icon"></ion-icon>
+      <ion-icon name="key-outline" class="empty-icon"></ion-icon>
     </div>
     <h3 class="empty-title">No hay invitaciones</h3>
     <p class="empty-message">Aún no se han creado invitaciones en el sistema.</p>

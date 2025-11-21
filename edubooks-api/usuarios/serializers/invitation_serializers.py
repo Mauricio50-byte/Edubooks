@@ -10,10 +10,11 @@ class InvitacionCrearSerializer(serializers.ModelSerializer):
     """
     dias_expiracion = serializers.IntegerField(default=7, min_value=1, max_value=30)
     
+    token = serializers.UUIDField(read_only=True)
     class Meta:
         model = InvitacionRegistro
         fields = [
-            'email_invitado', 'rol_asignado', 'mensaje_personalizado', 
+            'token', 'email_invitado', 'rol_asignado', 'mensaje_personalizado', 
             'datos_adicionales', 'dias_expiracion'
         ]
     

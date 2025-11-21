@@ -173,10 +173,6 @@ export class AuthService {
     });
   }
 
-  reenviarInvitacion(token: string): Observable<any> {
-    return this.apiService.post(`/auth/invitaciones/reenviar/${token}/`, {});
-  }
-
   obtenerEstadisticasInvitaciones(): Observable<any> {
     return this.apiService.get('/auth/invitaciones/estadisticas/');
   }

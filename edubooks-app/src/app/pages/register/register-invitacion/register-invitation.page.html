@@ -17,6 +17,30 @@
     <p>Validando invitación...</p>
   </div>
 
+  <!-- Paso de validación de token manual -->
+  <div *ngIf="!validatingToken && !invitacionInfo" class="register-container">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="key-outline"></ion-icon>
+          Pegar Token de Invitación
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-item class="form-item">
+          <ion-label position="stacked">Token de invitación</ion-label>
+          <ion-input formControlName="token_invitacion" placeholder="Ej: 123e4567-e89b-12d3-a456-426614174000"></ion-input>
+        </ion-item>
+        <div class="form-actions">
+          <ion-button expand="block" (click)="onValidateTokenInput()" class="gradient-primary">
+            <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
+            Validar Token
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
   <!-- Contenido principal -->
   <div *ngIf="!validatingToken && invitacionInfo" class="register-container">
     <!-- Información de la invitación -->
@@ -329,13 +353,4 @@
     </div>
   </div>
 
-  <!-- Error si no hay invitación válida -->
-  <div *ngIf="!validatingToken && !invitacionInfo" class="error-container">
-    <ion-icon name="warning-outline" color="danger"></ion-icon>
-    <h2>Invitación No Válida</h2>
-    <p>La invitación ha expirado o no es válida.</p>
-    <ion-button fill="outline" (click)="goToLogin()">
-      Ir al Login
-    </ion-button>
-  </div>
 </ion-content>

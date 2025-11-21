@@ -1,5 +1,3 @@
-from django.core.mail import send_mail
-from django.template.loader import render_to_string
 from django.conf import settings
 from django.utils import timezone
 from django.db import transaction
@@ -119,12 +117,7 @@ class NotificationService:
             except PlantillaNotificacion.DoesNotExist:
                 pass
             
-            # Enviar por email si está configurado
-            if config.debe_enviar_email(notificacion.tipo):
-                if plantilla and plantilla.enviar_email:
-                    resultado['email'] = NotificationService._enviar_email(
-                        notificacion, plantilla
-                    )
+            # Canal email deshabilitado
             
             # Enviar por push si está configurado
             if config.debe_enviar_push(notificacion.tipo):
@@ -140,42 +133,7 @@ class NotificationService:
             return resultado
     
     @staticmethod
-    def _enviar_email(notificacion: Notificacion, plantilla: PlantillaNotificacion) -> bool:
-        """Envía notificación por email"""
-        try:
-            # Procesar plantillas de email
-            asunto = NotificationService._procesar_template(
-                plantilla.asunto_email_template or notificacion.titulo,
-                notificacion.usuario,
-                notificacion.objeto_relacionado,
-                notificacion.datos_adicionales
-            )
-            
-            cuerpo = NotificationService._procesar_template(
-                plantilla.cuerpo_email_template or notificacion.mensaje,
-                notificacion.usuario,
-                notificacion.objeto_relacionado,
-                notificacion.datos_adicionales
-            )
-            
-            # Enviar email
-            send_mail(
-                subject=asunto,
-                message=cuerpo,
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[notificacion.usuario.email],
-                fail_silently=False
-            )
-            
-            # Marcar como enviada
-            notificacion.marcar_enviada_email()
-            
-            logger.info(f"Email enviado para notificación {notificacion.id}")
-            return True
-            
-        except Exception as e:
-            logger.error(f"Error enviando email para notificación {notificacion.id}: {str(e)}")
-            return False
+    # Canal email removido: no se envían correos desde notificaciones
     
     @staticmethod
     def _enviar_push(notificacion: Notificacion) -> bool:
@@ -371,9 +329,7 @@ class NotificationTemplateService:
                 'tipo': TipoNotificacion.INVITACION_RECIBIDA,
                 'titulo_template': 'Invitación para Registrarse',
                 'mensaje_template': 'Has recibido una invitación para registrarte en la Biblioteca Edubooks como {datos.rol}.',
-                'prioridad_default': PrioridadNotificacion.MEDIA,
-                'asunto_email_template': 'Invitación - Biblioteca Edubooks',
-                'cuerpo_email_template': 'Estimado/a {nombre_completo},\n\nHas recibido una invitación para registrarte en la Biblioteca Edubooks como {datos.rol}.\n\nUsa el siguiente enlace para completar tu registro:\n{datos.enlace_registro}\n\nEsta invitación expira el {datos.fecha_expiracion}.\n\nSaludos,\nBiblioteca Edubooks'
+                'prioridad_default': PrioridadNotificacion.MEDIA
             },
             {
                 'tipo': TipoNotificacion.BIENVENIDA,
