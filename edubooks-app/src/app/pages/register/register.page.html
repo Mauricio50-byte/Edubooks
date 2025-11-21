@@ -14,8 +14,8 @@
   <div class="register-container">
     <!-- Título -->
     <div class="header-section">
-      <h1>Crea tu cuenta de estudiante</h1>
-      <p>Los docentes se registran mediante invitación con token.</p>
+      <h1>Registro de cuenta</h1>
+      <p>Regístrate como estudiante, o usa un token de invitación si fuiste invitado.</p>
     </div>
 
     <!-- Formulario de registro de estudiante -->
@@ -108,17 +108,18 @@
       </ion-button>
     </form>
 
-    <!-- Invitación para docentes -->
+    <!-- Invitación por token -->
     <div class="info-section">
       <ion-card>
         <ion-card-header>
           <ion-card-title>
             <ion-icon name="information-circle-outline" color="primary"></ion-icon>
-            ¿Eres docente?
+            ¿Tienes un token de invitación?
           </ion-card-title>
         </ion-card-header>
         <ion-card-content>
-          <p>Los docentes reciben una invitación con token para registrarse.</p>
+          <p>El registro por invitación funciona únicamente con token.</p>
+          <p>Docentes y administradores reciben el token y lo ingresan para validar y completar su registro.</p>
           <ion-button expand="block" fill="outline" routerLink="/register-invitation">
             <ion-icon name="key-outline" slot="start"></ion-icon>
             Tengo un token de invitación
@@ -131,6 +132,10 @@
     <div class="additional-links">
       <ion-button fill="clear" (click)="goToLogin()" class="login-link">
         ¿Ya tienes cuenta? Inicia sesión aquí
+      </ion-button>
+      <ion-button fill="outline" routerLink="/register-invitation" class="invitation-link">
+        <ion-icon name="key-outline" slot="start"></ion-icon>
+        Registrar con token de invitación
       </ion-button>
     </div>
   </div>

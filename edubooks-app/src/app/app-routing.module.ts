@@ -33,7 +33,17 @@ const routes: Routes = [
     canActivate: [SystemInitGuard, NoAuthGuard] // Verificar inicialización y que NO esté autenticado
   },
   {
+    path: 'register-invitation',
+    loadChildren: () => import('./pages/register/register-invitacion/register-invitation.module').then( m => m.RegisterInvitationPageModule),
+    canActivate: [SystemInitGuard, NoAuthGuard]
+  },
+  {
     path: 'register-invitacion/:token',
+    loadChildren: () => import('./pages/register/register-invitacion/register-invitation.module').then( m => m.RegisterInvitationPageModule),
+    canActivate: [SystemInitGuard, NoAuthGuard]
+  },
+  {
+    path: 'register-invitacion',
     loadChildren: () => import('./pages/register/register-invitacion/register-invitation.module').then( m => m.RegisterInvitationPageModule),
     canActivate: [SystemInitGuard, NoAuthGuard]
   },
