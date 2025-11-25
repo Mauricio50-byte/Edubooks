@@ -182,20 +182,14 @@ class UsuarioPerfilSerializer(serializers.ModelSerializer):
         model = Usuario
         fields = [
             'id', 'email', 'username', 'nombre', 'apellido', 'nombre_completo', 'rol',
-            'fecha_registro', 'estado', 'telefono', 'numero_identificacion', 'genero',
-            # Campos de préstamos y sanciones (solo lectura)
-            'prestamos_activos', 'max_prestamos_permitidos', 'multas_pendientes', 
-            'puede_prestar', 'dias_sancion_restantes', 'fecha_ultima_sancion', 'sancionado_hasta',
+            'telefono', 'numero_identificacion', 'genero',
             # Datos específicos por rol
             'datos_estudiante', 'datos_docente', 'datos_administrador',
-            # Preferencias
-            'notificaciones_email', 'notificaciones_push', 'idioma_preferido',
-            # Auditoría
-            'fecha_ultima_actualizacion'
+            # Preferencias mínimas
+            'idioma_preferido'
         ]
         read_only_fields = [
-            'id', 'fecha_registro', 'prestamos_activos', 'multas_pendientes',
-            'fecha_ultima_sancion', 'sancionado_hasta', 'fecha_ultima_actualizacion'
+            'id'
         ]
     
     def get_datos_estudiante(self, obj):
@@ -215,8 +209,6 @@ class UsuarioPerfilSerializer(serializers.ModelSerializer):
                 'departamento': obj.docente.departamento,
                 'numero_empleado': obj.docente.numero_empleado,
                 'especialidad': obj.docente.especialidad,
-                'grado_academico': obj.docente.grado_academico,
-                'fecha_contratacion': obj.docente.fecha_contratacion,
             }
         return None
     
@@ -242,8 +234,7 @@ class UsuarioListSerializer(serializers.ModelSerializer):
         model = Usuario
         fields = [
             'id', 'email', 'username', 'nombre', 'apellido', 'nombre_completo', 'rol', 'genero',
-            'is_active', 'estado', 'fecha_registro', 'prestamos_activos', 'multas_pendientes',
-            'puede_prestar', 'telefono', 'datos_rol'
+            'is_active', 'fecha_registro', 'telefono', 'datos_rol'
         ]
         read_only_fields = ['id', 'fecha_registro']
     

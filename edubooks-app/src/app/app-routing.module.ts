@@ -107,7 +107,7 @@ const routes: Routes = [
     path: 'admin-prestamos',
     loadChildren: () => import('./pages/administrador/admin-prestamos/admin-prestamos.module').then( m => m.AdminPrestamosPageModule),
     canActivate: [SystemInitGuard, AuthGuard, RoleGuard],
-    data: { roles: ['administrador', 'docente'] }
+    data: { roles: ['administrador'] }
   },
   {
     path: 'admin-sanciones',
@@ -125,7 +125,7 @@ const routes: Routes = [
     path: 'admin-solicitudes',
     loadChildren: () => import('./pages/administrador/admin-solicitudes/admin-solicitudes.module').then( m => m.AdminSolicitudesPageModule),
     canActivate: [SystemInitGuard, AuthGuard, RoleGuard],
-    data: { roles: ['administrador', 'docente'] }
+    data: { roles: ['administrador'] }
   },
   {
     path: 'admin-invitaciones',
@@ -136,7 +136,8 @@ const routes: Routes = [
   {
     path: 'mis-solicitudes',
     loadChildren: () => import('./pages/docente_y_estudiante/mis-solicitudes/mis-solicitudes.module').then( m => m.MisSolicitudesPageModule),
-    canActivate: [SystemInitGuard, AuthGuard] // Verificar inicialización y que esté autenticado
+    canActivate: [SystemInitGuard, AuthGuard, RoleGuard],
+    data: { roles: ['estudiante', 'docente'] }
   },
   {
     path: 'ajustes/editar-perfil',

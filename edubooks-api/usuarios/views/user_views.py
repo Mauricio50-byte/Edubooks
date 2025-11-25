@@ -209,8 +209,47 @@ def actualizar_perfil(request):
             'message': 'Perfil actualizado exitosamente',
             'user': serializer.data
         }, status=status.HTTP_200_OK)
-    
     return Response({
         'message': 'Datos inválidos',
         'errors': serializer.errors
     }, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET', 'PUT'])
+@permission_classes([IsAuthenticated])
+def usuario_me(request):
+    """Compatibilidad: GET/PUT en /usuarios/me/ devolviendo solo el objeto usuario"""
+    if request.method == 'GET':
+        data = UsuarioPerfilSerializer(request.user).data
+        return Response(data, status=status.HTTP_200_OK)
+    if request.method == 'PUT':
+        serializer = UsuarioPerfilSerializer(request.user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def cambiar_password(request):
+    """Cambiar contraseña del usuario autenticado"""
+    password_actual = request.data.get('password_actual')
+    password_nueva = request.data.get('password_nueva')
+    password_confirm = request.data.get('password_confirm')
+
+    if not password_nueva:
+        return Response({'message': 'La nueva contraseña es requerida'}, status=status.HTTP_400_BAD_REQUEST)
+    if len(password_nueva) < 8:
+        return Response({'message': 'La nueva contraseña debe tener al menos 8 caracteres'}, status=status.HTTP_400_BAD_REQUEST)
+    if password_confirm is not None and password_nueva != password_confirm:
+        return Response({'message': 'La confirmación no coincide'}, status=status.HTTP_400_BAD_REQUEST)
+
+    user = request.user
+    if user.has_usable_password():
+        if not password_actual:
+            return Response({'message': 'La contraseña actual es requerida'}, status=status.HTTP_400_BAD_REQUEST)
+        if not user.check_password(password_actual):
+            return Response({'message': 'La contraseña actual no es correcta'}, status=status.HTTP_400_BAD_REQUEST)
+
+    user.set_password(password_nueva)
+    user.save()
+    return Response({'message': 'Contraseña actualizada'}, status=status.HTTP_200_OK)

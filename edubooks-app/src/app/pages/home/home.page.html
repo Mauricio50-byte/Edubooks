@@ -129,7 +129,7 @@
             <ion-icon name="chevron-forward-outline" slot="end" color="medium"></ion-icon>
           </ion-item>
 
-          <ion-item button (click)="navigateTo('/admin-prestamos')" *appHasRole="['administrador', 'docente']">
+          <ion-item button (click)="navigateTo('/admin-prestamos')" *appHasRole="'administrador'">
             <ion-icon name="swap-horizontal-outline" slot="start" color="tertiary"></ion-icon>
             <ion-label>
               <h3>Gestión de Préstamos</h3>
@@ -147,7 +147,16 @@
             <ion-icon name="chevron-forward-outline" slot="end" color="medium"></ion-icon>
           </ion-item>
 
-          <ion-item button (click)="navigateTo('/admin-solicitudes')" *appHasRole="['administrador', 'docente']">
+          <ion-item button (click)="navigateTo('/mis-solicitudes')" *appHasRole="['estudiante', 'docente']">
+            <ion-icon name="document-text-outline" slot="start" color="secondary"></ion-icon>
+            <ion-label>
+              <h3>Mis Solicitudes</h3>
+              <p>Ver mis solicitudes realizadas</p>
+            </ion-label>
+            <ion-icon name="chevron-forward-outline" slot="end" color="medium"></ion-icon>
+          </ion-item>
+
+          <ion-item button (click)="navigateTo('/admin-solicitudes')" *appHasRole="'administrador'">
             <ion-icon name="document-text-outline" slot="start" color="tertiary"></ion-icon>
             <ion-label>
               <h3>Solicitudes</h3>

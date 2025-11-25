@@ -41,8 +41,6 @@ export interface Usuario {
         departamento?: string;
         numero_empleado?: string;
         especialidad?: string;
-        grado_academico?: string;
-        fecha_contratacion?: string;
     };
     datos_administrador?: {
         area?: string;
@@ -82,8 +80,6 @@ export interface UsuarioRegistro {
         departamento: string;
         numero_empleado: string;
         especialidad?: string;
-        grado_academico?: string;
-        fecha_contratacion?: string;
     };
     datos_administrador?: {
         area: string;

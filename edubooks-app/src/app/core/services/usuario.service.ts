@@ -97,4 +97,45 @@ export class UsuarioService {
       );
   }
 
+  actualizarPerfil(datos: any): Observable<any> {
+    return this.apiService.put('/auth/usuarios/me/', datos)
+      .pipe(
+        map((usuarioActualizado: any) => {
+          this.authService.updateCurrentUser(usuarioActualizado);
+          return usuarioActualizado;
+        }),
+        catchError(error => {
+          console.error('Error actualizando perfil:', error);
+          return throwError(error);
+        })
+      );
+  }
+
+  cambiarPassword(passwordActual: string, passwordNueva: string): Observable<any> {
+    const payload = {
+      password_actual: passwordActual,
+      password_nueva: passwordNueva
+    };
+    return this.apiService.post('/auth/usuarios/me/password/', payload)
+      .pipe(
+        catchError(error => {
+          console.error('Error cambiando contraseña:', error);
+          return throwError(error);
+        })
+      );
+  }
+
+  obtenerPerfil(): Observable<any> {
+    return this.apiService.get('/auth/usuarios/me/')
+      .pipe(
+        map((usuario: any) => {
+          this.authService.updateCurrentUser(usuario);
+          return usuario;
+        }),
+        catchError(error => {
+          console.error('Error obteniendo perfil:', error);
+          return throwError(error);
+        })
+      );
+  }
 }

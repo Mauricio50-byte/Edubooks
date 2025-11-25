@@ -200,6 +200,12 @@ export class AuthService {
       throw error;
     }
   }
+  updateCurrentUser(user: Usuario): void {
+    try {
+      localStorage.setItem('current_user', JSON.stringify(user));
+      this.currentUserSubject.next(user);
+    } catch {}
+  }
   // Helpers de rol para compatibilidad
   isAdministrador(): boolean {
     const user = this.currentUserSubject.value;

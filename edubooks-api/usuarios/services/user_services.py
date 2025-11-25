@@ -199,7 +199,6 @@ class TeacherService(BaseUserService):
             'puede_prestar': docente.usuario.puede_prestar(),
             'especialidad': docente.especialidad,
             'departamento': docente.departamento,
-            'fecha_contratacion': docente.fecha_contratacion,
             'fecha_registro': docente.usuario.fecha_registro,
         }
 

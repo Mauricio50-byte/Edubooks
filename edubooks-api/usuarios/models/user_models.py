@@ -410,7 +410,6 @@ class Docente(models.Model):
     ])
     
     # Información contractual
-    fecha_contratacion = models.DateField()
     tipo_contrato = models.CharField(max_length=30, choices=[
         ('tiempo_completo', 'Tiempo Completo'),
         ('medio_tiempo', 'Medio Tiempo'),

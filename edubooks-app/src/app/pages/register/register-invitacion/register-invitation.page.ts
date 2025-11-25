@@ -52,17 +52,15 @@ export class RegisterInvitationPage implements OnInit {
     },
     'Docente': {
       required: ['especialidad', 'departamento'],
-      optional: ['fecha_contratacion', 'numero_empleado'],
+      optional: ['numero_empleado'],
       labels: {
         especialidad: 'Especialidad',
         departamento: 'Departamento',
-        fecha_contratacion: 'Fecha de Contratación',
         numero_empleado: 'Número de Empleado'
       },
       placeholders: {
         especialidad: 'Ej: Matemáticas',
         departamento: 'Ej: Ciencias Exactas',
-        fecha_contratacion: '',
         numero_empleado: 'Ej: DOC2024001'
       }
     },

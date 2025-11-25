@@ -207,11 +207,7 @@ class RegistroConInvitacionSerializer(serializers.ModelSerializer):
             matricula=datos_completos.get('matricula', f"EST{usuario.id:06d}"),
             semestre_actual=datos_completos.get('semestre_actual', 1),
             fecha_ingreso=datos_completos.get('fecha_ingreso', timezone.now().date()),
-            fecha_graduacion_esperada=datos_completos.get('fecha_graduacion_esperada'),
-            promedio_acumulado=datos_completos.get('promedio_acumulado'),
-            creditos_completados=datos_completos.get('creditos_completados', 0),
-            creditos_requeridos=datos_completos.get('creditos_requeridos', 240),
-            turno=datos_completos.get('turno', 'matutino')
+            fecha_graduacion_esperada=datos_completos.get('fecha_graduacion_esperada')
         )
     
     def _crear_perfil_docente(self, usuario, datos_usuario, datos_invitacion):
@@ -222,14 +218,7 @@ class RegistroConInvitacionSerializer(serializers.ModelSerializer):
             usuario=usuario,
             numero_empleado=datos_completos.get('numero_empleado', f"DOC{usuario.id:06d}"),
             departamento=datos_completos.get('departamento'),
-            especialidad=datos_completos.get('especialidad'),
-            grado_academico=datos_completos.get('grado_academico', 'licenciatura'),
-            fecha_contratacion=datos_completos.get('fecha_contratacion', timezone.now().date()),
-            tipo_contrato=datos_completos.get('tipo_contrato', 'tiempo_completo'),
-            materias_impartidas=datos_completos.get('materias_impartidas', ''),
-            investigaciones_activas=datos_completos.get('investigaciones_activas', ''),
-            publicaciones=datos_completos.get('publicaciones', ''),
-            activo_docencia=True
+            especialidad=datos_completos.get('especialidad')
         )
     
     def _crear_perfil_administrador(self, usuario, datos_usuario, datos_invitacion):
@@ -241,15 +230,7 @@ class RegistroConInvitacionSerializer(serializers.ModelSerializer):
             area=datos_completos.get('area'),
             cargo=datos_completos.get('cargo'),
             nivel_acceso=datos_completos.get('nivel_acceso', 1),
-            fecha_nombramiento=datos_completos.get('fecha_nombramiento', timezone.now().date()),
-            puede_crear_usuarios=datos_completos.get('puede_crear_usuarios', False),
-            puede_modificar_usuarios=datos_completos.get('puede_modificar_usuarios', False),
-            puede_eliminar_usuarios=datos_completos.get('puede_eliminar_usuarios', False),
-            puede_gestionar_libros=datos_completos.get('puede_gestionar_libros', True),
-            puede_gestionar_prestamos=datos_completos.get('puede_gestionar_prestamos', True),
-            puede_aplicar_sanciones=datos_completos.get('puede_aplicar_sanciones', False),
-            puede_generar_reportes=datos_completos.get('puede_generar_reportes', True),
-            puede_configurar_sistema=datos_completos.get('puede_configurar_sistema', False)
+            fecha_nombramiento=datos_completos.get('fecha_nombramiento', timezone.now().date())
         )
 
 

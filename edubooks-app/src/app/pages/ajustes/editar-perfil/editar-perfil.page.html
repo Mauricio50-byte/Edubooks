@@ -19,18 +19,120 @@
           <ion-item class="form-item">
             <ion-icon name="person-circle-outline" slot="start" color="tertiary"></ion-icon>
             <ion-label position="stacked">Nombre</ion-label>
-            <ion-input formControlName="nombre" placeholder="Tu nombre"></ion-input>
+            <ion-input formControlName="nombre" placeholder="Nombre"></ion-input>
+          </ion-item>
+
+          <ion-item class="form-item">
+            <ion-icon name="person-outline" slot="start" color="tertiary"></ion-icon>
+            <ion-label position="stacked">Apellido</ion-label>
+            <ion-input formControlName="apellido" placeholder="Apellido"></ion-input>
           </ion-item>
 
           <ion-item class="form-item">
             <ion-icon name="at-outline" slot="start" color="tertiary"></ion-icon>
             <ion-label position="stacked">Usuario</ion-label>
-            <ion-input formControlName="username" placeholder="Tu usuario"></ion-input>
+            <ion-input formControlName="username" placeholder="Usuario"></ion-input>
           </ion-item>
+
+          <ion-item class="form-item">
+            <ion-icon name="call-outline" slot="start" color="tertiary"></ion-icon>
+            <ion-label position="stacked">Teléfono</ion-label>
+            <ion-input formControlName="telefono" type="tel" placeholder="Teléfono"></ion-input>
+          </ion-item>
+
+          <ion-item class="form-item">
+            <ion-icon name="id-card-outline" slot="start" color="tertiary"></ion-icon>
+            <ion-label position="stacked">Número de identificación</ion-label>
+            <ion-input formControlName="numero_identificacion" placeholder="Identificación"></ion-input>
+          </ion-item>
+
+          <ion-item class="form-item">
+            <ion-icon name="male-female-outline" slot="start" color="tertiary"></ion-icon>
+            <ion-label position="stacked">Género</ion-label>
+            <ion-select formControlName="genero" placeholder="Selecciona tu género">
+              <ion-select-option value="M">Masculino</ion-select-option>
+              <ion-select-option value="F">Femenino</ion-select-option>
+              <ion-select-option value="O">Otro</ion-select-option>
+              <ion-select-option value="N">Prefiero no decir</ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <div *ngIf="rol === 'estudiante'" formGroupName="datos_estudiante">
+            <ion-item class="form-item">
+              <ion-label position="stacked">Carrera</ion-label>
+              <ion-input formControlName="carrera" placeholder="Carrera"></ion-input>
+            </ion-item>
+            <ion-item class="form-item">
+              <ion-label position="stacked">Matrícula</ion-label>
+              <ion-input formControlName="matricula" placeholder="Matrícula"></ion-input>
+            </ion-item>
+            <ion-item class="form-item">
+              <ion-label position="stacked">Semestre actual</ion-label>
+              <ion-input type="number" formControlName="semestre_actual" placeholder="Semestre"></ion-input>
+            </ion-item>
+          </div>
+
+          <div *ngIf="rol === 'docente'" formGroupName="datos_docente">
+            <ion-item class="form-item">
+              <ion-label position="stacked">Departamento</ion-label>
+              <ion-input formControlName="departamento" placeholder="Departamento"></ion-input>
+            </ion-item>
+            <ion-item class="form-item">
+              <ion-label position="stacked">Número de empleado</ion-label>
+              <ion-input formControlName="numero_empleado" placeholder="Número"></ion-input>
+            </ion-item>
+            <ion-item class="form-item">
+              <ion-label position="stacked">Especialidad</ion-label>
+              <ion-input formControlName="especialidad" placeholder="Especialidad"></ion-input>
+            </ion-item>
+          </div>
+
+          <div *ngIf="rol === 'administrador'" formGroupName="datos_administrador">
+            <ion-item class="form-item">
+              <ion-label position="stacked">Área</ion-label>
+              <ion-input formControlName="area" placeholder="Área"></ion-input>
+            </ion-item>
+            <ion-item class="form-item">
+              <ion-label position="stacked">Nivel de acceso</ion-label>
+              <ion-input formControlName="nivel_acceso" placeholder="Nivel"></ion-input>
+            </ion-item>
+            <ion-item class="form-item">
+              <ion-label position="stacked">Fecha de nombramiento</ion-label>
+              <ion-input formControlName="fecha_nombramiento" type="date"></ion-input>
+            </ion-item>
+          </div>
 
           <ion-button type="submit" expand="block" class="gradient-primary" [disabled]="isSaving || perfilForm.invalid">
             <ion-spinner *ngIf="isSaving" name="lines-small"></ion-spinner>
             <span *ngIf="!isSaving">Guardar cambios</span>
+          </ion-button>
+        </form>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card class="card-accent">
+      <ion-card-header>
+        <ion-card-title>Cambiar Contraseña</ion-card-title>
+        <ion-card-subtitle>Requiere tu contraseña actual</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <form [formGroup]="passwordForm" (ngSubmit)="cambiarPassword()" class="perfil-form">
+          <ion-item class="form-item" [class.ion-invalid]="passwordForm.get('password_actual')?.invalid && passwordForm.get('password_actual')?.touched">
+            <ion-label position="stacked">Contraseña actual</ion-label>
+            <ion-input formControlName="password_actual" type="password" placeholder="••••••••"></ion-input>
+          </ion-item>
+          <ion-item class="form-item" [class.ion-invalid]="passwordForm.get('password_nueva')?.invalid && passwordForm.get('password_nueva')?.touched">
+            <ion-label position="stacked">Nueva contraseña</ion-label>
+            <ion-input formControlName="password_nueva" type="password" placeholder="••••••••"></ion-input>
+          </ion-item>
+          <ion-item class="form-item" [class.ion-invalid]="passwordForm.get('password_confirm')?.invalid && passwordForm.get('password_confirm')?.touched">
+            <ion-label position="stacked">Confirmar nueva contraseña</ion-label>
+            <ion-input formControlName="password_confirm" type="password" placeholder="••••••••"></ion-input>
+          </ion-item>
+
+          <ion-button type="submit" expand="block" class="gradient-primary" [disabled]="isChangingPassword || passwordForm.invalid">
+            <ion-spinner *ngIf="isChangingPassword" name="lines-small"></ion-spinner>
+            <span *ngIf="!isChangingPassword">Actualizar contraseña</span>
           </ion-button>
         </form>
       </ion-card-content>

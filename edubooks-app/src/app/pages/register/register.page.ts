@@ -83,16 +83,15 @@ export class RegisterPage implements OnInit {
       matricula: [''],
       semestre_actual: [''],
       
-      // Campos específicos por rol - Docente (sin fecha_contratacion)
+      // Campos específicos por rol - Docente
       departamento: [''],
       numero_empleado: [''],
       especialidad: [''],
-      grado_academico: [''],
-      
-      // Campos específicos por rol - Administrador (sin fecha_nombramiento)
+
+      // Campos específicos por rol - Administrador
       area: [''],
       nivel_acceso: ['']
-    }, { 
+    }, {
       validators: this.passwordMatchValidator 
     });
   }
@@ -153,7 +152,7 @@ export class RegisterPage implements OnInit {
   private clearRoleValidations() {
     const roleFields = [
       'carrera', 'matricula', 'semestre_actual',
-      'departamento', 'numero_empleado', 'especialidad', 'grado_academico',
+      'departamento', 'numero_empleado', 'especialidad',
       'area', 'nivel_acceso'
     ];
     
@@ -194,8 +193,7 @@ export class RegisterPage implements OnInit {
       userData.datos_docente = {
         departamento: formValue.departamento,
         numero_empleado: formValue.numero_empleado || undefined,
-        especialidad: formValue.especialidad || undefined,
-        grado_academico: formValue.grado_academico || undefined
+        especialidad: formValue.especialidad || undefined
       };
     } else if (rol === 'administrador') {
       userData.datos_administrador = {

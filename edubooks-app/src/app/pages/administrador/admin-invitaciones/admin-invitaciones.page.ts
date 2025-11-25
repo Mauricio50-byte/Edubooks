@@ -157,7 +157,6 @@ export class AdminInvitacionesPage implements OnInit, OnDestroy {
       // Campos adicionales según el rol
       especialidad: [''],
       departamento: [''],
-      fecha_contratacion: [''],
       numero_empleado: [''],
       carrera: [''],
       semestre: [''],
@@ -316,7 +315,7 @@ export class AdminInvitacionesPage implements OnInit, OnDestroy {
     const rol = this.crearInvitacionForm.get('rol_asignado')?.value;
     
     // Limpiar campos específicos de rol
-    const camposRol = ['especialidad', 'departamento', 'fecha_contratacion', 'numero_empleado',
+    const camposRol = ['especialidad', 'departamento', 'numero_empleado',
                        'carrera', 'semestre', 'numero_estudiante', 'codigo_estudiante', 'cargo', 'area', 'nivel_acceso', 'fecha_nombramiento'];
     
     camposRol.forEach(campo => {
@@ -398,7 +397,6 @@ export class AdminInvitacionesPage implements OnInit, OnDestroy {
         if (rol === 'docente') {
           if (formData.especialidad) datosAdicionales.especialidad = formData.especialidad;
           if (formData.departamento) datosAdicionales.departamento = formData.departamento;
-          if (formData.fecha_contratacion) datosAdicionales.fecha_contratacion = formData.fecha_contratacion;
           if (formData.numero_empleado) datosAdicionales.numero_empleado = formData.numero_empleado;
         } else if (rol === 'estudiante') {
           if (formData.carrera) datosAdicionales.carrera = formData.carrera;
@@ -492,10 +490,9 @@ export class AdminInvitacionesPage implements OnInit, OnDestroy {
 
             const datosAdicionales: any = {};
             if (rolSel === 'docente') {
-              if (formValues.especialidad) datosAdicionales.especialidad = formValues.especialidad;
-              if (formValues.departamento) datosAdicionales.departamento = formValues.departamento;
-              if (formValues.fecha_contratacion) datosAdicionales.fecha_contratacion = formValues.fecha_contratacion;
-              if (formValues.numero_empleado) datosAdicionales.numero_empleado = formValues.numero_empleado;
+            if (formValues.especialidad) datosAdicionales.especialidad = formValues.especialidad;
+            if (formValues.departamento) datosAdicionales.departamento = formValues.departamento;
+            if (formValues.numero_empleado) datosAdicionales.numero_empleado = formValues.numero_empleado;
             } else if (rolSel === 'administrador') {
               if (formValues.cargo) datosAdicionales.cargo = formValues.cargo;
               if (formValues.area) datosAdicionales.area = formValues.area;

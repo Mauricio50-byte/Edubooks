@@ -11,6 +11,8 @@ urlpatterns = [
     path('supabase-sync/', views.supabase_sync, name='supabase-sync'),
     path('perfil/', views.perfil, name='perfil'),
     path('actualizar-perfil/', views.actualizar_perfil, name='actualizar_perfil'),
+    path('usuarios/me/', views.usuario_me, name='usuario_me'),
+    path('usuarios/me/password/', views.cambiar_password, name='cambiar_password'),
     
     # Sistema de invitaciones
     path('invitaciones/', include('usuarios.urls.invitation_urls')),
