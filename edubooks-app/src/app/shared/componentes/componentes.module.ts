@@ -5,6 +5,7 @@ import { IonicModule } from '@ionic/angular';
 
 // Importar módulos de auth
 import { AuthModule } from './auth/auth.module';
+import { CardComponent } from './card/card.component';
 import { UserDetailsComponent } from './user-details/user-details.component';
 import { CompactStatsComponent } from './compact-stats/compact-stats.component';
 import { InvitacionFormComponent } from './invitacion-form/invitacion-form.component';
@@ -22,14 +23,16 @@ import { InvitacionesListComponent } from './invitaciones-list/invitaciones-list
     UserDetailsComponent,
     CompactStatsComponent,
     InvitacionFormComponent,
-    InvitacionesListComponent
+    InvitacionesListComponent,
+    CardComponent
   ],
   exports: [
     AuthModule,
     UserDetailsComponent,
     CompactStatsComponent,
     InvitacionFormComponent,
-    InvitacionesListComponent
+    InvitacionesListComponent,
+    CardComponent
   ]
 })
 export class ComponentesModule { }

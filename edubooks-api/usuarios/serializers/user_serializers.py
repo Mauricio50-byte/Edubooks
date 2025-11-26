@@ -186,10 +186,12 @@ class UsuarioPerfilSerializer(serializers.ModelSerializer):
             # Datos específicos por rol
             'datos_estudiante', 'datos_docente', 'datos_administrador',
             # Preferencias mínimas
-            'idioma_preferido'
+            'idioma_preferido',
+            # Campos calculados de estado
+            'puede_prestar', 'dias_sancion_restantes'
         ]
         read_only_fields = [
-            'id'
+            'id', 'nombre_completo', 'puede_prestar', 'dias_sancion_restantes'
         ]
     
     def get_datos_estudiante(self, obj):
@@ -234,7 +236,7 @@ class UsuarioListSerializer(serializers.ModelSerializer):
         model = Usuario
         fields = [
             'id', 'email', 'username', 'nombre', 'apellido', 'nombre_completo', 'rol', 'genero',
-            'is_active', 'fecha_registro', 'telefono', 'datos_rol'
+            'is_active', 'fecha_registro', 'telefono', 'datos_rol', 'puede_prestar'
         ]
         read_only_fields = ['id', 'fecha_registro']
     

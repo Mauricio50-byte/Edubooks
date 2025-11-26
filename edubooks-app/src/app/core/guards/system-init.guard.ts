@@ -24,7 +24,8 @@ export class SystemInitGuard implements CanActivate {
       this.systemStatusCache$ = this.setupService.verificarSistema().pipe(
         shareReplay(1),
         catchError(error => {
-          console.error('Error verificando estado del sistema:', error);
+          const msg = (error && (error.message || error.error?.message)) || 'Error verificando estado del sistema';
+          console.warn(msg);
           // En caso de error, asumir que el sistema está inicializado
           return of({ is_initialized: true });
         })

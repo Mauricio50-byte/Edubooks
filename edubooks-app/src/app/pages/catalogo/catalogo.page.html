@@ -112,8 +112,9 @@
         </div>
         
         <div class="book-actions">
+
           <ion-button 
-            *ngIf="puedePrestar(libro)"
+            *ngIf="puedePrestar(libro) && !isPendiente(libro)"
             expand="block" 
             fill="solid" 
             color="success"
@@ -123,7 +124,7 @@
           </ion-button>
           
           <ion-button 
-            *ngIf="puedeReservar(libro)"
+            *ngIf="puedeReservar(libro) && !isPendiente(libro)"
             expand="block" 
             fill="outline" 
             color="warning"
@@ -133,7 +134,7 @@
           </ion-button>
           
           <ion-button 
-            *ngIf="libro.usuario_tiene_prestamo"
+            *ngIf="isPendiente(libro)"
             expand="block" 
             fill="outline" 
             color="warning"
@@ -143,7 +144,7 @@
           </ion-button>
           
           <ion-button 
-            *ngIf="!puedePrestar(libro) && !puedeReservar(libro) && !libro.usuario_tiene_prestamo"
+            *ngIf="!puedePrestar(libro) && !puedeReservar(libro) && !isPendiente(libro)"
             expand="block" 
             fill="outline" 
             color="medium"

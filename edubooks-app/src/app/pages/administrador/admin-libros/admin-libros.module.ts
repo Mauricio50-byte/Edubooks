@@ -6,7 +6,6 @@ import { IonicModule } from '@ionic/angular';
 
 import { AdminLibrosPageRoutingModule } from './admin-libros-routing.module';
 import { SharedModule } from '../../../shared/shared.module';
-import { CardComponent } from '../../../shared/componentes/card/card.component';
 
 import { AdminLibrosPage } from './admin-libros.page';
 
@@ -16,8 +15,7 @@ import { AdminLibrosPage } from './admin-libros.page';
     FormsModule,
     IonicModule,
     AdminLibrosPageRoutingModule,
-    SharedModule,
-    CardComponent
+    SharedModule
   ],
   declarations: [AdminLibrosPage]
 })

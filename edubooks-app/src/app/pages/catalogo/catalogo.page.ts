@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AlertController, ToastController, LoadingController } from '@ionic/angular';
 import { BibliotecaService } from '../../core/services/biblioteca.service';
+import { NotificacionesService, Notificacion } from '../../core/services/notificaciones.service';
 import { Libro } from '../../core/models/libro.model';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -28,15 +29,18 @@ export class CatalogoPage implements OnInit {
     { value: 'Mantenimiento', label: 'Mantenimiento', icon: '🔧' }
   ];
   isLoading: boolean = false;
+  private pendientes = new Set<number>();
   
   private searchSubject = new Subject<string>();
+  private notifPoll: any;
 
   constructor(
     private bibliotecaService: BibliotecaService,
     private router: Router,
     private alertController: AlertController,
     private toastController: ToastController,
-    private loadingController: LoadingController
+    private loadingController: LoadingController,
+    private notificacionesService: NotificacionesService
   ) {
     // Configurar búsqueda con debounce
     this.searchSubject.pipe(
@@ -49,11 +53,21 @@ export class CatalogoPage implements OnInit {
 
   ngOnInit() {
     this.cargarDatos();
+    this.cargarPendientesDesdeStorage();
+    this.notificacionesService.notificaciones$.pipe(
+      debounceTime(300)
+    ).subscribe(_ => {
+      this.actualizarPendientesDesdeBackend();
+    });
   }
 
   ionViewWillEnter() {
     // Recargar datos cuando se vuelve a la página
     this.cargarDatos();
+    // Iniciar polling de notificaciones para reflejar rechazos
+    this.notifPoll = setInterval(() => {
+      this.notificacionesService.cargarNotificaciones().subscribe();
+    }, 6000);
   }
 
   async cargarDatos() {
@@ -66,6 +80,9 @@ export class CatalogoPage implements OnInit {
           this.libros = libros;
           this.librosFiltrados = libros;
           this.isLoading = false;
+          // Sincronizar estados pendientes con la lista
+          this.sincronizarPendientesConLibros();
+          this.completarDetallesLibros(this.libros);
         },
         error: (error) => {
           console.error('Error cargando libros:', error);
@@ -105,6 +122,7 @@ export class CatalogoPage implements OnInit {
     this.bibliotecaService.searchLibros(query).subscribe({
       next: (resultados) => {
         this.librosFiltrados = resultados;
+        this.completarDetallesLibros(this.librosFiltrados);
       },
       error: (error) => {
         console.error('Error en búsqueda:', error);
@@ -147,6 +165,7 @@ export class CatalogoPage implements OnInit {
     }
 
     this.librosFiltrados = librosFiltrados;
+    this.completarDetallesLibros(this.librosFiltrados);
   }
 
   limpiarFiltros() {
@@ -200,7 +219,9 @@ export class CatalogoPage implements OnInit {
         });
         await toast.present();
 
-        // Actualizar la lista
+        // Marcar como pendiente en UI
+        this.marcarPendiente(libro.id);
+        // Refrescar datos opcionalmente
         this.cargarDatos();
       },
       error: async (error) => {
@@ -266,7 +287,7 @@ export class CatalogoPage implements OnInit {
 
   puedePrestar(libro: Libro): boolean {
     // No puede prestar si ya tiene un préstamo activo de este libro
-    if (libro.usuario_tiene_prestamo) {
+    if (this.isPendiente(libro)) {
       return false;
     }
     // Puede prestar si hay copias disponibles y el libro no está en mantenimiento
@@ -275,10 +296,103 @@ export class CatalogoPage implements OnInit {
 
   puedeReservar(libro: Libro): boolean {
     // No puede reservar si ya tiene un préstamo activo de este libro
-    if (libro.usuario_tiene_prestamo) {
+    if (this.isPendiente(libro)) {
       return false;
     }
     // Puede reservar si no hay copias disponibles y el libro no está en mantenimiento
     return libro.cantidad_disponible === 0 && libro.estado !== 'Mantenimiento';
+  }
+
+  // ===== Gestión de estado pendiente en UI =====
+  private cargarPendientesDesdeStorage(): void {
+    try {
+      const raw = localStorage.getItem('pendientes_prestamo');
+      if (raw) {
+        const arr: number[] = JSON.parse(raw);
+        this.pendientes = new Set(arr);
+      }
+    } catch {}
+  }
+
+  private guardarPendientesEnStorage(): void {
+    try {
+      localStorage.setItem('pendientes_prestamo', JSON.stringify(Array.from(this.pendientes)));
+    } catch {}
+  }
+
+  private sincronizarPendientesConLibros(): void {
+    // Opcional: marcar flag en objetos si existe
+    this.libros.forEach(l => {
+      if (this.pendientes.has(l.id)) {
+        l.usuario_tiene_prestamo = true;
+      } else {
+        delete l.usuario_tiene_prestamo;
+      }
+    });
+  }
+
+  private completarDetallesLibros(arr: Libro[]): void {
+    const incompletos = arr.filter(l => {
+      const ubic = (l.ubicacion ?? '').trim();
+      const total = l.cantidad_total as number | undefined;
+      return !ubic || total === undefined || Number.isNaN(total as number);
+    });
+    incompletos.forEach(l => {
+      this.bibliotecaService.getLibroById(l.id).subscribe(det => {
+        if (!det) return;
+        const replace = (list: Libro[]) => {
+          const idx = list.findIndex(x => x.id === det.id);
+          if (idx >= 0) list[idx] = det;
+        };
+        replace(this.libros);
+        replace(this.librosFiltrados);
+      });
+    });
+  }
+
+  isPendiente(libro: Libro): boolean {
+    return this.pendientes.has(libro.id) || !!libro.usuario_tiene_prestamo;
+  }
+
+  private marcarPendiente(libroId: number): void {
+    this.pendientes.add(libroId);
+    this.guardarPendientesEnStorage();
+    this.sincronizarPendientesConLibros();
+  }
+
+  private desmarcarPendiente(libroId: number): void {
+    this.pendientes.delete(libroId);
+    this.guardarPendientesEnStorage();
+    this.sincronizarPendientesConLibros();
+  }
+
+  private actualizarPendientesDesdeBackend(): void {
+    this.bibliotecaService.obtenerMisSolicitudes().subscribe({
+      next: (solicitudes: any[]) => {
+        const pendientesIds = new Set<number>();
+        const rechazadosIds = new Set<number>();
+        solicitudes.forEach((p: any) => {
+          const libroId = p?.libro?.id ?? p?.libro_id;
+          if (!libroId) return;
+          if (p.estado === 'Pendiente') pendientesIds.add(libroId);
+          if (p.estado === 'Rechazado') rechazadosIds.add(libroId);
+        });
+        // Mantener pendientes actuales solo si siguen pendientes en backend
+        this.pendientes.forEach(id => { if (!pendientesIds.has(id)) this.pendientes.delete(id); });
+        // Remover rechazos explícitos
+        rechazadosIds.forEach(id => this.pendientes.delete(id));
+        this.guardarPendientesEnStorage();
+        this.sincronizarPendientesConLibros();
+      },
+      error: _ => {
+        // Silencio: no cambiar estado si falla
+      }
+    });
+  }
+  ionViewWillLeave() {
+    if (this.notifPoll) {
+      clearInterval(this.notifPoll);
+      this.notifPoll = null;
+    }
   }
 }

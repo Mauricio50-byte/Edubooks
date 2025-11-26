@@ -15,11 +15,11 @@
     <div class="book-info">
       <ion-chip color="medium" size="small">
         <ion-icon name="location-outline"></ion-icon>
-        <ion-label>{{ libro.ubicacion }}</ion-label>
+        <ion-label>{{ formatUbicacion(libro.ubicacion) }}</ion-label>
       </ion-chip>
       <ion-chip color="tertiary" size="small">
         <ion-icon name="library-outline"></ion-icon>
-        <ion-label>{{ libro.cantidad_disponible }}/{{ libro.cantidad_total }}</ion-label>
+        <ion-label>{{ formatDisponibles(libro.cantidad_disponible) }}</ion-label>
       </ion-chip>
     </div>
 
