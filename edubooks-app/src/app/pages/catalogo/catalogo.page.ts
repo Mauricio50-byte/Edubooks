@@ -226,13 +226,13 @@ export class CatalogoPage implements OnInit {
       },
       error: async (error) => {
         await loading.dismiss();
-        
-        const alert = await this.alertController.create({
-          header: 'Error en Préstamo',
+        const toast = await this.toastController.create({
           message: error.message || 'No se pudo procesar el préstamo.',
-          buttons: ['OK']
+          duration: 4000,
+          color: 'danger',
+          position: 'top'
         });
-        await alert.present();
+        await toast.present();
       }
     });
   }
@@ -351,7 +351,12 @@ export class CatalogoPage implements OnInit {
   }
 
   isPendiente(libro: Libro): boolean {
-    return this.pendientes.has(libro.id) || !!libro.usuario_tiene_prestamo;
+    if (this.pendientes.has(libro.id)) return true;
+    return libro.prestamo_estado_usuario === 'Pendiente';
+  }
+
+  isPrestadoActivo(libro: Libro): boolean {
+    return libro.prestamo_estado_usuario === 'Activo';
   }
 
   private marcarPendiente(libroId: number): void {

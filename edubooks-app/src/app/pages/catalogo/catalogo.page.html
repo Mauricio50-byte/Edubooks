@@ -114,7 +114,7 @@
         <div class="book-actions">
 
           <ion-button 
-            *ngIf="puedePrestar(libro) && !isPendiente(libro)"
+            *ngIf="puedePrestar(libro) && !isPendiente(libro) && !isPrestadoActivo(libro)"
             expand="block" 
             fill="solid" 
             color="success"
@@ -142,9 +142,19 @@
             <ion-icon name="time-outline" slot="start"></ion-icon>
             Solicitud enviada
           </ion-button>
+
+          <ion-button 
+            *ngIf="isPrestadoActivo(libro)"
+            expand="block" 
+            fill="outline" 
+            color="medium"
+            disabled>
+            <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
+            Prestado actualmente
+          </ion-button>
           
           <ion-button 
-            *ngIf="!puedePrestar(libro) && !puedeReservar(libro) && !isPendiente(libro)"
+            *ngIf="!puedePrestar(libro) && !puedeReservar(libro) && !isPendiente(libro) && !isPrestadoActivo(libro)"
             expand="block" 
             fill="outline" 
             color="medium"

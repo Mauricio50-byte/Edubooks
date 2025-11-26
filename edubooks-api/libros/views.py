@@ -136,6 +136,7 @@ class PrestamoCreateView(generics.CreateAPIView):
     
     def perform_create(self, serializer):
         from rest_framework import serializers
+        from django.db import transaction
         # Verificar si el usuario tiene sanciones activas
         sanciones_activas = Sancion.objects.filter(
             usuario=self.request.user,
@@ -144,8 +145,19 @@ class PrestamoCreateView(generics.CreateAPIView):
         
         if sanciones_activas.exists():
             raise serializers.ValidationError("No puedes solicitar préstamos mientras tengas sanciones activas.")
-        
-        serializer.save()
+        # Evitar duplicación con verificación atómica
+        with transaction.atomic():
+            libro_id = self.request.data.get('libro_id')
+            if not libro_id:
+                raise serializers.ValidationError("El ID del libro es requerido.")
+            existe = Prestamo.objects.select_for_update().filter(
+                libro_id=libro_id,
+                usuario=self.request.user,
+                estado__in=['Pendiente','Activo']
+            ).exists()
+            if existe:
+                raise serializers.ValidationError("Ya tienes una solicitud de préstamo activa o pendiente de este libro.")
+            serializer.save()
 
 class PrestamoDetailView(generics.RetrieveAPIView):
     """Detalle de un préstamo específico"""

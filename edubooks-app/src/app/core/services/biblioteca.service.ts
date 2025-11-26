@@ -57,7 +57,9 @@ export class BibliotecaService {
           cantidad_disponible: libro.cantidad_disponible,
           descripcion: libro.descripcion,
           imagen_portada: libro.imagen_portada,
-          fecha_registro: libro.fecha_registro
+          fecha_registro: libro.fecha_registro,
+          usuario_tiene_prestamo: libro.usuario_tiene_prestamo ?? false,
+          prestamo_estado_usuario: libro.prestamo_estado_usuario
         }));
         // Actualizar datos locales
         this.libros = libros;
@@ -106,7 +108,9 @@ export class BibliotecaService {
           cantidad_disponible: libro.cantidad_disponible,
           descripcion: libro.descripcion,
           imagen_portada: libro.imagen_portada,
-          fecha_registro: libro.fecha_registro
+          fecha_registro: libro.fecha_registro,
+          usuario_tiene_prestamo: libro.usuario_tiene_prestamo ?? undefined,
+          prestamo_estado_usuario: libro.prestamo_estado_usuario
         };
 
         const idx = this.libros.findIndex(l => l.id === mapped.id);
@@ -195,14 +199,17 @@ export class BibliotecaService {
     return this.apiService.post('/prestamos/crear/', { libro_id: libroId })
       .pipe(
         map(response => {
-          // Actualizar datos locales si es exitoso
           this.actualizarDatosLocalesDespuesPrestamo(libroId);
           return response;
         }),
         catchError(error => {
-          console.error('Error creando préstamo:', error);
-          // Fallback a lógica simulada en caso de error de conexión
-          return this.prestarLibroSimulado(libroId);
+          // Si es fallo de conexión (status 0), usar simulación; si es validación 400/409, propagar mensaje claro
+          const msg = (error?.message || '').toLowerCase();
+          const isConn = msg.includes('no se pudo conectar');
+          if (isConn) {
+            return this.prestarLibroSimulado(libroId);
+          }
+          return throwError(() => new Error(error?.message || 'No se pudo crear el préstamo'));
         })
       );
   }

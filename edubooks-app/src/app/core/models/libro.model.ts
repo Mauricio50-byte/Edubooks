@@ -15,6 +15,7 @@ export interface Libro {
     imagen_portada?: string;
     fecha_registro: string;
     usuario_tiene_prestamo?: boolean;
+    prestamo_estado_usuario?: 'Pendiente' | 'Activo';
 }
 
 export interface Prestamo {

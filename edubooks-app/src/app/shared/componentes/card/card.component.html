@@ -24,7 +24,7 @@
     </div>
 
     <div class="book-actions" *ngIf="modo === 'catalogo'">
-      <ion-button *ngIf="puedePrestar" expand="block" fill="solid" color="success" (click)="onPrestar($event)">
+      <ion-button *ngIf="puedePrestar && libro.prestamo_estado_usuario !== 'Activo' && libro.prestamo_estado_usuario !== 'Pendiente'" expand="block" fill="solid" color="success" (click)="onPrestar($event)">
         <ion-icon name="send-outline" slot="start"></ion-icon>
         Solicitar
       </ion-button>
@@ -32,9 +32,13 @@
         <ion-icon name="bookmark-outline" slot="start"></ion-icon>
         Reservar
       </ion-button>
-      <ion-button *ngIf="usuario_tiene_prestamo" expand="block" fill="outline" color="warning" disabled>
+      <ion-button *ngIf="libro.prestamo_estado_usuario === 'Pendiente'" expand="block" fill="outline" color="warning" disabled>
         <ion-icon name="time-outline" slot="start"></ion-icon>
-        Solicitud enviada
+        Pendiente de aprobación
+      </ion-button>
+      <ion-button *ngIf="libro.prestamo_estado_usuario === 'Activo'" expand="block" fill="outline" color="medium" disabled>
+        <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
+        Prestado actualmente
       </ion-button>
       <ion-button *ngIf="!puedePrestar && !puedeReservar && !usuario_tiene_prestamo" expand="block" fill="outline" color="medium" disabled>
         <ion-icon name="ban-outline" slot="start"></ion-icon>

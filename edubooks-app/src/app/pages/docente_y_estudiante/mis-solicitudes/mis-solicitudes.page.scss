@@ -230,3 +230,20 @@
     color: var(--ion-color-danger-contrast);
   }
 }
+
+// Filtros
+ion-searchbar {
+  --background: var(--ion-color-light);
+  --border-radius: 12px;
+  margin-bottom: 8px;
+}
+
+ion-item {
+  --padding-start: 0;
+  --inner-padding-end: 0;
+
+  ion-label {
+    font-weight: 500;
+    min-width: 60px;
+  }
+}

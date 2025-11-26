@@ -56,6 +56,18 @@ export class ApiService {
         errorMessage = error.error.message;
       } else if (error.error?.detail) {
         errorMessage = error.error.detail;
+      } else if (error.error && typeof error.error === 'object') {
+        // Parsear errores de DRF (dict con arrays), e.g. {non_field_errors: ["..."]}
+        try {
+          const entries = Object.entries(error.error as any) as Array<[string, any]>;
+          const msgs = entries
+            .reduce<string[]>((acc, [, val]) => {
+              const arr = Array.isArray(val) ? val : [String(val)];
+              arr.forEach(v => { if (v) acc.push(String(v)); });
+              return acc;
+            }, []);
+          if (msgs.length) errorMessage = msgs[0] as string;
+        } catch {}
       } else if (error.status === 0) {
         errorMessage = 'No se pudo conectar con el servidor. Verifica que esté ejecutándose.';
       } else if (error.status === 400 && error.url?.includes('/auth/login/')) {

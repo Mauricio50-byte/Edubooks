@@ -15,10 +15,15 @@ import { AuthService } from '../../../core/services/auth.service';
 export class MisSolicitudesPage implements OnInit {
   solicitudes: any[] = [];
   prestamosActivos: any[] = [];
+  solicitudesFiltradas: any[] = [];
+  prestamosActivosFiltrados: any[] = [];
   isLoading = true;
   error = '';
   segmentValue = 'solicitudes';
   Math = Math;
+  mostrarFiltros = false;
+  terminoBusqueda = '';
+  filtroEstado = '';
 
   constructor(
     private bibliotecaService: BibliotecaService,
@@ -44,6 +49,7 @@ export class MisSolicitudesPage implements OnInit {
       this.bibliotecaService.obtenerMisSolicitudes().subscribe({
         next: (solicitudes) => {
           this.solicitudes = solicitudes || [];
+          this.solicitudesFiltradas = [...this.solicitudes];
           this.cargarPrestamosActivos();
         },
         error: (error) => {
@@ -63,11 +69,13 @@ export class MisSolicitudesPage implements OnInit {
     this.bibliotecaService.getPrestamosUsuario().subscribe({
       next: (prestamos) => {
         this.prestamosActivos = prestamos.filter((p: any) => p.estado === 'Activo') || [];
+        this.prestamosActivosFiltrados = [...this.prestamosActivos];
         this.isLoading = false;
       },
       error: (error) => {
         console.error('Error cargando préstamos activos:', error);
         this.prestamosActivos = [];
+        this.prestamosActivosFiltrados = [];
         this.isLoading = false;
       }
     });
@@ -75,6 +83,47 @@ export class MisSolicitudesPage implements OnInit {
 
   onSegmentChange(event: any) {
     this.segmentValue = event.detail.value;
+  }
+
+  aplicarFiltros() {
+    // Filtrar solicitudes
+    this.solicitudesFiltradas = this.solicitudes.filter((solicitud: any) => {
+      const cumpleEstado = !this.filtroEstado || solicitud.estado === this.filtroEstado;
+      const cumpleBusqueda = !this.terminoBusqueda ||
+        (solicitud.libro?.titulo || '').toLowerCase().includes(this.terminoBusqueda.toLowerCase()) ||
+        (solicitud.libro?.autor || '').toLowerCase().includes(this.terminoBusqueda.toLowerCase());
+      return cumpleEstado && cumpleBusqueda;
+    });
+
+    // Filtrar préstamos activos
+    this.prestamosActivosFiltrados = this.prestamosActivos.filter((prestamo: any) => {
+      const cumpleEstado = !this.filtroEstado || prestamo.estado === this.filtroEstado;
+      const cumpleBusqueda = !this.terminoBusqueda ||
+        (prestamo.libro?.titulo || '').toLowerCase().includes(this.terminoBusqueda.toLowerCase()) ||
+        (prestamo.libro?.autor || '').toLowerCase().includes(this.terminoBusqueda.toLowerCase());
+      return cumpleEstado && cumpleBusqueda;
+    });
+  }
+
+  onSearchChange(event: any) {
+    this.terminoBusqueda = event.detail.value;
+    this.aplicarFiltros();
+  }
+
+  onEstadoChange(event: any) {
+    this.filtroEstado = event.detail.value;
+    this.aplicarFiltros();
+  }
+
+  limpiarFiltros() {
+    this.filtroEstado = '';
+    this.terminoBusqueda = '';
+    this.solicitudesFiltradas = [...this.solicitudes];
+    this.prestamosActivosFiltrados = [...this.prestamosActivos];
+  }
+
+  toggleFiltros() {
+    this.mostrarFiltros = !this.mostrarFiltros;
   }
 
   getEstadoColor(estado: string): string {

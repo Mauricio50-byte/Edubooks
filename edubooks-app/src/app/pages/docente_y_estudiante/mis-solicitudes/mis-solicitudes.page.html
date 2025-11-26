@@ -5,14 +5,22 @@
     </ion-buttons>
     <ion-title>Mis Solicitudes</ion-title>
     <ion-buttons slot="end">
+      <ion-button (click)="toggleFiltros()">
+        <ion-icon name="filter" slot="icon-only"></ion-icon>
+      </ion-button>
       <ion-button (click)="cargarDatos()">
-        <ion-icon name="refresh-outline"></ion-icon>
+        <ion-icon name="refresh-outline" slot="icon-only"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Mis Solicitudes</ion-title>
+    </ion-toolbar>
+  </ion-header>
   <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
     <ion-refresher-content></ion-refresher-content>
   </ion-refresher>
@@ -28,6 +36,41 @@
       <ion-badge *ngIf="prestamosActivos.length > 0" color="success">{{ prestamosActivos.length }}</ion-badge>
     </ion-segment-button>
   </ion-segment>
+
+  <!-- Filtros -->
+  <ion-card *ngIf="mostrarFiltros">
+    <ion-card-header>
+      <ion-card-title>Filtros de Búsqueda</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-searchbar 
+        [(ngModel)]="terminoBusqueda"
+        placeholder="Buscar por título o autor"
+        (ionInput)="onSearchChange($event)"
+        show-clear-button="focus">
+      </ion-searchbar>
+      
+      <ion-item>
+        <ion-select 
+          [(ngModel)]="filtroEstado" 
+          placeholder="Filtrar por estado"
+          (ionChange)="onEstadoChange($event)">
+          <ion-select-option value="">Todos los estados</ion-select-option>
+          <ion-select-option value="Pendiente">Pendientes</ion-select-option>
+          <ion-select-option value="Rechazado">Rechazados</ion-select-option>
+          <ion-select-option value="Activo">Activos</ion-select-option>
+          <ion-select-option value="Devuelto">Devueltos</ion-select-option>
+          <ion-select-option value="Vencido">Vencidos</ion-select-option>
+        </ion-select>
+        <ion-label slot="start">Estado:</ion-label>
+      </ion-item>
+      
+      <ion-button fill="clear" (click)="limpiarFiltros()">
+        <ion-icon name="refresh" slot="start"></ion-icon>
+        Limpiar filtros
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
 
   <!-- Loading state -->
   <div class="loading-container" *ngIf="isLoading">
@@ -60,8 +103,8 @@
     </div>
 
     <!-- Lista de solicitudes -->
-    <div class="solicitudes-container" *ngIf="solicitudes.length > 0">
-      <ion-card *ngFor="let solicitud of solicitudes" class="solicitud-card">
+    <div class="solicitudes-container" *ngIf="solicitudesFiltradas.length > 0">
+      <ion-card *ngFor="let solicitud of solicitudesFiltradas" class="solicitud-card">
         <ion-card-header>
           <div class="solicitud-header">
             <div class="libro-info">
@@ -89,18 +132,28 @@
             <p>{{ solicitud.motivo_rechazo }}</p>
           </div>
 
-  <div [ngSwitch]="solicitud.estado">
-    <div *ngSwitchCase="'Pendiente'" class="estado-info estado-pendiente">
-      <ion-icon name="time-outline" color="warning"></ion-icon>
-      <span>Tu solicitud está siendo revisada por un administrador</span>
-    </div>
-    <div *ngSwitchCase="'Rechazado'" class="estado-info estado-rechazado">
-      <ion-icon name="close-circle-outline" color="danger"></ion-icon>
-      <span>Tu solicitud fue rechazada</span>
-    </div>
-  </div>
+          <div [ngSwitch]="solicitud.estado">
+            <div *ngSwitchCase="'Pendiente'" class="estado-info estado-pendiente">
+              <ion-icon name="time-outline" color="warning"></ion-icon>
+              <span>Tu solicitud está siendo revisada por un administrador</span>
+            </div>
+            <div *ngSwitchCase="'Rechazado'" class="estado-info estado-rechazado">
+              <ion-icon name="close-circle-outline" color="danger"></ion-icon>
+              <span>Tu solicitud fue rechazada</span>
+            </div>
+          </div>
         </ion-card-content>
       </ion-card>
+    </div>
+    <!-- Sin resultados en solicitudes -->
+    <div class="empty-state" *ngIf="solicitudes.length > 0 && solicitudesFiltradas.length === 0">
+      <ion-icon name="library-outline" color="medium" size="large"></ion-icon>
+      <h3>No se encontraron resultados</h3>
+      <p>Intenta ajustar los filtros de búsqueda.</p>
+      <ion-button fill="outline" (click)="limpiarFiltros()">
+        <ion-icon name="refresh" slot="start"></ion-icon>
+        Limpiar filtros
+      </ion-button>
     </div>
   </div>
 
@@ -118,8 +171,8 @@
     </div>
 
     <!-- Lista de préstamos activos -->
-    <div class="prestamos-container" *ngIf="prestamosActivos.length > 0">
-      <ion-card *ngFor="let prestamo of prestamosActivos" class="prestamo-card">
+    <div class="prestamos-container" *ngIf="prestamosActivosFiltrados.length > 0">
+      <ion-card *ngFor="let prestamo of prestamosActivosFiltrados" class="prestamo-card">
         <ion-card-header>
           <div class="prestamo-header">
             <div class="libro-info">
@@ -170,6 +223,16 @@
           </div>
         </ion-card-content>
       </ion-card>
+    </div>
+    <!-- Sin resultados en préstamos -->
+    <div class="empty-state" *ngIf="prestamosActivos.length > 0 && prestamosActivosFiltrados.length === 0">
+      <ion-icon name="library-outline" color="medium" size="large"></ion-icon>
+      <h3>No se encontraron resultados</h3>
+      <p>Intenta ajustar los filtros de búsqueda.</p>
+      <ion-button fill="outline" (click)="limpiarFiltros()">
+        <ion-icon name="refresh" slot="start"></ion-icon>
+        Limpiar filtros
+      </ion-button>
     </div>
   </div>
 </ion-content>

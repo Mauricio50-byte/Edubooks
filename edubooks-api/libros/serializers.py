@@ -215,10 +215,11 @@ class SancionSerializer(serializers.ModelSerializer):
 # Serializers para respuestas paginadas
 class LibroListSerializer(serializers.ModelSerializer):
     usuario_tiene_prestamo = serializers.SerializerMethodField()
+    prestamo_estado_usuario = serializers.SerializerMethodField()
     
     class Meta:
         model = Libro
-        fields = ['id', 'titulo', 'autor', 'categoria', 'estado', 'cantidad_disponible', 'imagen_portada', 'usuario_tiene_prestamo']
+        fields = ['id', 'titulo', 'autor', 'categoria', 'estado', 'cantidad_disponible', 'imagen_portada', 'usuario_tiene_prestamo', 'prestamo_estado_usuario']
     
     def get_usuario_tiene_prestamo(self, obj):
         request = self.context.get('request')
@@ -229,6 +230,17 @@ class LibroListSerializer(serializers.ModelSerializer):
                 estado__in=['Activo', 'Pendiente']
             ).exists()
         return False
+
+    def get_prestamo_estado_usuario(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            prestamo = Prestamo.objects.filter(
+                libro=obj,
+                usuario=request.user,
+                estado__in=['Activo', 'Pendiente']
+            ).order_by('-fecha_prestamo').first()
+            return prestamo.estado if prestamo else None
+        return None
 
 class PrestamoListSerializer(serializers.ModelSerializer):
     libro = LibroListSerializer(read_only=True)
