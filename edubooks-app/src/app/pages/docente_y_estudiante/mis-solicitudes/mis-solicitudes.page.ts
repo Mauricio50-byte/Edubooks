@@ -83,6 +83,8 @@ export class MisSolicitudesPage implements OnInit {
 
   onSegmentChange(event: any) {
     this.segmentValue = event.detail.value;
+    this.filtroEstado = '';
+    this.aplicarFiltros();
   }
 
   aplicarFiltros() {
@@ -124,6 +126,21 @@ export class MisSolicitudesPage implements OnInit {
 
   toggleFiltros() {
     this.mostrarFiltros = !this.mostrarFiltros;
+  }
+
+  get estadoOptions(): { value: string; label: string }[] {
+    const base = [{ value: '', label: 'Todos los estados' }];
+    if (this.segmentValue === 'solicitudes') {
+      return [
+        ...base,
+        { value: 'Pendiente', label: 'Pendientes' },
+        { value: 'Rechazado', label: 'Rechazados' }
+      ];
+    }
+    return [
+      ...base,
+      { value: 'Activo', label: 'Activos' }
+    ];
   }
 
   getEstadoColor(estado: string): string {

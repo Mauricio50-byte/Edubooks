@@ -55,12 +55,9 @@
           [(ngModel)]="filtroEstado" 
           placeholder="Filtrar por estado"
           (ionChange)="onEstadoChange($event)">
-          <ion-select-option value="">Todos los estados</ion-select-option>
-          <ion-select-option value="Pendiente">Pendientes</ion-select-option>
-          <ion-select-option value="Rechazado">Rechazados</ion-select-option>
-          <ion-select-option value="Activo">Activos</ion-select-option>
-          <ion-select-option value="Devuelto">Devueltos</ion-select-option>
-          <ion-select-option value="Vencido">Vencidos</ion-select-option>
+          <ion-select-option *ngFor="let opt of estadoOptions" [value]="opt.value">
+            {{ opt.label }}
+          </ion-select-option>
         </ion-select>
         <ion-label slot="start">Estado:</ion-label>
       </ion-item>

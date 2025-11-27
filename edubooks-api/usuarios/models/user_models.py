@@ -552,6 +552,3 @@ class Administrador(models.Model):
         if self.puede_configurar_sistema:
             permisos.append('configurar_sistema')
         return permisos
-
-
-# El modelo InvitacionRegistro se ha movido a invitation_models.py

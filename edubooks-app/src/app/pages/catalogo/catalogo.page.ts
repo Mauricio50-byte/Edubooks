@@ -30,7 +30,7 @@ export class CatalogoPage implements OnInit {
   ];
   isLoading: boolean = false;
   private pendientes = new Set<number>();
-  
+
   private searchSubject = new Subject<string>();
   private notifPoll: any;
 
@@ -72,7 +72,7 @@ export class CatalogoPage implements OnInit {
 
   async cargarDatos() {
     this.isLoading = true;
-    
+
     try {
       // Cargar libros
       this.bibliotecaService.getLibros().subscribe({
@@ -83,6 +83,7 @@ export class CatalogoPage implements OnInit {
           // Sincronizar estados pendientes con la lista
           this.sincronizarPendientesConLibros();
           this.completarDetallesLibros(this.libros);
+          this.actualizarPendientesDesdeBackend();
         },
         error: (error) => {
           console.error('Error cargando libros:', error);
@@ -146,7 +147,7 @@ export class CatalogoPage implements OnInit {
 
     // Filtrar por categoría
     if (this.categoriaSeleccionada && this.categoriaSeleccionada !== 'Todas') {
-      librosFiltrados = librosFiltrados.filter(libro => 
+      librosFiltrados = librosFiltrados.filter(libro =>
         libro.categoria === this.categoriaSeleccionada
       );
     }
@@ -154,11 +155,11 @@ export class CatalogoPage implements OnInit {
     // Filtrar por estado
     if (this.estadoSeleccionado && this.estadoSeleccionado !== 'Todos') {
       if (this.estadoSeleccionado === 'Disponible') {
-        librosFiltrados = librosFiltrados.filter(libro => 
+        librosFiltrados = librosFiltrados.filter(libro =>
           libro.cantidad_disponible > 0
         );
       } else {
-        librosFiltrados = librosFiltrados.filter(libro => 
+        librosFiltrados = librosFiltrados.filter(libro =>
           libro.estado === this.estadoSeleccionado
         );
       }
@@ -210,7 +211,7 @@ export class CatalogoPage implements OnInit {
     this.bibliotecaService.prestarLibro(libro.id).subscribe({
       next: async (response) => {
         await loading.dismiss();
-        
+
         const toast = await this.toastController.create({
           message: `¡Solicitud enviada! Tu petición de préstamo para "${libro.titulo}" está pendiente de aprobación.`,
           duration: 4000,
@@ -246,7 +247,7 @@ export class CatalogoPage implements OnInit {
     this.bibliotecaService.reservarLibro(libro.id).subscribe({
       next: async (response) => {
         await loading.dismiss();
-        
+
         const toast = await this.toastController.create({
           message: `¡Reserva exitosa! Te notificaremos cuando "${libro.titulo}" esté disponible.`,
           duration: 4000,
@@ -260,7 +261,7 @@ export class CatalogoPage implements OnInit {
       },
       error: async (error) => {
         await loading.dismiss();
-        
+
         const alert = await this.alertController.create({
           header: 'Error en Reserva',
           message: error.message || 'No se pudo procesar la reserva.',
@@ -311,13 +312,13 @@ export class CatalogoPage implements OnInit {
         const arr: number[] = JSON.parse(raw);
         this.pendientes = new Set(arr);
       }
-    } catch {}
+    } catch { }
   }
 
   private guardarPendientesEnStorage(): void {
     try {
       localStorage.setItem('pendientes_prestamo', JSON.stringify(Array.from(this.pendientes)));
-    } catch {}
+    } catch { }
   }
 
   private sincronizarPendientesConLibros(): void {
@@ -376,21 +377,39 @@ export class CatalogoPage implements OnInit {
       next: (solicitudes: any[]) => {
         const pendientesIds = new Set<number>();
         const rechazadosIds = new Set<number>();
+        const activosIds = new Set<number>();
+
         solicitudes.forEach((p: any) => {
           const libroId = p?.libro?.id ?? p?.libro_id;
           if (!libroId) return;
           if (p.estado === 'Pendiente') pendientesIds.add(libroId);
           if (p.estado === 'Rechazado') rechazadosIds.add(libroId);
+          if (p.estado === 'Activo') activosIds.add(libroId);
         });
+
         // Mantener pendientes actuales solo si siguen pendientes en backend
         this.pendientes.forEach(id => { if (!pendientesIds.has(id)) this.pendientes.delete(id); });
-        // Remover rechazos explícitos
+        // Remover rechazos explícitos y activos (ya no son pendientes)
         rechazadosIds.forEach(id => this.pendientes.delete(id));
+        activosIds.forEach(id => this.pendientes.delete(id));
+
         this.guardarPendientesEnStorage();
         this.sincronizarPendientesConLibros();
+        this.actualizarEstadoActivoEnLibros(activosIds);
       },
       error: _ => {
         // Silencio: no cambiar estado si falla
+      }
+    });
+  }
+
+  private actualizarEstadoActivoEnLibros(activosIds: Set<number>): void {
+    this.libros.forEach(l => {
+      if (activosIds.has(l.id)) {
+        l.prestamo_estado_usuario = 'Activo';
+      } else if (l.prestamo_estado_usuario === 'Activo') {
+        // Si estaba activo pero ya no aparece en la lista de activos, limpiamos el estado
+        delete l.prestamo_estado_usuario;
       }
     });
   }
