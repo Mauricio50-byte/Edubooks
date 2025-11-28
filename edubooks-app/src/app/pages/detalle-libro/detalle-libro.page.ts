@@ -110,12 +110,31 @@ export class DetalleLibroPage implements OnInit {
   async prestarLibro() {
     if (!this.libro) return;
 
+    const alert = await this.alertController.create({
+      header: 'Solicitar Préstamo',
+      message: `Opcional: agrega observaciones para el préstamo de "${this.libro.titulo}"`,
+      inputs: [
+        { name: 'observaciones', type: 'textarea', placeholder: 'Observaciones (opcional)' }
+      ],
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        { text: 'Continuar', role: 'confirm' }
+      ]
+    });
+    await alert.present();
+    const { data, role } = await alert.onDidDismiss();
+    if (role === 'cancel') return;
+
     const loading = await this.loadingController.create({
       message: 'Procesando préstamo...',
     });
     await loading.present();
 
-    this.bibliotecaService.prestarLibro(this.libro.id).subscribe({
+    const extra = {
+      observaciones: (data?.observaciones || '').trim() || undefined
+    };
+
+    this.bibliotecaService.prestarLibro(this.libro.id, extra).subscribe({
       next: async (response) => {
         await loading.dismiss();
         

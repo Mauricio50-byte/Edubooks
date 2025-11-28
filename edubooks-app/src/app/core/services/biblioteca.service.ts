@@ -189,14 +189,16 @@ export class BibliotecaService {
   }
 
   // Métodos para préstamos
-  prestarLibro(libroId: number): Observable<any> {
+  prestarLibro(libroId: number, extra?: { observaciones?: string }): Observable<any> {
     const usuario = this.authService.currentUserValue;
     if (!usuario) {
       return throwError(() => new Error('Usuario no autenticado'));
     }
 
     // Llamar al backend real
-    return this.apiService.post('/prestamos/crear/', { libro_id: libroId })
+    const payload: any = { libro_id: libroId };
+    if (extra?.observaciones) payload.observaciones = String(extra.observaciones).trim();
+    return this.apiService.post('/prestamos/crear/', payload)
       .pipe(
         map(response => {
           this.actualizarDatosLocalesDespuesPrestamo(libroId);
@@ -217,7 +219,7 @@ export class BibliotecaService {
   /**
    * Método de fallback para préstamo simulado
    */
-  private prestarLibroSimulado(libroId: number): Observable<any> {
+  private prestarLibroSimulado(libroId: number, extra?: { observaciones?: string }): Observable<any> {
     const usuario = this.authService.currentUserValue;
     if (!usuario) {
       return throwError(() => new Error('Usuario no autenticado'));
@@ -259,7 +261,7 @@ export class BibliotecaService {
       fecha_devolucion_esperada: fechaDevolucion.toISOString().split('T')[0],
       fecha_devolucion_real: undefined,
       estado: 'Activo',
-      observaciones: undefined
+      observaciones: extra?.observaciones || undefined
     };
 
     this.prestamos.push(nuevoPrestamo);
@@ -283,9 +285,12 @@ export class BibliotecaService {
     this.prestamosSubject.next([...this.prestamos]);
   }
 
-  devolverLibro(prestamoId: number): Observable<any> {
+  devolverLibro(prestamoId: number, data?: { fecha_devolucion_real?: string; observaciones?: string }): Observable<any> {
     // Llamar al backend real
-    return this.apiService.post(`/prestamos/${prestamoId}/devolver/`, {})
+    const payload: any = {};
+    if (data?.fecha_devolucion_real) payload.fecha_devolucion_real = data.fecha_devolucion_real;
+    if (data?.observaciones) payload.observaciones = String(data.observaciones).trim();
+    return this.apiService.post(`/prestamos/${prestamoId}/devolver/`, payload)
       .pipe(
         map(response => {
           // Actualizar datos locales si es exitoso
@@ -303,7 +308,7 @@ export class BibliotecaService {
   /**
    * Método de fallback para devolución simulada
    */
-  private devolverLibroSimulado(prestamoId: number): Observable<any> {
+  private devolverLibroSimulado(prestamoId: number, data?: { fecha_devolucion_real?: string; observaciones?: string }): Observable<any> {
     const prestamo = this.prestamos.find(p => p.id === prestamoId);
     if (!prestamo) {
       return throwError(() => new Error('Préstamo no encontrado'));
@@ -315,7 +320,8 @@ export class BibliotecaService {
 
     // Actualizar préstamo simulado
     prestamo.estado = 'Devuelto';
-    prestamo.fecha_devolucion_real = new Date().toISOString();
+    prestamo.fecha_devolucion_real = data?.fecha_devolucion_real || new Date().toISOString();
+    if (data?.observaciones) prestamo.observaciones = String(data.observaciones).trim();
     
     this.actualizarDatosLocalesDespuesDevolucion(prestamoId);
     return of({ success: true }).pipe(delay(500));
@@ -868,7 +874,7 @@ export class BibliotecaService {
   }
 
   rechazarPrestamo(prestamoId: number, motivo: string): Observable<any> {
-    return this.apiService.post(`/prestamos/${prestamoId}/rechazar/`, { motivo });
+    return this.apiService.post(`/prestamos/${prestamoId}/rechazar/`, { motivo_rechazo: String(motivo).trim() });
   }
 
   obtenerMisSolicitudes(): Observable<any> {

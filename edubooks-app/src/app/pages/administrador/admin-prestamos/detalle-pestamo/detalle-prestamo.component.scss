@@ -1,4 +1,4 @@
-.user-details-container {
+.detalle-prestamo-container {
   --background: var(--ion-color-dark);
   color: var(--ion-color-light);
   --padding-top: 16px;
@@ -7,36 +7,30 @@
   --padding-end: 16px;
 }
 
-.user-header {
+.detalle-header {
   display: flex;
   align-items: center;
   gap: 16px;
   padding: 12px 8px 20px 8px;
-  border-bottom: 1px solid var(--ion-color-step-150, #e6e6e6);
+  border-bottom: 1px solid var(--ion-color-step-150);
 }
 
-.user-avatar .avatar-circle {
-  width: 64px;
-  height: 64px;
+.avatar-circle {
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-primary-tint));
+  background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-secondary));
   display: flex;
   align-items: center;
   justify-content: center;
   color: #fff;
-  font-weight: 700;
-  font-size: 20px;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
 }
 
-.user-basic-info .user-name {
+.basic-info .title {
   margin: 0 0 6px 0;
   font-size: 18px;
   font-weight: 600;
-}
-
-.status-chip {
-  margin-left: 8px;
 }
 
 .details-grid {
@@ -47,9 +41,7 @@
 }
 
 @media (max-width: 640px) {
-  .details-grid {
-    grid-template-columns: 1fr;
-  }
+  .details-grid { grid-template-columns: 1fr; }
 }
 
 .detail-section {
@@ -86,21 +78,6 @@
   color: var(--ion-color-light);
 }
 
-.role-badge {
-  padding: 2px 8px;
-  border-radius: 6px;
-  background: linear-gradient(to right, var(--ion-color-primary), var(--ion-color-secondary));
-  color: var(--ion-color-light);
-}
-
-.status-active {
-  color: var(--ion-color-success);
-}
-
-.status-inactive {
-  color: var(--ion-color-danger);
-}
-
 .modal-actions {
   padding: 8px 12px 20px 12px;
 }
@@ -109,9 +86,3 @@
   --border-radius: 12px;
 }
 
-/* Dark mode tweaks */
-@media (prefers-color-scheme: dark) {
-  .user-header {
-    border-bottom-color: var(--ion-color-step-250, #2a2a2a);
-  }
-}

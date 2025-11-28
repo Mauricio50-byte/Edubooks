@@ -203,12 +203,31 @@ export class CatalogoPage implements OnInit {
   }
 
   async prestarLibro(libro: Libro) {
+    const alert = await this.alertController.create({
+      header: 'Solicitar Préstamo',
+      message: `Opcional: agrega observaciones para el préstamo de "${libro.titulo}"`,
+      inputs: [
+        { name: 'observaciones', type: 'textarea', placeholder: 'Observaciones (opcional)' }
+      ],
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        { text: 'Continuar', role: 'confirm' }
+      ]
+    });
+    await alert.present();
+    const { data, role } = await alert.onDidDismiss();
+    if (role === 'cancel') return;
+
     const loading = await this.loadingController.create({
       message: 'Procesando préstamo...',
     });
     await loading.present();
 
-    this.bibliotecaService.prestarLibro(libro.id).subscribe({
+    const extra = {
+      observaciones: (data?.observaciones || '').trim() || undefined
+    };
+
+    this.bibliotecaService.prestarLibro(libro.id, extra).subscribe({
       next: async (response) => {
         await loading.dismiss();
 

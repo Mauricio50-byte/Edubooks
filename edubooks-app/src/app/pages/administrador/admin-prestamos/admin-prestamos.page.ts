@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { LoadingController, ToastController, AlertController } from '@ionic/angular';
+import { LoadingController, ToastController, AlertController, ModalController } from '@ionic/angular';
 import { AuthService } from '../../../core/services/auth.service';
 import { BibliotecaService } from '../../../core/services/biblioteca.service';
 import { Prestamo } from '../../../core/models/libro.model';
@@ -23,6 +23,7 @@ export class AdminPrestamosPage implements OnInit {
     private authService: AuthService,
     private bibliotecaService: BibliotecaService,
     private alertController: AlertController,
+    private modalController: ModalController,
     private loadingController: LoadingController,
     private toastController: ToastController,
     private router: Router
@@ -189,33 +190,48 @@ export class AdminPrestamosPage implements OnInit {
   }
 
   /**
+   * Métricas de resumen
+   */
+  get stats(): Array<{ color: 'primary' | 'tertiary' | 'success' | 'danger'; icon: string; label: string; value: number }> {
+    return [
+      { color: 'primary',   icon: 'library',          label: 'total',     value: this.prestamos?.length || 0 },
+      { color: 'tertiary',  icon: 'time',             label: 'activos',   value: this.contarPrestamosPorEstado('Activo') },
+      { color: 'success',   icon: 'checkmark-circle', label: 'devueltos', value: this.contarPrestamosPorEstado('Devuelto') },
+      { color: 'danger',    icon: 'warning',          label: 'vencidos',  value: this.contarPrestamosPorEstado('Vencido') }
+    ];
+  }
+
+  /**
    * Marcar como devuelto
    */
   async marcarComoDevuelto(prestamo: any) {
     const alert = await this.alertController.create({
       header: 'Confirmar Devolución',
       message: `¿Confirmas que ${prestamo.usuario?.nombre || 'Usuario'} ${prestamo.usuario?.apellido || ''} ha devuelto "${prestamo.libro?.titulo || 'Libro'}"?`,
-      buttons: [
+      inputs: [
         {
-          text: 'Cancelar',
-          role: 'cancel'
-        },
+          name: 'observaciones',
+          type: 'textarea',
+          placeholder: 'Observaciones (opcional)'
+        }
+      ],
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
         {
           text: 'Confirmar',
-          handler: async () => {
-            await this.procesarDevolucion(prestamo);
+          handler: async (data) => {
+            await this.procesarDevolucion(prestamo, data?.observaciones);
           }
         }
       ]
     });
-
     await alert.present();
   }
 
   /**
    * Procesar devolución
    */
-  private async procesarDevolucion(prestamo: any) {
+  private async procesarDevolucion(prestamo: any, observaciones?: string) {
     const loading = await this.loadingController.create({
       message: 'Procesando devolución...'
     });
@@ -223,11 +239,15 @@ export class AdminPrestamosPage implements OnInit {
 
     try {
       // Llamar al servicio real para devolver libro
-      await this.bibliotecaService.devolverLibro(prestamo.id).toPromise();
+      await this.bibliotecaService.devolverLibro(prestamo.id, {
+        fecha_devolucion_real: new Date().toISOString(),
+        observaciones: observaciones?.trim() || undefined
+      }).toPromise();
       
       // Actualizar estado local
       prestamo.estado = 'Devuelto';
       prestamo.fecha_devolucion_real = new Date().toISOString();
+      if (observaciones) prestamo.observaciones = observaciones;
       
       await loading.dismiss();
       await this.mostrarToast('Devolución registrada exitosamente', 'success');
@@ -245,24 +265,13 @@ export class AdminPrestamosPage implements OnInit {
    * Ver detalles del préstamo
    */
   async verDetallesPrestamo(prestamo: any) {
-    const alert = await this.alertController.create({
-      header: 'Detalles del Préstamo',
-      message: `
-        <strong>Usuario:</strong> ${prestamo.usuario?.nombre || 'N/A'} ${prestamo.usuario?.apellido || ''}<br>
-        <strong>Email:</strong> ${prestamo.usuario?.email || 'N/A'}<br><br>
-        <strong>Libro:</strong> ${prestamo.libro?.titulo || 'N/A'}<br>
-        <strong>Autor:</strong> ${prestamo.libro?.autor || 'N/A'}<br>
-        <strong>ISBN:</strong> ${prestamo.libro?.isbn || 'No disponible'}<br><br>
-        <strong>Fecha de préstamo:</strong> ${this.formatearFecha(prestamo.fecha_prestamo)}<br>
-        <strong>Fecha de devolución esperada:</strong> ${prestamo.fecha_devolucion_esperada_formatted || 'Pendiente de aprobación'}<br>
-        ${prestamo.fecha_devolucion_real ? `<strong>Fecha de devolución real:</strong> ${this.formatearFecha(prestamo.fecha_devolucion_real)}<br>` : ''}
-        <strong>Renovaciones:</strong> ${prestamo.renovaciones}/2<br>
-        <strong>Estado:</strong> ${prestamo.estado}
-      `,
-      buttons: ['Cerrar']
+    const { DetallePrestamoComponent } = await import('./detalle-pestamo/detalle-prestamo.component');
+    const modal = await this.modalController.create({
+      component: DetallePrestamoComponent,
+      componentProps: { prestamo },
+      cssClass: 'detalle-prestamo-modal'
     });
-
-    await alert.present();
+    await modal.present();
   }
 
   /**

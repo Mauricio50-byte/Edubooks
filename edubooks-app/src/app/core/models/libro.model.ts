@@ -32,8 +32,10 @@ export interface Prestamo {
     fecha_devolucion_esperada: string;
     fecha_devolucion_esperada_formatted?: string;
     fecha_devolucion_real?: string;
+    fecha_aprobacion?: string;
     estado: 'Pendiente' | 'Activo' | 'Devuelto' | 'Vencido' | 'Rechazado';
     observaciones?: string;
+    motivo_rechazo?: string;
     renovaciones?: number;
 }
 

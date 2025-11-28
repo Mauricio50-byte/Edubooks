@@ -18,12 +18,12 @@
   gap: 8px;
   font-size: 1.1rem;
   font-weight: 600;
-  color: var(--ion-color-primary, #4fc3f7);
+  color: var(--ion-color-primary);
   margin: 0;
 }
 
 .section-icon {
-  color: var(--ion-color-primary, #4fc3f7);
+  color: var(--ion-color-primary);
 }
 
 .filter-summary .filter-chip {
@@ -39,19 +39,19 @@
 
 .search-container {
   .dark-searchbar {
-    --background: #2a2a2a;
-    --color: #ffffff;
-    --placeholder-color: #9ca3af;
-    --icon-color: var(--ion-color-primary, #4fc3f7);
+    --background: var(--ion-color-dark-tint);
+    --color: var(--ion-color-light);
+    --placeholder-color: var(--ion-color-medium);
+    --icon-color: var(--ion-color-primary);
     --border-radius: 16px;
     --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-    border: 1px solid #404040;
+    border: 1px solid var(--ion-color-medium-shade);
   }
 
   /* Estado focus para dar realce sutil */
   .dark-searchbar:focus-within {
-    --box-shadow: 0 0 0 3px rgba(79, 195, 247, 0.3);
-    border-color: #4fc3f7;
+    --box-shadow: 0 0 0 3px rgba(var(--ion-color-primary-rgb), 0.3);
+    border-color: var(--ion-color-primary);
   }
 }
 
@@ -64,8 +64,8 @@
 }
 
 .chip-group {
-  background: #2a2a2a;
-  border: 1px solid #404040;
+  background: var(--ion-color-step-100);
+  border: 1px solid var(--ion-color-medium-shade);
   border-radius: 12px;
   padding: 12px 16px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
@@ -74,22 +74,22 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    color: var(--ion-color-primary, #4fc3f7);
+    color: var(--ion-color-primary);
     font-weight: 600;
     margin-bottom: 12px;
   }
   .group-label .label-action-icon {
     margin-left: auto;
     font-size: 18px;
-    color: #9ca3af;
+    color: var(--ion-color-medium);
     cursor: pointer;
     transition: color 0.2s ease;
   }
   .group-label .label-action-icon:hover {
-    color: var(--ion-color-primary, #4fc3f7);
+    color: var(--ion-color-primary);
   }
   .group-label .label-action-icon:focus {
-    outline: 2px solid var(--ion-color-primary, #4fc3f7);
+    outline: 2px solid var(--ion-color-primary);
     outline-offset: 2px;
     border-radius: 4px;
   }
@@ -122,50 +122,50 @@ ion-chip {
   font-weight: 500;
 }
 
-/* Primary (azul claro para tema oscuro) */
+/* Primary */
 ion-chip[color="primary"]:not([outline]) {
-  --background: rgba(79, 195, 247, 0.2);
-  --color: #4fc3f7;
-  --border-color: rgba(79, 195, 247, 0.4);
+  --background: rgba(var(--ion-color-primary-rgb), 0.2);
+  --color: var(--ion-color-primary);
+  --border-color: rgba(var(--ion-color-primary-rgb), 0.4);
 }
 ion-chip[color="primary"][outline] {
   --background: transparent;
-  --color: #4fc3f7;
-  --border-color: #4fc3f7;
+  --color: var(--ion-color-primary);
+  --border-color: var(--ion-color-primary);
 }
 
-/* Success (verde claro para tema oscuro) */
+/* Secondary */
+ion-chip[color="secondary"]:not([outline]) {
+  --background: rgba(var(--ion-color-secondary-rgb), 0.2);
+  --color: var(--ion-color-secondary);
+  --border-color: rgba(var(--ion-color-secondary-rgb), 0.4);
+}
+ion-chip[color="secondary"][outline] {
+  --background: transparent;
+  --color: var(--ion-color-secondary);
+  --border-color: var(--ion-color-secondary);
+}
+
+/* Success */
 ion-chip[color="success"]:not([outline]) {
-  --background: rgba(76, 175, 80, 0.2);
-  --color: #4caf50;
-  --border-color: rgba(76, 175, 80, 0.4);
+  --background: rgba(var(--ion-color-success-rgb), 0.2);
+  --color: var(--ion-color-success);
+  --border-color: rgba(var(--ion-color-success-rgb), 0.4);
 }
 ion-chip[color="success"][outline] {
   --background: transparent;
-  --color: #4caf50;
-  --border-color: #4caf50;
+  --color: var(--ion-color-success);
+  --border-color: var(--ion-color-success);
 }
 
-/* Danger (rojo claro para tema oscuro) */
+/* Danger */
 ion-chip[color="danger"]:not([outline]) {
-  --background: rgba(244, 67, 54, 0.2);
-  --color: #f44336;
-  --border-color: rgba(244, 67, 54, 0.4);
+  --background: rgba(var(--ion-color-danger-rgb), 0.2);
+  --color: var(--ion-color-danger);
+  --border-color: rgba(var(--ion-color-danger-rgb), 0.4);
 }
 ion-chip[color="danger"][outline] {
   --background: transparent;
-  --color: #f44336;
-  --border-color: #f44336;
-}
-
-/* Warning (amarillo claro para tema oscuro) */
-ion-chip[color="warning"]:not([outline]) {
-  --background: rgba(255, 193, 7, 0.2);
-  --color: #ffc107;
-  --border-color: rgba(255, 193, 7, 0.4);
-}
-ion-chip[color="warning"][outline] {
-  --background: transparent;
-  --color: #ffc107;
-  --border-color: #ffc107;
+  --color: var(--ion-color-danger);
+  --border-color: var(--ion-color-danger);
 }

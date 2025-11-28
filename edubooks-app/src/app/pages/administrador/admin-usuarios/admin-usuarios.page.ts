@@ -28,7 +28,7 @@ export class AdminUsuariosPage implements OnInit {
   rolOptions: FilterOption[] = [
     { value: '', label: 'Todos los roles', icon: 'people-outline' },
     { value: 'administrador', label: 'Administradores', icon: 'shield-outline', color: 'danger' },
-    { value: 'docente', label: 'Docentes', icon: 'school-outline', color: 'warning' },
+    { value: 'docente', label: 'Docentes', icon: 'school-outline', color: 'secondary' },
     { value: 'estudiante', label: 'Estudiantes', icon: 'person-outline', color: 'primary' }
   ];
 
@@ -41,7 +41,7 @@ export class AdminUsuariosPage implements OnInit {
   generoOptions: FilterOption[] = [
     { value: '', label: 'Todos los géneros', icon: 'transgender-outline' },
     { value: 'M', label: 'Masculino', icon: 'male-outline', color: 'primary' },
-    { value: 'F', label: 'Femenino', icon: 'female-outline', color: 'warning' },
+    { value: 'F', label: 'Femenino', icon: 'female-outline', color: 'secondary' },
     { value: 'O', label: 'Otro', icon: 'ellipse-outline', color: 'medium' },
     { value: 'N', label: 'Prefiero no decir', icon: 'remove-outline', color: 'tertiary' }
   ];
@@ -219,7 +219,7 @@ export class AdminUsuariosPage implements OnInit {
     const r = (rol || '').toLowerCase();
     switch (r) {
       case 'administrador': return 'danger';
-      case 'docente': return 'warning';
+      case 'docente': return 'secondary';
       case 'estudiante': return 'primary';
       default: return 'medium';
     }
@@ -266,7 +266,7 @@ export class AdminUsuariosPage implements OnInit {
   getGeneroColor(genero?: string): string {
     switch (genero) {
       case 'M': return 'primary';
-      case 'F': return 'warning';
+      case 'F': return 'secondary';
       case 'O': return 'medium';
       case 'N': return 'tertiary';
       default: return 'medium';

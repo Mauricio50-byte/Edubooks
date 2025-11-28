@@ -1,5 +1,5 @@
 <ion-header [translucent]="true">
-  <ion-toolbar>
+  <ion-toolbar color="dark">
     <ion-title>Administrar Usuarios</ion-title>
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/home"></ion-back-button>
@@ -7,7 +7,7 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
+<ion-content [fullscreen]="true" class="admin-usuarios-content">
   <ion-header collapse="condense">
     <ion-toolbar>
       <ion-title size="large">Administrar Usuarios</ion-title>
@@ -55,8 +55,8 @@
   </div>
 
   <!-- Estadísticas rápidas -->
-  <ion-card *ngIf="!isLoading && usuarios.length > 0">
-    <ion-card-header>
+  <ion-card *ngIf="!isLoading && usuarios.length > 0" class="stats-card">
+    <ion-card-header class="gradient-primary">
       <ion-card-title>Resumen de Usuarios</ion-card-title>
     </ion-card-header>
     <ion-card-content>
@@ -94,7 +94,7 @@
     <ion-card-content>
       <ion-icon name="alert-circle" class="error-icon"></ion-icon>
       <p>{{ error }}</p>
-      <ion-button fill="clear" (click)="cargarUsuarios()">
+      <ion-button fill="solid" class="gradient-primary" (click)="cargarUsuarios()">
         <ion-icon name="refresh" slot="start"></ion-icon>
         Reintentar
       </ion-button>
@@ -172,7 +172,7 @@
             <ion-icon [name]="usuario.is_active ? 'close-circle' : 'checkmark-circle'" slot="start"></ion-icon>
             {{ usuario.is_active ? 'Desactivar' : 'Activar' }}
           </ion-button>
-          <ion-button fill="outline" size="small" (click)="verDetallesUsuario(usuario)">
+          <ion-button fill="solid" size="small" class="gradient-primary" (click)="verDetallesUsuario(usuario)">
             <ion-icon name="eye" slot="start"></ion-icon>
             Ver Detalles
           </ion-button>
