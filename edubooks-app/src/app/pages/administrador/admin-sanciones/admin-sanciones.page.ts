@@ -190,7 +190,7 @@ export class AdminSancionesPage implements OnInit {
 
   getTipoColor(tipo: string): string {
     switch (tipo) {
-      case 'Multa': return 'warning';
+      case 'Multa': return 'secondary';
       case 'Suspensión': return 'danger';
       default: return 'medium';
     }

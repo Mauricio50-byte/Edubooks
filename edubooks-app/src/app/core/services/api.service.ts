@@ -81,7 +81,7 @@ export class ApiService {
     }
 
     // console.error('Error en API:', error); // Comentado para evitar logs innecesarios
-    return throwError(() => ({ message: errorMessage }));
+    return throwError(() => ({ message: errorMessage, status: error.status, backend: error.error, url: error.url }));
   }
 
   private handleCapacitorError(endpoint: string, error: any) { return this.handleError(error as any); }

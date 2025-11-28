@@ -7,12 +7,12 @@
 
 ion-item.selected {
   border-left: 3px solid var(--ion-color-primary);
-  background: rgba(255, 75, 107, 0.08);
+  background: rgba(var(--ion-color-primary-rgb), 0.08);
 }
 
 .usuario-seleccionado {
   margin-top: 0.5rem;
-  background: #2A2A50;
+  background: var(--ion-color-dark-tint);
   border-radius: 8px;
 }
 

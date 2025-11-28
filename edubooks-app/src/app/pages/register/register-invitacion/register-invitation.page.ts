@@ -302,8 +302,18 @@ export class RegisterInvitationPage implements OnInit {
       });
       await loading.present();
 
-      // Preparar datos para envío
       const formData = { ...this.registerForm.value, token_invitacion: String(this.registerForm.get('token_invitacion')?.value || '').trim() };
+      formData.username = String(formData.username || '').trim();
+      formData.nombre = String(formData.nombre || '').trim();
+      formData.apellido = String(formData.apellido || '').trim();
+      // Mantener password_confirm porque el backend lo requiere
+      formData.password_confirm = String(formData.password_confirm || '').trim();
+      ['telefono','numero_identificacion','genero'].forEach(k => { if (!formData[k]) delete formData[k]; });
+      if (this.invitacionInfo?.email_invitado) {
+        (formData as any).email = this.invitacionInfo.email_invitado;
+      }
+      (formData as any).token = formData.token_invitacion;
+      (formData as any).rol = String(this.invitacionInfo?.rol || '').toLowerCase();
       
       // Separar datos específicos del rol
       const roleFields = this.getRoleFields();
@@ -320,7 +330,15 @@ export class RegisterInvitationPage implements OnInit {
       if (this.invitacionInfo?.rol === 'Estudiante') {
         formData.datos_estudiante = roleData;
       } else if (this.invitacionInfo?.rol === 'Docente') {
+        // Compatibilidad de nombre para número/código de empleado
+        if (roleData.numero_empleado && !roleData.codigo_empleado) {
+          roleData.codigo_empleado = roleData.numero_empleado;
+        }
         formData.datos_docente = roleData;
+        // Enviar también al nivel raíz si el backend lo espera ahí
+        if (roleData.numero_empleado && !(formData as any).numero_empleado) {
+          (formData as any).numero_empleado = roleData.numero_empleado;
+        }
       } else if (this.invitacionInfo?.rol === 'Administrador') {
         formData.datos_administrador = roleData;
       }
@@ -340,7 +358,22 @@ export class RegisterInvitationPage implements OnInit {
         this.router.navigate(['/login']);
       } catch (error: any) {
         await loading.dismiss();
-        this.showError(error.message || 'Error en el registro. Por favor, intenta nuevamente.');
+        let msg = error?.message || 'Error en el registro. Por favor, intenta nuevamente.';
+        const b = error?.backend;
+        if (b && typeof b === 'object') {
+          try {
+            const entries = Object.entries(b) as Array<[string, any]>;
+            const pieces = entries.reduce<string[]>((acc, [k, v]) => {
+              const arr = Array.isArray(v) ? v : [String(v)];
+              arr.forEach(m => acc.push(`${k}: ${m}`));
+              return acc;
+            }, []);
+            if (pieces.length) msg = pieces[0];
+          } catch {}
+        } else if (error?.backend?.message || error?.backend?.detail) {
+          msg = error.backend.message || error.backend.detail;
+        }
+        this.showError(msg);
       }
     } else {
       await this.showError('Por favor, completa todos los campos requeridos correctamente.');

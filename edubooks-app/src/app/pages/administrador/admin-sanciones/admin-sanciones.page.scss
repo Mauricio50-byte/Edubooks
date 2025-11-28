@@ -19,7 +19,7 @@
   gap: 0.75rem;
   padding: 0.5rem;
   border-radius: 8px;
-  background: #2A2A50; /* profundidad sobre fondo oscuro según prompt */
+  background: var(--ion-color-dark-tint);
 }
 
 .filters {
@@ -28,8 +28,21 @@
   gap: 0.5rem;
 }
 
+.filters ion-item {
+  --background: var(--ion-color-dark);
+  --color: var(--ion-color-light);
+  --border-radius: 8px;
+}
+
+.filters ion-select {
+  --color: var(--ion-color-light);
+}
+
 .sancion-item {
   --inner-padding-end: 0;
+  --background: var(--ion-color-dark);
+  --color: var(--ion-color-light);
+  border-radius: 12px;
 }
 
 .sancion-header {
@@ -50,10 +63,19 @@
 
 .descripcion {
   margin: 0.5rem 0;
+  color: var(--ion-color-medium);
 }
 
 .detalles {
   margin-top: 0.5rem;
+}
+
+.detalles h3 {
+  color: var(--ion-color-light);
+}
+
+.detalles p {
+  color: var(--ion-color-medium);
 }
 
 .acciones {
@@ -76,4 +98,19 @@
   font-size: 3rem;
   margin-bottom: 1rem;
   opacity: 0.7;
+  color: var(--ion-color-medium);
+}
+
+ion-card {
+  background: var(--ion-color-dark);
+  border-radius: 12px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+}
+
+ion-card-title {
+  color: var(--ion-color-light);
+}
+
+ion-card-subtitle {
+  color: var(--ion-color-medium);
 }
