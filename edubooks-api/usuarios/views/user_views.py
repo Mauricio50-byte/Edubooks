@@ -12,6 +12,7 @@ import jwt
 import requests
 from django.conf import settings
 import logging
+from django.core.exceptions import ValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -131,21 +132,43 @@ def supabase_sync(request):
                     usuario.save()
                     
             except Usuario.DoesNotExist:
-                # Crear nuevo usuario desde datos de Supabase
+                base_username = (user_data.get('username') or email.split('@')[0] or '').strip()
+                if not base_username:
+                    base_username = 'usuario'
+                username = base_username
+                suffix = 1
+                while Usuario.objects.filter(username=username).exists():
+                    username = f"{base_username}{suffix}"
+                    suffix += 1
+
+                raw_nombre = (user_data.get('nombre') or supabase_user.get('user_metadata', {}).get('nombre') or 'Usuario')
+                raw_apellido = (user_data.get('apellido') or supabase_user.get('user_metadata', {}).get('apellido') or 'Supabase')
+
+                import re
+                nombre = re.sub(r'[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]', '', str(raw_nombre)).strip() or 'Usuario'
+                apellido = re.sub(r'[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]', '', str(raw_apellido)).strip() or 'Supabase'
+
                 usuario_data = {
                     'email': email,
-                    'username': user_data.get('username', email.split('@')[0]),
-                    'nombre': user_data.get('nombre', ''),
-                    'apellido': user_data.get('apellido', ''),
+                    'username': username,
+                    'nombre': nombre,
+                    'apellido': apellido,
                     'rol': 'estudiante',
                     'supabase_id': supabase_user.get('id'),
                     'activo': True
                 }
-                
-                # Crear usuario sin contraseña (autenticación por Supabase)
+
                 usuario = Usuario(**usuario_data)
                 usuario.set_unusable_password()
-                usuario.save()
+                try:
+                    usuario.full_clean()
+                    usuario.save()
+                except (ValidationError, IntegrityError) as e:
+                    logger.error(f"Error validando/guardando usuario desde Supabase: {e}")
+                    return Response({
+                        'message': 'Datos de usuario inválidos',
+                        'detail': str(e)
+                    }, status=status.HTTP_400_BAD_REQUEST)
         
         # Generar tokens JWT para Django
         refresh = RefreshToken.for_user(usuario)
