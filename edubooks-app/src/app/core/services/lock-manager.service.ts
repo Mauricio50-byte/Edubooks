@@ -18,7 +18,10 @@ export class LockManagerService {
         const keysToRemove = [];
         for (let i = 0; i < window.localStorage.length; i++) {
           const key = window.localStorage.key(i);
-          if (key && (key.includes('sb-') && key.includes('-auth-token'))) {
+          if (!key) continue;
+          const isAuthToken = key.includes('sb-') && key.endsWith('-auth-token');
+          const isCodeVerifier = key.includes('code-verifier');
+          if (isAuthToken && !isCodeVerifier) {
             keysToRemove.push(key);
           }
         }

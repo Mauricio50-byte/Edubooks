@@ -137,7 +137,7 @@ def supabase_sync(request):
                     'username': user_data.get('username', email.split('@')[0]),
                     'nombre': user_data.get('nombre', ''),
                     'apellido': user_data.get('apellido', ''),
-                    'rol': 'Estudiante',  # Rol por defecto
+                    'rol': 'estudiante',
                     'supabase_id': supabase_user.get('id'),
                     'activo': True
                 }
@@ -169,10 +169,9 @@ def supabase_sync(request):
 def verify_supabase_token(token):
     """Verificar token de Supabase con la API"""
     try:
-        # Verificar token con Supabase
         headers = {
             'Authorization': f'Bearer {token}',
-            'apikey': settings.SUPABASE_ANON_KEY
+            'apikey': settings.SUPABASE_SERVICE_KEY or settings.SUPABASE_ANON_KEY
         }
         
         response = requests.get(
@@ -182,9 +181,8 @@ def verify_supabase_token(token):
         
         if response.status_code == 200:
             return response.json()
-        else:
-            logger.error(f"Error verificando token Supabase: {response.status_code}")
-            return None
+        logger.error(f"Error verificando token Supabase: {response.status_code} {response.text}")
+        return None
             
     except Exception as e:
         logger.error(f"Error en verificación de token: {str(e)}")

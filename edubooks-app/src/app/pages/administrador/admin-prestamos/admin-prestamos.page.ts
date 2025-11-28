@@ -18,6 +18,8 @@ export class AdminPrestamosPage implements OnInit {
   usuarioActual: any = null;
   searchTerm: string = '';
   filtroEstado: string = '';
+  isDetalleOpen = false;
+  selectedPrestamo?: Prestamo;
 
   constructor(
     private authService: AuthService,
@@ -51,14 +53,14 @@ export class AdminPrestamosPage implements OnInit {
     try {
       // Llamar al servicio real para obtener préstamos
       const prestamos = await this.bibliotecaService.getPrestamos().toPromise();
-      this.prestamos = prestamos || [];
+      this.prestamos = (prestamos || []).map(p => this.enrichPrestamo(p));
       
     } catch (error: any) {
       this.error = error.message || 'Error al cargar los préstamos';
       console.error('Error cargando préstamos:', error);
       
       // Fallback a datos simulados en caso de error
-      this.prestamos = [
+      const base: Prestamo[] = [
         {
           id: 1,
           usuario: {
@@ -152,10 +154,31 @@ export class AdminPrestamosPage implements OnInit {
           estado: 'Vencido',
           renovaciones: 2
         }
-      ];
+      ] as Prestamo[];
+      this.prestamos = base.map(p => this.enrichPrestamo(p));
     } finally {
       this.isLoading = false;
     }
+  }
+
+  private enrichPrestamo(p: Prestamo): Prestamo {
+    const estadoColor = p.estado === 'Activo' ? 'primary' : p.estado === 'Devuelto' ? 'success' : p.estado === 'Vencido' ? 'danger' : 'medium';
+    const fmt = (fecha?: string) => fecha ? new Date(fecha).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A';
+    let dias_retraso = 0;
+    if (p.estado === 'Vencido' && p.fecha_devolucion_esperada) {
+      const fechaEsperada = new Date(p.fecha_devolucion_esperada);
+      const hoy = new Date();
+      const diferencia = hoy.getTime() - fechaEsperada.getTime();
+      dias_retraso = Math.ceil(diferencia / (1000 * 3600 * 24));
+    }
+    return {
+      ...p,
+      estadoColor,
+      fecha_prestamo_formatted: fmt(p.fecha_prestamo),
+      fecha_devolucion_real_formatted: p.fecha_devolucion_real ? fmt(p.fecha_devolucion_real) : undefined,
+      fecha_devolucion_esperada_formatted: p.fecha_devolucion_esperada_formatted || fmt(p.fecha_devolucion_esperada),
+      dias_retraso
+    };
   }
 
   /**
@@ -264,14 +287,18 @@ export class AdminPrestamosPage implements OnInit {
   /**
    * Ver detalles del préstamo
    */
-  async verDetallesPrestamo(prestamo: any) {
-    const { DetallePrestamoComponent } = await import('./detalle-pestamo/detalle-prestamo.component');
-    const modal = await this.modalController.create({
-      component: DetallePrestamoComponent,
-      componentProps: { prestamo },
-      cssClass: 'detalle-prestamo-modal'
-    });
-    await modal.present();
+  async verDetallesPrestamo(prestamo: Prestamo) {
+    this.selectedPrestamo = JSON.parse(JSON.stringify(prestamo));
+    this.isDetalleOpen = true;
+  }
+
+  closeDetalle() {
+    this.isDetalleOpen = false;
+    this.selectedPrestamo = undefined;
+  }
+
+  trackByPrestamo(index: number, p: Prestamo): number {
+    return p.id;
   }
 
   /**

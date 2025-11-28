@@ -143,8 +143,6 @@ export class SupabaseService {
     await this.waitForInitialization();
     
     try {
-      // Limpiar cualquier sesión anterior
-      await this.supabase.auth.signOut();
       const redirectUrl = Capacitor.getPlatform() === 'web'
         ? `${window.location.origin}/auth/callback`
         : 'io.ionic.starter://auth/callback';
@@ -351,24 +349,25 @@ export class SupabaseService {
     try {
       // Con flujo PKCE, el callback contiene el código de autorización
       const url = new URL(window.location.href);
-      const code = url.searchParams.get('code');
-      if (code) {
-      const { data, error } = await this.supabase.auth.exchangeCodeForSession(code);
-        if (error) {
-          console.error('Error intercambiando código por sesión:', error);
-          throw error;
-        }
-        if (data?.session) {
-          this.sessionSubject.next(data.session);
-          this.userSubject.next(data.session.user);
-          return;
+      const hasCode = !!url.searchParams.get('code');
+      if (hasCode) {
+        // detectSessionInUrl está habilitado: dejar que supabase-js haga el intercambio automáticamente
+        // y esperar brevemente a que la sesión esté disponible
+        for (let i = 0; i < 20; i++) {
+          const { data: autoSession } = await this.supabase.auth.getSession();
+          if (autoSession?.session) {
+            this.sessionSubject.next(autoSession.session);
+            this.userSubject.next(autoSession.session.user);
+            return;
+          }
+          await new Promise(res => setTimeout(res, 150));
         }
       }
       // Fallback: intentar obtener sesión actual si ya fue procesada por Supabase
       const { data: sessionData, error: getError } = await this.supabase.auth.getSession();
       if (getError) {
         console.error('Error obteniendo sesión en callback:', getError);
-        throw getError;
+        return;
       }
       if (sessionData.session) {
         this.sessionSubject.next(sessionData.session);
@@ -378,7 +377,7 @@ export class SupabaseService {
       console.warn('Callback de autenticación sin sesión ni código');
     } catch (error) {
       console.error('Error manejando callback de auth:', error);
-      throw error;
+      return;
     }
   }
 }

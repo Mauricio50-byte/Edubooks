@@ -31,12 +31,16 @@ export interface Prestamo {
     fecha_prestamo: string;
     fecha_devolucion_esperada: string;
     fecha_devolucion_esperada_formatted?: string;
+    fecha_prestamo_formatted?: string;
+    fecha_devolucion_real_formatted?: string;
     fecha_devolucion_real?: string;
     fecha_aprobacion?: string;
     estado: 'Pendiente' | 'Activo' | 'Devuelto' | 'Vencido' | 'Rechazado';
     observaciones?: string;
     motivo_rechazo?: string;
     renovaciones?: number;
+    dias_retraso?: number;
+    estadoColor?: 'primary' | 'success' | 'danger' | 'medium';
 }
 
 export interface Reserva {
