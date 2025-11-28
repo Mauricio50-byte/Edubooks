@@ -9,6 +9,14 @@
 
 <ion-content [fullscreen]="true">
   <div class="ajustes-container">
+    <div *ngIf="isLoadingPerfil" class="loading-container">
+      <ion-spinner name="dots"></ion-spinner>
+      <p>Cargando perfil...</p>
+    </div>
+    <div *ngIf="!isLoadingPerfil && loadError" class="error-container">
+      <ion-icon name="alert-circle-outline" color="danger"></ion-icon>
+      <p>{{ loadError }}</p>
+    </div>
     <ion-card class="card-accent">
       <ion-card-header>
         <ion-card-title>Tu Información</ion-card-title>

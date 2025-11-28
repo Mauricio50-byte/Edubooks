@@ -126,6 +126,20 @@ class UsuarioRegistroSerializer(serializers.ModelSerializer):
             if 'fecha_graduacion_esperada' in datos_estudiante and isinstance(datos_estudiante['fecha_graduacion_esperada'], str):
                 from datetime import datetime
                 datos_estudiante['fecha_graduacion_esperada'] = datetime.strptime(datos_estudiante['fecha_graduacion_esperada'], '%Y-%m-%d').date()
+            # Convertir promedio_acumulado si viene como string
+            if 'promedio_acumulado' in datos_estudiante and isinstance(datos_estudiante['promedio_acumulado'], str):
+                from decimal import Decimal
+                try:
+                    datos_estudiante['promedio_acumulado'] = Decimal(datos_estudiante['promedio_acumulado'])
+                except Exception:
+                    datos_estudiante['promedio_acumulado'] = None
+            # Filtrar solo campos permitidos del modelo Estudiante
+            campos_permitidos = {
+                'carrera', 'matricula', 'semestre_actual', 'fecha_ingreso',
+                'fecha_graduacion_esperada', 'promedio_acumulado',
+                'creditos_completados', 'creditos_requeridos', 'turno'
+            }
+            datos_estudiante = {k: v for k, v in (datos_estudiante or {}).items() if k in campos_permitidos}
             Estudiante.objects.create(usuario=usuario, **datos_estudiante)
         elif rol == 'docente' and datos_docente:
             Docente.objects.create(usuario=usuario, **datos_docente)

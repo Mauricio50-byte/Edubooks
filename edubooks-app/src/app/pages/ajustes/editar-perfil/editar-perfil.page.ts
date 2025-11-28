@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ToastController } from '@ionic/angular';
+import { ToastController, LoadingController } from '@ionic/angular';
 import { AuthService } from '../../../core/services/auth.service';
 import { UsuarioService } from '../../../core/services/usuario.service';
 import { Usuario } from '../../../core/models/usuario.model';
@@ -19,10 +19,13 @@ export class EditarPerfilPage implements OnInit, OnDestroy {
   passwordForm: FormGroup;
   isChangingPassword = false;
   destroy$ = new Subject<void>();
+  isLoadingPerfil = false;
+  loadError = '';
 
   constructor(
     private fb: FormBuilder,
     private toastController: ToastController,
+    private loadingController: LoadingController,
     private authService: AuthService,
     private usuarioService: UsuarioService
   ) {
@@ -63,16 +66,44 @@ export class EditarPerfilPage implements OnInit, OnDestroy {
       .subscribe(u => {
         this.usuarioActual = u;
         if (u) {
-          this.patchUserToForm(u);
+          const valid = this.validateUsuarioData(u);
+          this.patchUserToForm(valid);
           this.applyRoleValidators();
         } else {
-          this.usuarioService.obtenerPerfil().subscribe({
-            next: data => {
-              this.usuarioActual = data;
-              this.patchUserToForm(data);
-              this.applyRoleValidators();
-            }
+          this.cargarPerfil();
+        }
+      });
+  }
+
+  private async cargarPerfil() {
+    this.isLoadingPerfil = true;
+    this.loadError = '';
+    this.perfilForm.disable({ emitEvent: false });
+    const loading = await this.loadingController.create({ message: 'Cargando perfil...', cssClass: 'custom-loading' });
+    await loading.present();
+    this.usuarioService.obtenerPerfil()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: async data => {
+          const valid = this.validateUsuarioData(data);
+          this.usuarioActual = valid;
+          this.patchUserToForm(valid);
+          this.applyRoleValidators();
+          this.isLoadingPerfil = false;
+          this.perfilForm.enable({ emitEvent: false });
+          await loading.dismiss();
+        },
+        error: async (err) => {
+          this.loadError = err?.message || 'No se pudo cargar el perfil';
+          const toast = await this.toastController.create({
+            message: this.loadError,
+            duration: 2500,
+            color: 'danger'
           });
+          await toast.present();
+          this.isLoadingPerfil = false;
+          this.perfilForm.enable({ emitEvent: false });
+          await loading.dismiss();
         }
       });
   }
@@ -151,6 +182,43 @@ export class EditarPerfilPage implements OnInit, OnDestroy {
       adminGroup.get('fecha_nombramiento')?.setValidators([]);
       adminGroup.updateValueAndValidity({ onlySelf: true });
     }
+  }
+
+  private validateUsuarioData(data: any): Usuario {
+    const out: any = {};
+    const s = (v: any) => typeof v === 'string' ? v : v !== undefined && v !== null ? String(v) : '';
+    const n = (v: any) => {
+      const num = typeof v === 'number' ? v : parseInt(String(v), 10);
+      return isNaN(num) ? undefined : num;
+    };
+    out.id = typeof data?.id === 'number' ? data.id : undefined;
+    out.email = s(data?.email);
+    out.username = s(data?.username);
+    out.nombre = s(data?.nombre);
+    out.apellido = s(data?.apellido);
+    out.rol = String(data?.rol || '').toLowerCase() as any;
+    out.telefono = data?.telefono ? s(data.telefono) : '';
+    out.numero_identificacion = data?.numero_identificacion ? s(data.numero_identificacion) : '';
+    out.genero = data?.genero ? String(data.genero) as any : undefined;
+    const de = data?.datos_estudiante || {};
+    const dd = data?.datos_docente || {};
+    const da = data?.datos_administrador || {};
+    const datos_estudiante: any = {};
+    if (de?.carrera !== undefined) datos_estudiante.carrera = s(de.carrera);
+    if (de?.matricula !== undefined) datos_estudiante.matricula = s(de.matricula);
+    if (de?.semestre_actual !== undefined) datos_estudiante.semestre_actual = n(de.semestre_actual);
+    const datos_docente: any = {};
+    if (dd?.departamento !== undefined) datos_docente.departamento = s(dd.departamento);
+    if (dd?.numero_empleado !== undefined) datos_docente.numero_empleado = s(dd.numero_empleado);
+    if (dd?.especialidad !== undefined) datos_docente.especialidad = s(dd.especialidad);
+    const datos_administrador: any = {};
+    if (da?.area !== undefined) datos_administrador.area = s(da.area);
+    if (da?.nivel_acceso !== undefined) datos_administrador.nivel_acceso = s(da.nivel_acceso);
+    if (da?.fecha_nombramiento !== undefined) datos_administrador.fecha_nombramiento = s(da.fecha_nombramiento);
+    if (Object.keys(datos_estudiante).length) out.datos_estudiante = datos_estudiante;
+    if (Object.keys(datos_docente).length) out.datos_docente = datos_docente;
+    if (Object.keys(datos_administrador).length) out.datos_administrador = datos_administrador;
+    return out as Usuario;
   }
 
   private passwordMatchValidator(form: FormGroup) {

@@ -214,11 +214,17 @@ class RegistroConInvitacionSerializer(serializers.ModelSerializer):
         """Crear perfil de docente."""
         datos_completos = {**datos_invitacion, **datos_usuario}
         
+        # Asegurar campos requeridos por el modelo
+        grado = datos_completos.get('grado_academico') or 'licenciatura'
+        contrato = datos_completos.get('tipo_contrato') or 'tiempo_completo'
+
         Docente.objects.create(
             usuario=usuario,
             numero_empleado=datos_completos.get('numero_empleado', f"DOC{usuario.id:06d}"),
             departamento=datos_completos.get('departamento'),
-            especialidad=datos_completos.get('especialidad')
+            especialidad=datos_completos.get('especialidad'),
+            grado_academico=grado,
+            tipo_contrato=contrato
         )
     
     def _crear_perfil_administrador(self, usuario, datos_usuario, datos_invitacion):

@@ -74,8 +74,7 @@ export class AuthService {
 
   // Registro de usuario (solo estudiantes)
   registro(userData: UsuarioRegistro): Observable<AuthResponse> {
-    // Asegurar rol estudiante siempre
-    const payload = { ...userData, rol: 'estudiante' };
+    const payload = this.sanitizeUserPayload({ ...userData, rol: 'estudiante' });
     return this.apiService.post<AuthResponse>('/auth/registro/', payload)
       .pipe(
         catchError(error => {
@@ -140,7 +139,7 @@ export class AuthService {
   }
 
   registroConInvitacion(userData: any): Observable<any> {
-    const payload = { ...userData, token_invitacion: (userData?.token_invitacion || '').toString().trim() };
+    const payload = this.sanitizeUserPayload({ ...userData, token_invitacion: (userData?.token_invitacion || '').toString().trim() });
     return this.apiService.post('/auth/invitaciones/registro/', payload)
       .pipe(
         tap((response: any) => {
@@ -215,5 +214,44 @@ export class AuthService {
   isDocente(): boolean {
     const user = this.currentUserSubject.value;
     return user?.rol === 'docente';
+  }
+
+  private sanitizeUserPayload(data: any): any {
+    const allowedTop = [
+      'email','username','nombre','apellido','rol','password','password_confirm',
+      'telefono','numero_identificacion','genero',
+      'notificaciones_email','notificaciones_push','idioma_preferido',
+      'token_invitacion','token'
+    ];
+    const out: any = {};
+    const setVal = (obj: any, k: string, v: any) => { obj[k] = typeof v === 'string' ? v.trim() : v; };
+    allowedTop.forEach(k => { if (data[k] !== undefined) setVal(out, k, data[k]); });
+    out.rol = String(out.rol || '').toLowerCase() || 'estudiante';
+
+    const clean = (obj: any, allowed: string[]) => {
+      const res: any = {};
+      allowed.forEach(k => { if (obj && obj[k] !== undefined) setVal(res, k, obj[k]); });
+      return res;
+    };
+
+    const allowedEst = ['carrera','matricula','semestre_actual','grado','seccion'];
+    const allowedDoc = ['departamento','numero_empleado','especialidad','codigo_empleado'];
+    const allowedAdm = ['area','nivel_acceso','fecha_nombramiento','cargo'];
+
+    if (data.datos_estudiante) {
+      const e = clean(data.datos_estudiante, allowedEst);
+      if (Object.keys(e).length) out.datos_estudiante = e;
+    }
+    if (data.datos_docente) {
+      const d = clean(data.datos_docente, allowedDoc);
+      if (d.numero_empleado && !d.codigo_empleado) d.codigo_empleado = d.numero_empleado;
+      if (Object.keys(d).length) out.datos_docente = d;
+    }
+    if (data.datos_administrador) {
+      const a = clean(data.datos_administrador, allowedAdm);
+      if (Object.keys(a).length) out.datos_administrador = a;
+    }
+
+    return out;
   }
 }
