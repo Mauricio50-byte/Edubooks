@@ -1,0 +1,260 @@
+@startuml
+
+title Edubooks - Diagrama de Actividad
+
+start
+partition Usuario {
+  :Ingresar credenciales;
+}
+partition AppMobile {
+  :Validar entrada;
+  note right: Se valida formato de credenciales y estado del usuario
+}
+partition AuthService {
+  :Iniciar sesión;
+}
+partition DB {
+  :Consultar usuario;
+}
+if (Credenciales válidas?) then (sí)
+  partition AuthService {
+    :Generar token;
+  }
+  partition AppMobile {
+    :Establecer sesión;
+  }
+  split
+    partition AppMobile {
+      :Redirigir a dashboard;
+    }
+    partition DB {
+      :Registrar evento de acceso;
+    }
+  end split
+  stop
+else (no)
+  partition AppMobile {
+    :Mostrar error de autenticación;
+  }
+  stop
+endif
+
+start
+partition Usuario {
+  :Ingresar criterios de búsqueda;
+}
+partition AppMobile {
+  :Normalizar y validar query;
+}
+partition CatalogoService {
+  :Consultar catálogo;
+}
+partition DB {
+  :Filtrar por título/autor/categoría;
+}
+if (¿Hay resultados?) then (sí)
+  partition AppMobile {
+    :Paginar y ordenar resultados;
+    :Mostrar lista de libros;
+  }
+  stop
+else (no)
+  partition AppMobile {
+    :Mostrar mensaje sin resultados;
+  }
+  stop
+endif
+
+start
+partition Usuario {
+  :Solicitar préstamo de libro;
+}
+partition AppMobile {
+  :Validar sesión y permisos;
+}
+partition PrestamoService {
+  :Verificar disponibilidad del ejemplar;
+}
+partition DB {
+  :Consultar inventario;
+}
+if (¿Disponible?) then (sí)
+  partition SancionService {
+    :Evaluar sanciones bloqueantes;
+  }
+  partition DB {
+    :Obtener sanciones del usuario;
+  }
+  if (¿Sanción bloqueante?) then (sí)
+    partition AppMobile {
+      :Rechazar solicitud y mostrar detalle;
+    }
+    stop
+  else (no)
+    partition PrestamoService {
+      :Registrar préstamo y fecha de devolución;
+    }
+    partition DB {
+      :Guardar préstamo;
+    }
+    split
+      partition NotificacionService {
+        :Preparar notificación de préstamo;
+        note right: Envío asíncrono vía proveedor de email
+      }
+      partition AppMobile {
+        :Mostrar confirmación al usuario;
+      }
+    split again
+      partition ProveedorEmail {
+        :Enviar email al usuario;
+      }
+    end split
+    stop
+  endif
+else (no)
+  partition AppMobile {
+    :Mostrar no disponible;
+  }
+  stop
+endif
+
+start
+partition Usuario {
+  :Solicitar renovación;
+}
+partition PrestamoService {
+  :Obtener préstamo;
+}
+partition DB {
+  :Leer datos de préstamo;
+}
+if (¿No vencido?) then (sí)
+  if (¿Límite de renovaciones?) then (no)
+    partition PrestamoService {
+      :Extender fecha de devolución;
+    }
+    partition DB {
+      :Actualizar préstamo;
+    }
+    split
+      partition NotificacionService {
+        :Notificar renovación;
+      }
+    split again
+      partition AppMobile {
+        :Mostrar renovación exitosa;
+      }
+    end split
+    stop
+  else (sí)
+    partition AppMobile {
+      :Informar límite de renovaciones alcanzado;
+    }
+    stop
+  endif
+else (no)
+  partition SancionService {
+    :Generar sanción por mora;
+  }
+  partition DB {
+    :Crear sanción;
+  }
+  partition NotificacionService {
+    :Notificar sanción al usuario;
+  }
+  partition AppMobile {
+    :Informar rechazo de renovación;
+  }
+  stop
+endif
+
+start
+partition Usuario {
+  :Devolver libro en mostrador o app;
+}
+partition PrestamoService {
+  :Cerrar préstamo;
+}
+partition DB {
+  :Marcar préstamo como devuelto;
+}
+while (¿Sanción relacionada pendiente?) is (sí)
+  partition SancionService {
+    :Reevaluar sanciones por devolución;
+  }
+  partition DB {
+    :Actualizar sanciones;
+  }
+endwhile (no)
+split
+  partition NotificacionService {
+    :Notificar devolución registrada;
+    note right: Las notificaciones se envían en paralelo y no bloquean
+  }
+split again
+  partition AppMobile {
+    :Mostrar confirmación;
+  }
+end split
+stop
+
+start
+partition Usuario {
+  :Añadir libro a bibliografía;
+}
+partition CatalogoService {
+  :Obtener libro por ID;
+}
+partition DB {
+  :Consultar libro;
+}
+if (¿Libro encontrado?) then (sí)
+  partition BibliografiaService {
+    :Agregar libro a bibliografía del usuario;
+  }
+  partition DB {
+    :Guardar bibliografía;
+  }
+  partition AppMobile {
+    :Mostrar confirmación;
+  }
+  stop
+else (no)
+  partition AppMobile {
+    :Mostrar error libro no encontrado;
+  }
+  stop
+endif
+
+start
+partition Bibliotecario {
+  :Abrir módulo de sanciones;
+}
+partition AppMobile {
+  :Listar sanciones del usuario;
+}
+partition SancionService {
+  :Solicitar sanciones a BD;
+}
+partition DB {
+  :Obtener sanciones;
+}
+partition AppMobile {
+  :Mostrar sanciones;
+}
+if (¿Aplicar acción?) then (sí)
+  partition SancionService {
+    :Actualizar sanción (estado/fechas);
+  }
+  partition DB {
+    :Persistir cambios;
+  }
+  partition AppMobile {
+    :Confirmar acción;
+  }
+  stop
+else (no)
+  stop
+endif
+@enduml

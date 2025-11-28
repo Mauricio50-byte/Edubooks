@@ -4,8 +4,8 @@
 
 export const environment = {
   production: false,
-  // apiUrl: 'https://edubooks.onrender.com/api',
-  apiUrl: 'http://127.0.0.1:8000/api',
+  apiUrl: 'https://edubooks.onrender.com/api',
+  //apiUrl: 'http://127.0.0.1:8000/api',
   supabase: {
     url: 'https://abxhanoipdrdctyyxaej.supabase.co',
     anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFieGhhbm9pcGRyZGN0eXl4YWVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkwMzI4MTcsImV4cCI6MjA3NDYwODgxN30.KQrl6YmZ8eBoq4lrVojF1O3mPSKeDRtQNYalJEkPRto'

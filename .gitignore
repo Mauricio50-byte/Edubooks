@@ -22,5 +22,6 @@ local_settings.py
 .DS_Store
 Thumbs.db
 
-/*.md
+#/*.md
 /*.plantuml
+#D/
