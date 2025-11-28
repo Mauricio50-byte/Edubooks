@@ -186,7 +186,14 @@ def devolver_libro(request, prestamo_id):
         
         prestamo.estado = 'Devuelto'
         prestamo.fecha_devolucion_real = timezone.now()
-        prestamo.save()
+        observaciones = request.data.get('observaciones')
+        if observaciones is not None:
+            prestamo.observaciones = str(observaciones)
+        from django.core.exceptions import ValidationError
+        try:
+            prestamo.save()
+        except ValidationError as e:
+            return Response({'error': e.message_dict}, status=400)
         
         # Verificar si hay retraso y aplicar sanción si es necesario
         if prestamo.fecha_devolucion_real.date() > prestamo.fecha_devolucion_esperada:
@@ -228,7 +235,21 @@ def aprobar_prestamo(request, prestamo_id):
     prestamo.estado = 'Activo'
     prestamo.aprobado_por = request.user
     prestamo.fecha_aprobacion = timezone.now()
-    prestamo.save()
+    fecha_esperada = request.data.get('fecha_devolucion_esperada')
+    if fecha_esperada:
+        try:
+            from datetime import datetime
+            prestamo.fecha_devolucion_esperada = datetime.strptime(fecha_esperada, '%Y-%m-%d').date()
+        except Exception:
+            return Response({'error': 'Formato de fecha_devolucion_esperada inválido. Use YYYY-MM-DD.'}, status=400)
+    observaciones = request.data.get('observaciones')
+    if observaciones is not None:
+        prestamo.observaciones = str(observaciones)
+    from django.core.exceptions import ValidationError
+    try:
+        prestamo.save()
+    except ValidationError as e:
+        return Response({'error': e.message_dict}, status=400)
     
     # Crear notificación para el usuario
     Notificacion.objects.create(
