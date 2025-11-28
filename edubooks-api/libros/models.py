@@ -291,6 +291,7 @@ class Prestamo(models.Model, SupabaseModelMixin):
             raise ValidationError(errors)
     
     def save(self, *args, **kwargs):
+        # Establecer campos derivados previos a validación
         # Establecer fecha de devolución esperada solo cuando se aprueba
         if self.estado == 'Activo' and not self.fecha_devolucion_esperada:
             self.fecha_devolucion_esperada = date.today() + timedelta(days=15)
@@ -302,6 +303,9 @@ class Prestamo(models.Model, SupabaseModelMixin):
         # Actualizar estado si está vencido
         if self.estado == 'Activo' and self.fecha_devolucion_esperada and date.today() > self.fecha_devolucion_esperada:
             self.estado = 'Vencido'
+        
+        # Validar una vez establecidos campos derivados
+        self.full_clean()
         
         # Verificar si es una actualización de estado para disponibilidad
         es_actualizacion = self.pk is not None
