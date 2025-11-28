@@ -343,6 +343,11 @@ export class RegisterInvitationPage implements OnInit {
         formData.datos_administrador = roleData;
       }
 
+      (formData as any).datos_adicionales = {
+        ...(formData as any).datos_adicionales,
+        ...roleData
+      };
+
       try {
         const response = await this.authService.registroConInvitacion(formData).toPromise();
         await loading.dismiss();
