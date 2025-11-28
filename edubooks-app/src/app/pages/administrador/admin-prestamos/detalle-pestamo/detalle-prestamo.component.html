@@ -15,8 +15,8 @@
       <ion-icon name="library-outline"></ion-icon>
     </div>
     <div class="basic-info">
-      <h3 class="title">{{ getLibroTitulo() }}</h3>
-      <ion-chip [color]="getEstadoColor(prestamo.estado)">
+      <h3 class="title">{{ libroTitulo }}</h3>
+      <ion-chip [color]="estadoColor">
         <ion-icon [name]="prestamo.estado === 'Devuelto' ? 'checkmark-circle' : (prestamo.estado === 'Vencido' ? 'warning' : 'time')" slot="start"></ion-icon>
         <ion-label>{{ prestamo.estado || 'Sin estado' }}</ion-label>
       </ion-chip>
@@ -34,11 +34,11 @@
       <ion-card-content>
         <div class="detail-row">
           <span class="detail-label">Nombre:</span>
-          <span class="detail-value">{{ getUsuarioNombre() }}</span>
+          <span class="detail-value">{{ usuarioNombre }}</span>
         </div>
         <div class="detail-row">
           <span class="detail-label">Email:</span>
-          <span class="detail-value">{{ getEmail() }}</span>
+          <span class="detail-value">{{ email }}</span>
         </div>
       </ion-card-content>
     </ion-card>
@@ -53,11 +53,11 @@
       <ion-card-content>
         <div class="detail-row">
           <span class="detail-label">Título:</span>
-          <span class="detail-value">{{ getLibroTitulo() }}</span>
+          <span class="detail-value">{{ libroTitulo }}</span>
         </div>
         <div class="detail-row">
           <span class="detail-label">Autor:</span>
-          <span class="detail-value">{{ getLibroAutor() }}</span>
+          <span class="detail-value">{{ libroAutor }}</span>
         </div>
         <div class="detail-row" *ngIf="prestamo.libro.isbn">
           <span class="detail-label">ISBN:</span>
@@ -76,15 +76,15 @@
       <ion-card-content>
         <div class="detail-row">
           <span class="detail-label">Préstamo:</span>
-          <span class="detail-value">{{ formatearFecha(prestamo.fecha_prestamo) }}</span>
+          <span class="detail-value">{{ fechaPrestamoFmt }}</span>
         </div>
         <div class="detail-row">
           <span class="detail-label">Devolución esperada:</span>
-          <span class="detail-value">{{ formatearFecha(prestamo.fecha_devolucion_esperada) }}</span>
+          <span class="detail-value">{{ fechaDevolucionEsperadaFmt }}</span>
         </div>
         <div class="detail-row" *ngIf="prestamo.fecha_devolucion_real">
           <span class="detail-label">Devolución real:</span>
-          <span class="detail-value">{{ formatearFecha(prestamo.fecha_devolucion_real) }}</span>
+          <span class="detail-value">{{ fechaDevolucionRealFmt }}</span>
         </div>
         <div class="detail-row">
           <span class="detail-label">Renovaciones:</span>
