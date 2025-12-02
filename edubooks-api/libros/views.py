@@ -11,8 +11,11 @@ from .serializers import (
     LibroSerializer, LibroDetalleSerializer, LibroListSerializer,
     PrestamoSerializer, PrestamoListSerializer,
     ReservaSerializer, ReservaListSerializer,
-    BibliografiaSerializer, SancionSerializer, NotificacionSerializer
+    BibliografiaSerializer, SancionSerializer, NotificacionSerializer,
+    LibroRTSerializer, PrestamoRTSerializer, ReservaRTSerializer
 )
+from edubooks.firebase_client import get_db, verify_token
+import uuid
 from usuarios.auth.permissions import IsAdministrador, IsDocente, IsEstudiante
 
 class StandardResultsSetPagination(PageNumberPagination):
@@ -183,7 +186,7 @@ def devolver_libro(request, prestamo_id):
                 {'error': 'Este préstamo no está activo'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         prestamo.estado = 'Devuelto'
         prestamo.fecha_devolucion_real = timezone.now()
         observaciones = request.data.get('observaciones')
@@ -1069,3 +1072,129 @@ def buscar_libro_por_titulo(request):
             {'error': f'Error al buscar libro: {str(e)}'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def rt_libros_list(request):
+    db = get_db()
+    snap = db.reference('libros').get() or {}
+    items = []
+    for k, v in snap.items():
+        item = {'id': k}
+        item.update(v or {})
+        items.append(item)
+    titulo = request.query_params.get('titulo')
+    autor = request.query_params.get('autor')
+    categoria = request.query_params.get('categoria')
+    disponible = request.query_params.get('disponible')
+    if titulo:
+        items = [i for i in items if titulo.lower() in str(i.get('titulo','')).lower()]
+    if autor:
+        items = [i for i in items if autor.lower() in str(i.get('autor','')).lower()]
+    if categoria:
+        items = [i for i in items if categoria.lower() in str(i.get('categoria','')).lower()]
+    if disponible == 'true':
+        items = [i for i in items if (i.get('cantidad_disponible') or 0) > 0]
+    items = sorted(items, key=lambda x: str(x.get('titulo','')))
+    return Response({'results': items})
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def rt_libros_create(request):
+    serializer = LibroRTSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=400)
+    data = serializer.validated_data
+    libro_id = data.get('id') or uuid.uuid4().hex
+    db = get_db()
+    db.reference(f'libros/{libro_id}').set({
+        'titulo': data['titulo'],
+        'autor': data['autor'],
+        'categoria': data['categoria'],
+        'estado': data.get('estado','Disponible'),
+        'cantidad_total': data.get('cantidad_total',1),
+        'cantidad_disponible': data.get('cantidad_disponible',1),
+        'imagen_portada': data.get('imagen_portada')
+    })
+    result = {'id': libro_id}
+    result.update(data)
+    return Response(result, status=201)
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def rt_prestamos_create(request):
+    auth_header = request.META.get('HTTP_AUTHORIZATION','')
+    uid = None
+    if auth_header.startswith('Bearer '):
+        try:
+            decoded = verify_token(auth_header.split()[1])
+            uid = decoded.get('uid')
+        except Exception:
+            uid = None
+    usuario_id = uid or str(getattr(request.user,'email',None) or request.user.pk)
+    payload = dict(request.data)
+    payload['usuarioId'] = usuario_id
+    serializer = PrestamoRTSerializer(data=payload)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=400)
+    data = serializer.validated_data
+    prestamo_id = data.get('id') or uuid.uuid4().hex
+    from django.utils import timezone as tz
+    fecha_prestamo = data.get('fecha_prestamo') or tz.now()
+    db = get_db()
+    ref = db.reference(f'prestamos/{prestamo_id}')
+    ref.set({
+        'usuarioId': data['usuarioId'],
+        'libroId': data['libroId'],
+        'fecha_prestamo': fecha_prestamo.isoformat(),
+        'fecha_devolucion_esperada': data.get('fecha_devolucion_esperada').isoformat() if data.get('fecha_devolucion_esperada') else None,
+        'estado': data.get('estado','Pendiente'),
+        'observaciones': data.get('observaciones')
+    })
+    return Response({'id': prestamo_id}, status=201)
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def rt_reservas_create(request):
+    auth_header = request.META.get('HTTP_AUTHORIZATION','')
+    uid = None
+    if auth_header.startswith('Bearer '):
+        try:
+            decoded = verify_token(auth_header.split()[1])
+            uid = decoded.get('uid')
+        except Exception:
+            uid = None
+    usuario_id = uid or str(getattr(request.user,'email',None) or request.user.pk)
+    payload = dict(request.data)
+    payload['usuarioId'] = usuario_id
+    serializer = ReservaRTSerializer(data=payload)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=400)
+    data = serializer.validated_data
+    reserva_id = data.get('id') or uuid.uuid4().hex
+    from django.utils import timezone as tz
+    fecha_reserva = data.get('fecha_reserva') or tz.now()
+    db = get_db()
+    ref = db.reference(f'reservas/{reserva_id}')
+    ref.set({
+        'usuarioId': data['usuarioId'],
+        'libroId': data['libroId'],
+        'fecha_reserva': fecha_reserva.isoformat(),
+        'estado': data.get('estado','Activa')
+    })
+    return Response({'id': reserva_id}, status=201)
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def rt_prestamo_devolver(request, prestamo_id):
+    db = get_db()
+    r = db.reference(f'prestamos/{prestamo_id}')
+    snap = r.get() or {}
+    if not snap:
+        return Response({'error':'No existe'}, status=404)
+    from django.utils import timezone as tz
+    estado = snap.get('estado')
+    if estado != 'Activo':
+        return Response({'error':'No está activo'}, status=400)
+    r.update({'estado':'Devuelto','fecha_devolucion_real': tz.now().isoformat()})
+    return Response({'ok': True})

@@ -6,9 +6,8 @@ app_name = 'usuarios'
 
 urlpatterns = [
     # Autenticación
-    path('registro/', views.registro, name='registro'),
-    path('login/', views.login, name='login'),
-    path('supabase-sync/', views.supabase_sync, name='supabase-sync'),
+    # Autenticación basada en Firebase
+    path('firebase-sync/', views.firebase_sync, name='firebase-sync'),
     path('perfil/', views.perfil, name='perfil'),
     path('actualizar-perfil/', views.actualizar_perfil, name='actualizar_perfil'),
     path('usuarios/me/', views.usuario_me, name='usuario_me'),

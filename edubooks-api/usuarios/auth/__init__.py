@@ -1,10 +1,10 @@
 # auth/__init__.py
-from .authentication import SupabaseAuthentication
-from .backends import SupabaseAuthBackend
+from .firebase_authentication import FirebaseAuthentication
+from .firebase_backends import FirebaseAuthBackend
 from .permissions import IsAdministrador, IsDocente, IsEstudiante
 
 __all__ = [
-    'SupabaseAuthentication',
-    'SupabaseAuthBackend',
+    'FirebaseAuthentication',
+    'FirebaseAuthBackend',
     'IsAdministrador', 'IsDocente', 'IsEstudiante',
 ]

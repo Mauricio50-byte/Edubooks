@@ -3,6 +3,32 @@ from rest_framework import serializers
 from .models import Libro, Prestamo, Reserva, Bibliografia, Sancion, Notificacion
 from usuarios.serializers import UsuarioPerfilSerializer
 
+class LibroRTSerializer(serializers.Serializer):
+    id = serializers.CharField(required=False)
+    titulo = serializers.CharField()
+    autor = serializers.CharField()
+    categoria = serializers.CharField()
+    estado = serializers.CharField(default='Disponible')
+    cantidad_total = serializers.IntegerField(default=1)
+    cantidad_disponible = serializers.IntegerField(default=1)
+    imagen_portada = serializers.URLField(required=False, allow_null=True, allow_blank=True)
+
+class PrestamoRTSerializer(serializers.Serializer):
+    id = serializers.CharField(required=False)
+    usuarioId = serializers.CharField()
+    libroId = serializers.CharField()
+    fecha_prestamo = serializers.DateTimeField(required=False)
+    fecha_devolucion_esperada = serializers.DateField(required=False)
+    estado = serializers.CharField(default='Pendiente')
+    observaciones = serializers.CharField(required=False, allow_blank=True)
+
+class ReservaRTSerializer(serializers.Serializer):
+    id = serializers.CharField(required=False)
+    usuarioId = serializers.CharField()
+    libroId = serializers.CharField()
+    fecha_reserva = serializers.DateTimeField(required=False)
+    estado = serializers.CharField(default='Activa')
+
 class LibroSerializer(serializers.ModelSerializer):
     class Meta:
         model = Libro

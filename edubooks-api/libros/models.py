@@ -4,11 +4,10 @@ from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator, MaxValueValidator
 from datetime import date, timedelta
 from django.utils import timezone
-from edubooks.supabase_adapter import SupabaseModelMixin
 
 User = get_user_model()
 
-class Libro(models.Model, SupabaseModelMixin):
+class Libro(models.Model):
     ESTADOS_CHOICES = [
         ('Disponible', 'Disponible'),
         ('Prestado', 'Prestado'),
@@ -169,7 +168,7 @@ class Libro(models.Model, SupabaseModelMixin):
             self.estado = 'Disponible'
         super().save(*args, **kwargs)
 
-class Prestamo(models.Model, SupabaseModelMixin):
+class Prestamo(models.Model):
     ESTADOS_CHOICES = [
         ('Pendiente', 'Pendiente'),
         ('Activo', 'Activo'),

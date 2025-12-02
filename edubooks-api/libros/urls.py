@@ -60,6 +60,13 @@ urlpatterns = [
     path('sanciones/<int:sancion_id>/rechazar/', views.rechazar_sancion, name='rechazar-sancion'),
     path('dashboard-sanciones/', views.dashboard_sanciones, name='dashboard-sanciones'),
     
+    # RTDB Firebase
+    path('rt/libros/', views.rt_libros_list, name='rt-libros-list'),
+    path('rt/libros/crear/', views.rt_libros_create, name='rt-libros-create'),
+    path('rt/prestamos/crear/', views.rt_prestamos_create, name='rt-prestamos-create'),
+    path('rt/reservas/crear/', views.rt_reservas_create, name='rt-reservas-create'),
+    path('rt/prestamos/<str:prestamo_id>/devolver/', views.rt_prestamo_devolver, name='rt-prestamo-devolver'),
+    
     # URLs de Notificaciones
     path('notificaciones/', views.obtener_notificaciones, name='obtener-notificaciones'),
     path('notificaciones/<int:notificacion_id>/marcar-leida/', views.marcar_notificacion_leida, name='marcar-notificacion-leida'),

@@ -26,8 +26,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'rest_framework_simplejwt',
-    'rest_framework_simplejwt.token_blacklist',  # Para blacklist de tokens
     'corsheaders',  # Para permitir CORS
     'usuarios',
     'libros',
@@ -48,17 +46,15 @@ ROOT_URLCONF = 'edubooks.urls'
 
 AUTH_USER_MODEL = 'usuarios.Usuario'
 
-# Configuración híbrida Django-Supabase
 AUTHENTICATION_BACKENDS = [
-    'usuarios.auth.backends.SupabaseAuthBackend',  # Backend personalizado para Supabase
-    'django.contrib.auth.backends.ModelBackend',  # Backend tradicional de Django
+    'usuarios.auth.firebase_backends.FirebaseAuthBackend',
+    'django.contrib.auth.backends.ModelBackend',
 ]
 
 # Configuración de REST Framework
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-        'usuarios.auth.authentication.SupabaseAuthentication',  # Autenticación híbrida
+        'usuarios.auth.firebase_authentication.FirebaseAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
@@ -70,13 +66,7 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 20,
 }
 
-# Configuración de JWT
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
-    'ROTATE_REFRESH_TOKENS': True,
-    'BLACKLIST_AFTER_ROTATION': True,
-}
+SIMPLE_JWT = {}
 
 # Configuración de CORS
 # CORS Configuration
@@ -147,11 +137,9 @@ WSGI_APPLICATION = 'edubooks.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# Selección de motor de base de datos por variable de entorno
 DB_ENGINE = config('DB_ENGINE', default='sqlite').lower()
 
 if DB_ENGINE == 'sqlite':
-    # Configuración local por defecto para desarrollo
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -159,18 +147,14 @@ if DB_ENGINE == 'sqlite':
         }
     }
 else:
-    # Configuración para Supabase (PostgreSQL)
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': config('SUPABASE_DB_NAME', default='postgres'),
-            'USER': config('SUPABASE_DB_USER', default='postgres'),
-            'PASSWORD': config('SUPABASE_DB_PASSWORD', default=''),
-            'HOST': config('SUPABASE_DB_HOST', default='localhost'),
-            'PORT': config('SUPABASE_DB_PORT', default='5432'),
-            'OPTIONS': {
-                'sslmode': 'require',
-            },
+            'NAME': config('POSTGRES_DB', default='postgres'),
+            'USER': config('POSTGRES_USER', default='postgres'),
+            'PASSWORD': config('POSTGRES_PASSWORD', default=''),
+            'HOST': config('POSTGRES_HOST', default='localhost'),
+            'PORT': config('POSTGRES_PORT', default='5432'),
         }
     }
 
@@ -202,23 +186,7 @@ STATIC_URL = 'static/'
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Configuración de Supabase
-SUPABASE_URL = config('SUPABASE_URL', default='')
-SUPABASE_ANON_KEY = config('SUPABASE_ANON_KEY', default='')
-SUPABASE_KEY = config('SUPABASE_ANON_KEY', default='')  # Para compatibilidad
-SUPABASE_SERVICE_KEY = config('SUPABASE_SERVICE_KEY', default='')
-
-# Configuración híbrida: usar Supabase para auth y storage, Django para lógica de negocio
-SUPABASE_FEATURES = {
-    'AUTH_ENABLED': True,  # Usar Supabase para autenticación
-    'STORAGE_ENABLED': True,  # Usar Supabase Storage para archivos
-    'REALTIME_ENABLED': True,  # Habilitar funcionalidades en tiempo real
-    'EDGE_FUNCTIONS_ENABLED': False,  # Usar Django para lógica compleja
-}
-
-# Configuración de archivos y storage
-SUPABASE_STORAGE_BUCKET = 'edubooks-files'
-MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10MB
+MAX_UPLOAD_SIZE = 10 * 1024 * 1024
 
 # Configuración de logging
 LOG_HANDLERS = ['console'] if DEBUG else ['console', 'file']
@@ -287,3 +255,7 @@ if not DEBUG and not os.path.exists(log_dir):
 # URL del frontend para enlaces públicos
 FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:8100')
 FRONTEND_PUBLIC_URL = os.getenv('FRONTEND_PUBLIC_URL', FRONTEND_URL)
+
+# Configuración de Firebase
+FIREBASE_SERVICE_ACCOUNT = config('FIREBASE_SERVICE_ACCOUNT', default='')
+FIREBASE_DATABASE_URL = config('FIREBASE_DATABASE_URL', default='')

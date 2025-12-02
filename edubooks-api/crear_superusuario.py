@@ -10,9 +10,12 @@ django.setup()
 from usuarios.models import Usuario, Administrador
 
 def run():
-    email = 'mauro@edubooks.com'
-    username = 'mauro'
-    password = 'mauro0109'
+    email = os.getenv('SUPERUSER_EMAIL')
+    username = os.getenv('SUPERUSER_USERNAME')
+    password = os.getenv('SUPERUSER_PASSWORD')
+    if not email or not username or not password:
+        print('ERROR: Define SUPERUSER_EMAIL, SUPERUSER_USERNAME y SUPERUSER_PASSWORD en el entorno')
+        sys.exit(2)
     try:
         Usuario.objects.filter(email=email).delete()
         usuario = Usuario.objects.create_user(

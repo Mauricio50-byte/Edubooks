@@ -5,6 +5,7 @@ import { map, delay, catchError } from 'rxjs/operators';
 import { Libro, Prestamo, Reserva } from '../models/libro.model';
 import { AuthService } from './auth.service';
 import { ApiService } from './api.service';
+import { Database, ref, set, onValue } from '@angular/fire/database';
 
 @Injectable({
   providedIn: 'root'
@@ -25,9 +26,19 @@ export class BibliotecaService {
 
   constructor(
     private authService: AuthService,
-    private apiService: ApiService
+    private apiService: ApiService,
+    private db: Database
   ) {
     this.initializeData();
+  }
+
+  // Acceso a Firebase Realtime Database
+  async crearLibroFirebase(id: string, data: any) {
+    await set(ref(this.db, `libros/${id}`), data);
+  }
+
+  onLibrosFirebase(callback: (val: any) => void) {
+    onValue(ref(this.db, 'libros'), snapshot => callback(snapshot.val()));
   }
 
   private initializeData() {

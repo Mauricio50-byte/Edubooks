@@ -1,26 +1,26 @@
 # Ignorar cachés y bytecode de Python
-__pycache__/
-*.py[cod]
-*.pyo
+#__pycache__/
+#*.py[cod]
+#*.pyo
 
 # Entornos virtuales
-env/
-venv/
-.venv/
+#env/
+#venv/
+#.venv/
 
 # Archivos de entorno
-.env
-**/.env
-edubooks-api/.env
+#.env
+#**/.env
+#edubooks-api/.env
 
 # Logs y configuración local
-*.log
-local_settings.py
+#"*.log
+#local_settings.py
 
 # IDE/SO
-.vscode/
-.DS_Store
-Thumbs.db
+#.vscode/
+#|.DS_Store
+#Thumbs.db
 
 #/*.md
 /*.plantuml

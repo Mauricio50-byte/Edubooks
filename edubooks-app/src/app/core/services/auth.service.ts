@@ -4,7 +4,7 @@ import { tap, catchError, switchMap } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { ApiService } from './api.service';
-import { SupabaseService } from './supabase.service';
+import { Auth, GoogleAuthProvider, onAuthStateChanged, signInWithPopup } from '@angular/fire/auth';
 import { Usuario, UsuarioLogin, UsuarioRegistro, AuthResponse } from '../models/usuario.model';
 
 @Injectable({
@@ -19,14 +19,29 @@ export class AuthService {
   constructor(
     private apiService: ApiService,
     private router: Router,
-    private supabaseService: SupabaseService
+    private auth: Auth
   ) {
     this.currentUserSubject = new BehaviorSubject<Usuario | null>(this.loadStoredUser());
     this.currentUser$ = this.currentUserSubject.asObservable();
-    // Delay Supabase initialization to avoid NavigatorLockAcquireTimeoutError
-    setTimeout(() => {
-      this.initializeSupabaseAuth();
-    }, 100);
+    onAuthStateChanged(this.auth, async (user) => {
+      if (user && !this.isAuthenticatedSubject.value) {
+        const idToken = await user.getIdToken();
+        const payload = {
+          firebase_token: idToken,
+          user_data: {
+            username: user.email?.split('@')[0] || '',
+            nombre: user.displayName || '',
+            apellido: ''
+          }
+        };
+        this.apiService.post<AuthResponse>('/auth/firebase-sync/', payload)
+          .pipe(
+            tap(response => this.handleAuthSuccess(response)),
+            catchError(error => { throw error; })
+          )
+          .subscribe();
+      }
+    });
   }
 
   // Método público para inicializar autenticación
@@ -36,15 +51,7 @@ export class AuthService {
     console.log('AuthService inicializado');
   }
 
-  // Inicializar autenticación de Supabase
-  private initializeSupabaseAuth() {
-    this.supabaseService.user$.subscribe((supabaseUser: any) => {
-      if (supabaseUser && !this.isAuthenticatedSubject.value) {
-        // Usuario autenticado en Supabase pero no en Django
-        this.syncWithDjango(supabaseUser);
-      }
-    });
-  }
+  // Eliminado: inicialización Supabase (migrado a Firebase)
 
   private loadStoredUser(): Usuario | null {
     try {
@@ -106,31 +113,7 @@ export class AuthService {
     this.router.navigate(['/login']);
   }
 
-  // Sincronización con Django usando Supabase
-  private async syncWithDjango(supabaseUser: any): Promise<void> {
-    try {
-      const supabaseToken = await this.supabaseService.getAccessToken();
-      if (!supabaseToken) {
-        return;
-      }
-      const payload = {
-        supabase_token: supabaseToken,
-        user_data: {
-          username: supabaseUser?.email?.split('@')[0] || '',
-          nombre: supabaseUser?.user_metadata?.nombre || '',
-          apellido: supabaseUser?.user_metadata?.apellido || ''
-        }
-      };
-      this.apiService.post<AuthResponse>('/auth/supabase-sync/', payload)
-        .pipe(
-          tap(response => this.handleAuthSuccess(response)),
-          catchError(error => { throw error; })
-        )
-        .subscribe();
-    } catch (error) {
-      console.error('Error al sincronizar con Django:', error);
-    }
-  }
+  // Eliminado: sincronización Supabase (migrado a Firebase)
 
   // Métodos para el sistema de invitaciones
   validarTokenInvitacion(token: string): Observable<any> {
@@ -190,14 +173,10 @@ export class AuthService {
     return this.isAuthenticatedSubject.value;
   }
 
-  // Login con Google (Supabase)
+  // Login con Google (Firebase)
   async loginWithGoogle(): Promise<void> {
-    try {
-      await this.supabaseService.signInWithGoogle();
-      // La sincronización con Django se maneja en initializeSupabaseAuth()
-    } catch (error) {
-      throw error;
-    }
+    const provider = new GoogleAuthProvider();
+    await signInWithPopup(this.auth, provider);
   }
   updateCurrentUser(user: Usuario): void {
     try {

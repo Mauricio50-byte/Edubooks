@@ -6,7 +6,6 @@ from django.utils import timezone
 from datetime import timedelta
 import uuid
 import logging
-from edubooks.supabase_adapter import SupabaseModelMixin
 
 # Importar modelos de notificaciones y auditoría
 from .notification_models import *
@@ -28,7 +27,7 @@ class UsuarioManager(BaseUserManager):
     def create_superuser(self, email, username, password=None, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
-        extra_fields.setdefault('rol', 'Administrador')
+        extra_fields.setdefault('rol', 'administrador')
         
         if extra_fields.get('is_staff') is not True:
             raise ValueError('Superuser debe tener is_staff=True.')
@@ -37,7 +36,7 @@ class UsuarioManager(BaseUserManager):
         
         return self.create_user(email, username, password, **extra_fields)
 
-class Usuario(AbstractBaseUser, PermissionsMixin, SupabaseModelMixin):
+class Usuario(AbstractBaseUser, PermissionsMixin):
     """
     Modelo base de Usuario normalizado.
     Contiene solo los campos comunes a todos los roles.
@@ -70,8 +69,6 @@ class Usuario(AbstractBaseUser, PermissionsMixin, SupabaseModelMixin):
     apellido = models.CharField(max_length=100)
     rol = models.CharField(max_length=15, choices=ROLES_CHOICES)
     
-    # Campo para integración con Supabase
-    supabase_id = models.CharField(max_length=255, unique=True, blank=True, null=True)
     
     # Campos de contacto y datos personales
     telefono = models.CharField(max_length=20, blank=True, null=True)
@@ -93,10 +90,6 @@ class Usuario(AbstractBaseUser, PermissionsMixin, SupabaseModelMixin):
     # Campos para notificaciones y preferencias
     notificaciones_email = models.BooleanField(default=True)
     notificaciones_push = models.BooleanField(default=True)
-    idioma_preferido = models.CharField(max_length=5, default='es', choices=[
-        ('es', 'Español'),
-        ('en', 'English'),
-    ])
     
     # Campos de auditoría
     fecha_ultima_actualizacion = models.DateTimeField(auto_now=True)
@@ -138,8 +131,7 @@ class Usuario(AbstractBaseUser, PermissionsMixin, SupabaseModelMixin):
             models.Index(fields=['activo', 'estado'], name='idx_usuario_activo_estado'),
             models.Index(fields=['prestamos_activos', 'max_prestamos_permitidos'], name='idx_usuario_prestamos'),
             
-            # Índice para integración con Supabase
-            models.Index(fields=['supabase_id'], name='idx_usuario_supabase_id'),
+            
         ]
         verbose_name = 'Usuario'
         verbose_name_plural = 'Usuarios'
