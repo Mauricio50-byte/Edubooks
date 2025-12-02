@@ -16,10 +16,7 @@ export const environment = {
     appId: '1:425633503294:web:b0e5c88fc3e1d4d44b996f',
     measurementId: 'G-HZF9Q3LCW4'
   },
-  supabase: {
-    url: 'https://dlaspmegzblefvofvsng.supabase.co',
-    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsYXNwbWVnemJsZWZ2b2Z2c25nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE1MDc5OTEsImV4cCI6MjA3NzA4Mzk5MX0.8jITxJouJI4ep2d9EHKWwYITLISiVCRxZST5E1ntZCo'
-  }
+  
 };
 
 //mauro

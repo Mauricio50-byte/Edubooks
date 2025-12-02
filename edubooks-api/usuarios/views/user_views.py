@@ -2,14 +2,11 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from django.contrib.auth import authenticate
-from django.db import transaction
-from django.db import IntegrityError
 from ..models import Usuario
-from ..serializers import UsuarioPerfilSerializer, UsuarioRegistroSerializer
+from ..serializers import UsuarioPerfilSerializer
 import logging
-from django.core.exceptions import ValidationError
 from edubooks.firebase_client import verify_token as verify_firebase_token
+from edubooks.firebase_client import get_db
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +42,34 @@ def firebase_sync(request):
         }, status=status.HTTP_200_OK)
     except Exception as e:
         logger.error(f"Error en sincronización con Firebase: {str(e)}")
+        return Response({'message': 'Error interno del servidor', 'errors': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def rt_entidades(request):
+    try:
+        auth_header = request.META.get('HTTP_AUTHORIZATION','')
+        uid = None
+        if auth_header.startswith('Bearer '):
+            try:
+                decoded = verify_firebase_token(auth_header.split()[1])
+                uid = decoded.get('uid')
+            except Exception:
+                uid = None
+        db = get_db()
+        root = db.reference('entidadUsuarios').get() or {}
+        results = []
+        for entidad_id, usuarios in (root or {}).items():
+            u = (usuarios or {}).get(uid) if uid else None
+            if u:
+                results.append({
+                    'entidadId': entidad_id,
+                    'rol': (u or {}).get('rol'),
+                    'perfil': (u or {}).get('perfil')
+                })
+        return Response({'results': results}, status=status.HTTP_200_OK)
+    except Exception as e:
         return Response({'message': 'Error interno del servidor', 'errors': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 

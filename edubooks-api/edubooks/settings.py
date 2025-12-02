@@ -4,7 +4,6 @@ import os
 from decouple import config
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning, module="pkg_resources")
-warnings.filterwarnings("ignore", category=UserWarning, module="rest_framework_simplejwt")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -65,8 +64,6 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
 }
-
-SIMPLE_JWT = {}
 
 # Configuración de CORS
 # CORS Configuration
@@ -259,3 +256,4 @@ FRONTEND_PUBLIC_URL = os.getenv('FRONTEND_PUBLIC_URL', FRONTEND_URL)
 # Configuración de Firebase
 FIREBASE_SERVICE_ACCOUNT = config('FIREBASE_SERVICE_ACCOUNT', default='')
 FIREBASE_DATABASE_URL = config('FIREBASE_DATABASE_URL', default='')
+USE_RELATIONAL_API = config('USE_RELATIONAL_API', default=False, cast=bool)

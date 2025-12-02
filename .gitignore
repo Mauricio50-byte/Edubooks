@@ -25,3 +25,7 @@
 #/*.md
 /*.plantuml
 #D/
+edubooks-api/.env
+edubooks-api/serviceAccountKey.json
+serviceAccountKey.json
+.env

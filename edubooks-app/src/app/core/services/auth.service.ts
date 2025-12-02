@@ -4,6 +4,7 @@ import { tap, catchError, switchMap } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { ApiService } from './api.service';
+import { BibliotecaService } from './biblioteca.service';
 import { Auth, GoogleAuthProvider, onAuthStateChanged, signInWithPopup } from '@angular/fire/auth';
 import { Usuario, UsuarioLogin, UsuarioRegistro, AuthResponse } from '../models/usuario.model';
 
@@ -19,7 +20,8 @@ export class AuthService {
   constructor(
     private apiService: ApiService,
     private router: Router,
-    private auth: Auth
+    private auth: Auth,
+    private bibliotecaService: BibliotecaService
   ) {
     this.currentUserSubject = new BehaviorSubject<Usuario | null>(this.loadStoredUser());
     this.currentUser$ = this.currentUserSubject.asObservable();
@@ -68,15 +70,39 @@ export class AuthService {
     }
   }
 
-  private handleAuthSuccess(response: AuthResponse) {
-    if (response && response.user && response.tokens) {
+  private handleAuthSuccess(response: any) {
+    const hasTokens = !!(response && response.tokens && response.user);
+    if (hasTokens) {
       localStorage.setItem('access_token', response.tokens.access);
       localStorage.setItem('refresh_token', response.tokens.refresh);
       localStorage.setItem('current_user', JSON.stringify(response.user));
       localStorage.setItem('is_authenticated', 'true');
       this.currentUserSubject.next(response.user);
       this.isAuthenticatedSubject.next(true);
+    } else if (response && response.firebase) {
+      const fb = response.firebase;
+      const user: any = {
+        id: fb.uid,
+        email: fb.email,
+        username: (fb.email || '').split('@')[0],
+        nombre: fb.nombre || '',
+        apellido: '',
+        rol: 'estudiante'
+      };
+      localStorage.setItem('current_user', JSON.stringify(user));
+      localStorage.setItem('is_authenticated', 'true');
+      this.currentUserSubject.next(user);
+      this.isAuthenticatedSubject.next(true);
     }
+    this.apiService.get('/auth/rt/entidades/').subscribe({
+      next: (res: any) => {
+        const first = Array.isArray(res?.results) ? res.results[0] : null;
+        const eid = first?.entidadId || 'default';
+        this.bibliotecaService.setEntidadId(eid);
+        localStorage.setItem('entidad_id', eid);
+      },
+      error: () => {}
+    });
   }
 
   // Registro de usuario (solo estudiantes)

@@ -8,6 +8,7 @@ urlpatterns = [
     # Autenticación
     # Autenticación basada en Firebase
     path('firebase-sync/', views.firebase_sync, name='firebase-sync'),
+    path('rt/entidades/', views.rt_entidades, name='rt-entidades'),
     path('perfil/', views.perfil, name='perfil'),
     path('actualizar-perfil/', views.actualizar_perfil, name='actualizar_perfil'),
     path('usuarios/me/', views.usuario_me, name='usuario_me'),

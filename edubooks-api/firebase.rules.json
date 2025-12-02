@@ -1,0 +1,42 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "entidades": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    "entidadUsuarios": {
+      "$entidadId": {
+        "$uid": {
+          ".read": "auth != null && auth.uid === $uid",
+          ".write": "auth != null && auth.uid === $uid"
+        }
+      }
+    },
+    "entidadLibros": {
+      "$entidadId": {
+        ".read": "auth != null",
+        ".write": "auth != null && root.child('entidadUsuarios/'+$entidadId+'/'+auth.uid+'/rol').val() === 'administrador'"
+      }
+    },
+    "entidadPrestamos": {
+      "$entidadId": {
+        ".read": "auth != null",
+        ".write": "auth != null && root.child('entidadUsuarios/'+$entidadId+'/'+auth.uid+'/rol').val() === 'administrador'"
+      }
+    },
+    "entidadReservas": {
+      "$entidadId": {
+        ".read": "auth != null",
+        ".write": "auth != null"
+      }
+    },
+    "entidadSanciones": {
+      "$entidadId": {
+        ".read": "auth != null && root.child('entidadUsuarios/'+$entidadId+'/'+auth.uid+'/rol').val() === 'administrador'",
+        ".write": "auth != null && root.child('entidadUsuarios/'+$entidadId+'/'+auth.uid+'/rol').val() === 'administrador'"
+      }
+    }
+  }
+}

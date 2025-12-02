@@ -1120,6 +1120,35 @@ def rt_libros_create(request):
     result.update(data)
     return Response(result, status=201)
 
+@api_view(['PUT'])
+@permission_classes([permissions.IsAuthenticated])
+def rt_libros_update(request, libro_id):
+    db = get_db()
+    ref = db.reference(f'libros/{libro_id}')
+    snap = ref.get() or {}
+    if not snap:
+        return Response({'error':'No existe'}, status=404)
+    payload = dict(request.data)
+    allowed = ['titulo','autor','categoria','estado','cantidad_total','cantidad_disponible','imagen_portada']
+    update = {k: payload[k] for k in allowed if k in payload}
+    if not update:
+        return Response({'error':'Sin cambios'}, status=400)
+    ref.update(update)
+    snap = ref.get() or {}
+    out = {'id': libro_id}
+    out.update(snap)
+    return Response(out)
+
+@api_view(['DELETE'])
+@permission_classes([permissions.IsAuthenticated])
+def rt_libros_delete(request, libro_id):
+    db = get_db()
+    ref = db.reference(f'libros/{libro_id}')
+    if not ref.get():
+        return Response({'error':'No existe'}, status=404)
+    ref.delete()
+    return Response({'ok': True})
+
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
 def rt_prestamos_create(request):
@@ -1153,6 +1182,24 @@ def rt_prestamos_create(request):
     })
     return Response({'id': prestamo_id}, status=201)
 
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def rt_prestamos_list(request):
+    db = get_db()
+    snap = db.reference('prestamos').get() or {}
+    items = []
+    for k, v in snap.items():
+        item = {'id': k}
+        item.update(v or {})
+        items.append(item)
+    estado = request.query_params.get('estado')
+    usuario_id = request.query_params.get('usuarioId')
+    if estado:
+        items = [i for i in items if str(i.get('estado','')) == estado]
+    if usuario_id:
+        items = [i for i in items if str(i.get('usuarioId','')) == usuario_id]
+    return Response({'results': items})
+
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
 def rt_reservas_create(request):
@@ -1184,6 +1231,24 @@ def rt_reservas_create(request):
     })
     return Response({'id': reserva_id}, status=201)
 
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def rt_reservas_list(request):
+    db = get_db()
+    snap = db.reference('reservas').get() or {}
+    items = []
+    for k, v in snap.items():
+        item = {'id': k}
+        item.update(v or {})
+        items.append(item)
+    estado = request.query_params.get('estado')
+    usuario_id = request.query_params.get('usuarioId')
+    if estado:
+        items = [i for i in items if str(i.get('estado','')) == estado]
+    if usuario_id:
+        items = [i for i in items if str(i.get('usuarioId','')) == usuario_id]
+    return Response({'results': items})
+
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
 def rt_prestamo_devolver(request, prestamo_id):
@@ -1198,3 +1263,296 @@ def rt_prestamo_devolver(request, prestamo_id):
         return Response({'error':'No está activo'}, status=400)
     r.update({'estado':'Devuelto','fecha_devolucion_real': tz.now().isoformat()})
     return Response({'ok': True})
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def rt_entidad_libros_list(request, entidad_id):
+    db = get_db()
+    snap = db.reference(f'entidadLibros/{entidad_id}').get() or {}
+    items = []
+    for k, v in snap.items():
+        item = {'id': k}
+        item.update(v or {})
+        items.append(item)
+    titulo = request.query_params.get('titulo')
+    autor = request.query_params.get('autor')
+    categoria = request.query_params.get('categoria')
+    disponible = request.query_params.get('disponible')
+    if titulo:
+        items = [i for i in items if titulo.lower() in str(i.get('titulo','')).lower()]
+    if autor:
+        items = [i for i in items if autor.lower() in str(i.get('autor','')).lower()]
+    if categoria:
+        items = [i for i in items if categoria.lower() in str(i.get('categoria','')).lower()]
+    if disponible == 'true':
+        items = [i for i in items if (i.get('cantidad_disponible') or 0) > 0]
+    items = sorted(items, key=lambda x: str(x.get('titulo','')))
+    return Response({'results': items})
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def rt_entidad_libros_create(request, entidad_id):
+    serializer = LibroRTSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=400)
+    data = serializer.validated_data
+    libro_id = data.get('id') or uuid.uuid4().hex
+    db = get_db()
+    db.reference(f'entidadLibros/{entidad_id}/{libro_id}').set({
+        'titulo': data['titulo'],
+        'autor': data['autor'],
+        'categoria': data['categoria'],
+        'estado': data.get('estado','Disponible'),
+        'cantidad_total': data.get('cantidad_total',1),
+        'cantidad_disponible': data.get('cantidad_disponible',1),
+        'imagen_portada': data.get('imagen_portada')
+    })
+    result = {'id': libro_id}
+    result.update(data)
+    return Response(result, status=201)
+
+@api_view(['PUT'])
+@permission_classes([permissions.IsAuthenticated])
+def rt_entidad_libros_update(request, entidad_id, libro_id):
+    db = get_db()
+    ref = db.reference(f'entidadLibros/{entidad_id}/{libro_id}')
+    snap = ref.get() or {}
+    if not snap:
+        return Response({'error':'No existe'}, status=404)
+    payload = dict(request.data)
+    allowed = ['titulo','autor','categoria','estado','cantidad_total','cantidad_disponible','imagen_portada']
+    update = {k: payload[k] for k in allowed if k in payload}
+    if not update:
+        return Response({'error':'Sin cambios'}, status=400)
+    ref.update(update)
+    snap = ref.get() or {}
+    out = {'id': libro_id}
+    out.update(snap)
+    return Response(out)
+
+@api_view(['DELETE'])
+@permission_classes([permissions.IsAuthenticated])
+def rt_entidad_libros_delete(request, entidad_id, libro_id):
+    db = get_db()
+    ref = db.reference(f'entidadLibros/{entidad_id}/{libro_id}')
+    if not ref.get():
+        return Response({'error':'No existe'}, status=404)
+    ref.delete()
+    return Response({'ok': True})
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def rt_entidad_prestamos_create(request, entidad_id):
+    auth_header = request.META.get('HTTP_AUTHORIZATION','')
+    uid = None
+    if auth_header.startswith('Bearer '):
+        try:
+            decoded = verify_token(auth_header.split()[1])
+            uid = decoded.get('uid')
+        except Exception:
+            uid = None
+    usuario_id = uid or str(getattr(request.user,'email',None) or request.user.pk)
+    payload = dict(request.data)
+    payload['usuarioId'] = usuario_id
+    serializer = PrestamoRTSerializer(data=payload)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=400)
+    data = serializer.validated_data
+    prestamo_id = data.get('id') or uuid.uuid4().hex
+    from django.utils import timezone as tz
+    fecha_prestamo = data.get('fecha_prestamo') or tz.now()
+    db = get_db()
+    ref = db.reference(f'entidadPrestamos/{entidad_id}/{prestamo_id}')
+    ref.set({
+        'usuarioId': data['usuarioId'],
+        'libroId': data['libroId'],
+        'fecha_prestamo': fecha_prestamo.isoformat(),
+        'fecha_devolucion_esperada': data.get('fecha_devolucion_esperada').isoformat() if data.get('fecha_devolucion_esperada') else None,
+        'estado': data.get('estado','Pendiente'),
+        'observaciones': data.get('observaciones')
+    })
+    return Response({'id': prestamo_id}, status=201)
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def rt_entidad_reservas_create(request, entidad_id):
+    auth_header = request.META.get('HTTP_AUTHORIZATION','')
+    uid = None
+    if auth_header.startswith('Bearer '):
+        try:
+            decoded = verify_token(auth_header.split()[1])
+            uid = decoded.get('uid')
+        except Exception:
+            uid = None
+    usuario_id = uid or str(getattr(request.user,'email',None) or request.user.pk)
+    payload = dict(request.data)
+    payload['usuarioId'] = usuario_id
+    serializer = ReservaRTSerializer(data=payload)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=400)
+    data = serializer.validated_data
+    reserva_id = data.get('id') or uuid.uuid4().hex
+    from django.utils import timezone as tz
+    fecha_reserva = data.get('fecha_reserva') or tz.now()
+    db = get_db()
+    ref = db.reference(f'entidadReservas/{entidad_id}/{reserva_id}')
+    ref.set({
+        'usuarioId': data['usuarioId'],
+        'libroId': data['libroId'],
+        'fecha_reserva': fecha_reserva.isoformat(),
+        'estado': data.get('estado','Activa')
+    })
+    return Response({'id': reserva_id}, status=201)
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def rt_entidad_prestamo_devolver(request, entidad_id, prestamo_id):
+    db = get_db()
+    r = db.reference(f'entidadPrestamos/{entidad_id}/{prestamo_id}')
+    snap = r.get() or {}
+    if not snap:
+        return Response({'error':'No existe'}, status=404)
+    from django.utils import timezone as tz
+    estado = snap.get('estado')
+    if estado != 'Activo':
+        return Response({'error':'No está activo'}, status=400)
+    r.update({'estado':'Devuelto','fecha_devolucion_real': tz.now().isoformat()})
+    return Response({'ok': True})
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def rt_entidad_sanciones_list(request, entidad_id):
+    db = get_db()
+    snap = db.reference(f'entidadSanciones/{entidad_id}').get() or {}
+    items = []
+    for k, v in snap.items():
+        item = {'id': k}
+        item.update(v or {})
+        items.append(item)
+    estado = request.query_params.get('estado')
+    if estado:
+        items = [i for i in items if str(i.get('estado','')) == estado]
+    return Response({'results': items})
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def rt_entidad_bibliografias_list(request, entidad_id):
+    db = get_db()
+    snap = db.reference(f'entidadBibliografias/{entidad_id}').get() or {}
+    items = []
+    for k, v in snap.items():
+        item = {'id': k}
+        item.update(v or {})
+        items.append(item)
+    programa = request.query_params.get('programa')
+    curso = request.query_params.get('curso')
+    activa = request.query_params.get('activa')
+    if programa:
+        items = [i for i in items if programa.lower() in str(i.get('programa','')).lower()]
+    if curso:
+        items = [i for i in items if curso.lower() in str(i.get('curso','')).lower()]
+    if activa is not None:
+        items = [i for i in items if str(i.get('activa','')).lower() == str(activa).lower()]
+    return Response({'results': items})
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def rt_entidad_bibliografias_create(request, entidad_id):
+    payload = dict(request.data)
+    data = {
+        'curso': str(payload.get('curso') or ''),
+        'programa': str(payload.get('programa') or ''),
+        'descripcion': payload.get('descripcion'),
+        'libros': payload.get('libros') or {},
+        'fecha_creacion': __import__('datetime').datetime.utcnow().isoformat(),
+        'activa': bool(payload.get('activa', True)),
+        'es_publica': bool(payload.get('es_publica', True)),
+        'docenteId': str(payload.get('docenteId') or '')
+    }
+    biblio_id = str(payload.get('id') or uuid.uuid4().hex)
+    db = get_db()
+    db.reference(f'entidadBibliografias/{entidad_id}/{biblio_id}').set(data)
+    out = {'id': biblio_id}
+    out.update(data)
+    return Response(out, status=201)
+@api_view(['PUT'])
+@permission_classes([permissions.IsAuthenticated])
+def rt_entidad_bibliografias_update(request, entidad_id, bibliografia_id):
+    db = get_db()
+    ref = db.reference(f'entidadBibliografias/{entidad_id}/{bibliografia_id}')
+    if not ref.get():
+        return Response({'error':'No existe'}, status=404)
+    payload = dict(request.data)
+    allowed = ['curso','programa','descripcion','activa','es_publica']
+    update = {k: payload[k] for k in allowed if k in payload}
+    ref.update(update)
+    snap = ref.get() or {}
+    out = {'id': bibliografia_id}
+    out.update(snap)
+    return Response(out)
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def rt_entidad_bibliografias_get(request, entidad_id, bibliografia_id):
+    db = get_db()
+    ref = db.reference(f'entidadBibliografias/{entidad_id}/{bibliografia_id}')
+    snap = ref.get() or {}
+    if not snap:
+        return Response({'error':'No existe'}, status=404)
+    out = {'id': bibliografia_id}
+    out.update(snap)
+    return Response(out)
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def rt_entidad_bibliografia_agregar_libro(request, entidad_id, bibliografia_id):
+    db = get_db()
+    ref = db.reference(f'entidadBibliografias/{entidad_id}/{bibliografia_id}')
+    snap = ref.get() or {}
+    if not snap:
+        return Response({'error':'No existe'}, status=404)
+    libro_id = str(request.data.get('libroId') or '')
+    if not libro_id:
+        return Response({'error':'libroId requerido'}, status=400)
+    libros = snap.get('libros') or {}
+    libros[str(libro_id)] = True
+    ref.update({'libros': libros})
+    return Response({'ok': True})
+@api_view(['DELETE'])
+@permission_classes([permissions.IsAuthenticated])
+def rt_entidad_bibliografia_remover_libro(request, entidad_id, bibliografia_id, libro_id):
+    db = get_db()
+    ref = db.reference(f'entidadBibliografias/{entidad_id}/{bibliografia_id}')
+    snap = ref.get() or {}
+    if not snap:
+        return Response({'error':'No existe'}, status=404)
+    libros = snap.get('libros') or {}
+    libro_key = str(libro_id)
+    if libro_key in libros:
+        del libros[libro_key]
+        ref.update({'libros': libros})
+    return Response({'ok': True})
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def rt_entidad_programas(request, entidad_id):
+    db = get_db()
+    snap = db.reference(f'entidadBibliografias/{entidad_id}').get() or {}
+    programas = sorted(list({str((v or {}).get('programa') or '').strip() for v in snap.values() if v}))
+    programas = [p for p in programas if p]
+    return Response({'programas': programas})
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def rt_entidad_estadisticas(request, entidad_id):
+    db = get_db()
+    libros = db.reference(f'entidadLibros/{entidad_id}').get() or {}
+    prestamos = db.reference(f'entidadPrestamos/{entidad_id}').get() or {}
+    reservas = db.reference(f'entidadReservas/{entidad_id}').get() or {}
+    sanciones = db.reference(f'entidadSanciones/{entidad_id}').get() or {}
+    total_libros = len(libros)
+    libros_disponibles = sum(1 for v in libros.values() if (v or {}).get('cantidad_disponible',0) > 0)
+    prestamos_activos = sum(1 for v in prestamos.values() if (v or {}).get('estado') == 'Activo')
+    reservas_activas = sum(1 for v in reservas.values() if (v or {}).get('estado') == 'Activa')
+    sanciones_activas = sum(1 for v in sanciones.values() if (v or {}).get('estado') == 'Activa')
+    return Response({
+        'total_libros': total_libros,
+        'libros_disponibles': libros_disponibles,
+        'prestamos_activos': prestamos_activos,
+        'reservas_activas': reservas_activas,
+        'sanciones_activas': sanciones_activas
+    })
