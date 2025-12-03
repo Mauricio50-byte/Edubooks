@@ -1,0 +1,296 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Dashboard</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="loadDashboardData()">
+        <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="dashboard-container" *ngIf="stats">
+    <!-- Header con última actualización -->
+    <div class="update-info">
+      <ion-text color="medium">
+        <p class="ion-text-center">
+          <ion-icon name="time-outline"></ion-icon>
+          Última actualización: {{ lastUpdate | date:'short' }}
+        </p>
+      </ion-text>
+    </div>
+
+    <!-- Tarjetas de estadísticas principales -->
+    <div class="stats-grid">
+      <!-- Total Usuarios -->
+      <ion-card class="stat-card">
+        <ion-card-content>
+          <div class="stat-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <ion-icon name="people-outline"></ion-icon>
+          </div>
+          <div class="stat-info">
+            <h2>{{ stats.total_users }}</h2>
+            <p>Total Usuarios</p>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Total Libros -->
+      <ion-card class="stat-card">
+        <ion-card-content>
+          <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+            <ion-icon name="book-outline"></ion-icon>
+          </div>
+          <div class="stat-info">
+            <h2>{{ stats.total_books }}</h2>
+            <p>Total Libros</p>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Libros Disponibles -->
+      <ion-card class="stat-card">
+        <ion-card-content>
+          <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+            <ion-icon name="checkmark-circle-outline"></ion-icon>
+          </div>
+          <div class="stat-info">
+            <h2>{{ stats.available_books }}</h2>
+            <p>Disponibles</p>
+            <ion-badge color="success">{{ getPercentage(stats.available_books, stats.total_books) }}%</ion-badge>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Préstamos Activos -->
+      <ion-card class="stat-card">
+        <ion-card-content>
+          <div class="stat-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+            <ion-icon name="swap-horizontal-outline"></ion-icon>
+          </div>
+          <div class="stat-info">
+            <h2>{{ stats.active_loans }}</h2>
+            <p>Préstamos Activos</p>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Préstamos Pendientes -->
+      <ion-card class="stat-card">
+        <ion-card-content>
+          <div class="stat-icon" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+            <ion-icon name="hourglass-outline"></ion-icon>
+          </div>
+          <div class="stat-info">
+            <h2>{{ stats.pending_loans }}</h2>
+            <p>Pendientes</p>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Préstamos Vencidos -->
+      <ion-card class="stat-card" [class.alert]="stats.overdue_loans > 0">
+        <ion-card-content>
+          <div class="stat-icon" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);">
+            <ion-icon name="alert-circle-outline"></ion-icon>
+          </div>
+          <div class="stat-info">
+            <h2>{{ stats.overdue_loans }}</h2>
+            <p>Vencidos</p>
+            <ion-badge color="danger" *ngIf="stats.overdue_loans > 0">¡Atención!</ion-badge>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Usuarios por Rol -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="pie-chart-outline"></ion-icon>
+          Usuarios por Rol
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="role-stats">
+          <div class="role-item">
+            <div class="role-bar">
+              <div class="role-fill estudiante" 
+                   [style.width.%]="getPercentage(stats.users_by_role.estudiante, stats.total_users)">
+              </div>
+            </div>
+            <div class="role-label">
+              <span>Estudiantes</span>
+              <strong>{{ stats.users_by_role.estudiante }}</strong>
+            </div>
+          </div>
+
+          <div class="role-item">
+            <div class="role-bar">
+              <div class="role-fill docente" 
+                   [style.width.%]="getPercentage(stats.users_by_role.docente, stats.total_users)">
+              </div>
+            </div>
+            <div class="role-label">
+              <span>Docentes</span>
+              <strong>{{ stats.users_by_role.docente }}</strong>
+            </div>
+          </div>
+
+          <div class="role-item">
+            <div class="role-bar">
+              <div class="role-fill administrador" 
+                   [style.width.%]="getPercentage(stats.users_by_role.administrador, stats.total_users)">
+              </div>
+            </div>
+            <div class="role-label">
+              <span>Administradores</span>
+              <strong>{{ stats.users_by_role.administrador }}</strong>
+            </div>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Libros Más Populares -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="trophy-outline"></ion-icon>
+          Top 5 Libros Más Prestados
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list *ngIf="popularBooks.length > 0; else noBooks">
+          <ion-item *ngFor="let book of popularBooks; let i = index" lines="full">
+            <ion-avatar slot="start" *ngIf="book.imagen_portada">
+              <img [src]="book.imagen_portada" [alt]="book.titulo">
+            </ion-avatar>
+            <ion-label>
+              <h3>
+                <ion-badge [color]="i === 0 ? 'warning' : i === 1 ? 'medium' : 'tertiary'">
+                  #{{ i + 1 }}
+                </ion-badge>
+                {{ book.titulo }}
+              </h3>
+              <p>{{ book.autor }}</p>
+              <p class="book-category">
+                <ion-icon name="pricetag-outline"></ion-icon>
+                {{ book.categoria }}
+              </p>
+            </ion-label>
+            <ion-badge slot="end" color="primary">
+              {{ book.total_loans }} préstamos
+            </ion-badge>
+          </ion-item>
+        </ion-list>
+        <ng-template #noBooks>
+          <div class="empty-state">
+            <ion-icon name="book-outline"></ion-icon>
+            <p>No hay datos de préstamos aún</p>
+          </div>
+        </ng-template>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Actividad Reciente de Usuarios -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="pulse-outline"></ion-icon>
+          Actividad Reciente (últimos {{ activityPeriodDays }} días)
+        </ion-card-title>
+        <ion-card-subtitle>
+          {{ totalActiveUsers }} usuarios activos
+        </ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list *ngIf="userActivity.length > 0; else noActivity">
+          <ion-item *ngFor="let user of userActivity" lines="full">
+            <ion-avatar slot="start">
+              <div class="user-avatar">
+                {{ user.nombre.charAt(0) }}{{ user.apellido.charAt(0) }}
+              </div>
+            </ion-avatar>
+            <ion-label>
+              <h3>{{ user.nombre }} {{ user.apellido }}</h3>
+              <p>{{ user.email }}</p>
+              <p>
+                <ion-badge [color]="user.role === 'estudiante' ? 'primary' : user.role === 'docente' ? 'secondary' : 'tertiary'">
+                  {{ user.role }}
+                </ion-badge>
+              </p>
+            </ion-label>
+            <div slot="end" class="activity-stats">
+              <div class="activity-item">
+                <ion-icon name="add-circle-outline" color="primary"></ion-icon>
+                <span>{{ user.loan_requests }}</span>
+              </div>
+              <div class="activity-item">
+                <ion-icon name="checkmark-circle-outline" color="success"></ion-icon>
+                <span>{{ user.active_loans }}</span>
+              </div>
+              <div class="activity-item">
+                <ion-icon name="return-down-back-outline" color="medium"></ion-icon>
+                <span>{{ user.returned_loans }}</span>
+              </div>
+            </div>
+          </ion-item>
+        </ion-list>
+        <ng-template #noActivity>
+          <div class="empty-state">
+            <ion-icon name="people-outline"></ion-icon>
+            <p>No hay actividad reciente</p>
+          </div>
+        </ng-template>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Acciones Rápidas -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="flash-outline"></ion-icon>
+          Acciones Rápidas
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="quick-actions">
+          <ion-button expand="block" color="primary" routerLink="/administrador/admin-solicitudes">
+            <ion-icon slot="start" name="mail-outline"></ion-icon>
+            Ver Solicitudes ({{ stats.pending_loans }})
+          </ion-button>
+
+          <ion-button expand="block" color="warning" routerLink="/administrador/admin-prestamos" *ngIf="stats.overdue_loans > 0">
+            <ion-icon slot="start" name="alert-circle-outline"></ion-icon>
+            Préstamos Vencidos ({{ stats.overdue_loans }})
+          </ion-button>
+
+          <ion-button expand="block" color="secondary" routerLink="/administrador/admin-libros">
+            <ion-icon slot="start" name="add-circle-outline"></ion-icon>
+            Agregar Libro
+          </ion-button>
+
+          <ion-button expand="block" color="tertiary" routerLink="/administrador/admin-usuarios">
+            <ion-icon slot="start" name="person-add-outline"></ion-icon>
+            Gestionar Usuarios
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="!stats">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Cargando estadísticas...</p>
+  </div>
+</ion-content>

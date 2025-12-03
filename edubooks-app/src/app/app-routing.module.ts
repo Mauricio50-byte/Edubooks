@@ -157,7 +157,11 @@ const routes: Routes = [
   {
     path: '**',
     redirectTo: 'login' // Ruta por defecto para páginas no encontradas
+  },  {
+    path: 'admin-dashboard',
+    loadChildren: () => import('./pages/administrador/admin-dashboard/admin-dashboard.module').then( m => m.AdminDashboardPageModule)
   }
+
 ];
 
 @NgModule({

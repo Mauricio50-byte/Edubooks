@@ -18,36 +18,39 @@ ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=lamb
 
 # Application definition
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
+    # 'django.contrib.admin',  # Removed for Firebase migration
+    'django.contrib.auth',     # Kept for DRF compatibility if needed, but might be removable
+    # 'django.contrib.contenttypes', # Removed for Firebase migration
+    # 'django.contrib.sessions',     # Removed for Firebase migration
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'corsheaders',  # Para permitir CORS
+    'corsheaders',
     'usuarios',
     'libros',
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',  # Debe ir primero
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
+    # 'django.contrib.sessions.middleware.SessionMiddleware', # Removed
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    # 'django.contrib.auth.middleware.AuthenticationMiddleware', # Removed
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # Middlewares de Firebase
+    'edubooks.firebase_middleware.FirebaseAuthMiddleware',
+    'edubooks.firebase_middleware.TenantIsolationMiddleware',
 ]
 
 ROOT_URLCONF = 'edubooks.urls'
 
-AUTH_USER_MODEL = 'usuarios.Usuario'
+# AUTH_USER_MODEL = 'usuarios.Usuario' # Removed as models are deleted
 
 AUTHENTICATION_BACKENDS = [
     'usuarios.auth.firebase_backends.FirebaseAuthBackend',
-    'django.contrib.auth.backends.ModelBackend',
+    # 'django.contrib.auth.backends.ModelBackend', # Removed
 ]
 
 # Configuración de REST Framework
@@ -132,28 +135,16 @@ TEMPLATES = [
 WSGI_APPLICATION = 'edubooks.wsgi.application'
 
 # Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+# Firebase Realtime Database se usa en lugar de bases de datos relacionales
+# La configuración de Firebase se maneja en firebase_config.py
+# No se requiere configuración de DATABASES para Django ya que no usamos el ORM
 
-DB_ENGINE = config('DB_ENGINE', default='sqlite').lower()
-
-if DB_ENGINE == 'sqlite':
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
+# Configuración dummy para Django (requerida pero no utilizada)
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.dummy'
     }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': config('POSTGRES_DB', default='postgres'),
-            'USER': config('POSTGRES_USER', default='postgres'),
-            'PASSWORD': config('POSTGRES_PASSWORD', default=''),
-            'HOST': config('POSTGRES_HOST', default='localhost'),
-            'PORT': config('POSTGRES_PORT', default='5432'),
-        }
-    }
+}
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
